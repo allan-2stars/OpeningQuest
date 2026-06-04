@@ -8,12 +8,31 @@ import {
 } from "./defaults.ts";
 
 export async function seedCoreData(): Promise<void> {
-  const existingProfile = await db.userProfile.get(DEFAULT_USER_PROFILE.id);
-  if (!existingProfile) {
-    await createUserProfile(DEFAULT_USER_PROFILE);
-  }
+  await db.transaction(
+    "rw",
+    [db.userProfile, db.achievements, db.pieceSkins, db.boardThemes],
+    async () => {
+      if (!(await db.userProfile.get(DEFAULT_USER_PROFILE.id))) {
+        await createUserProfile(DEFAULT_USER_PROFILE);
+      }
 
-  await db.achievements.bulkPut(DEFAULT_ACHIEVEMENTS);
-  await db.pieceSkins.put(DEFAULT_PIECE_SKIN);
-  await db.boardThemes.put(DEFAULT_BOARD_THEME);
+      const existingAchievementIds = new Set(
+        (await db.achievements.toArray()).map((a) => a.id),
+      );
+      const newAchievements = DEFAULT_ACHIEVEMENTS.filter(
+        (a) => !existingAchievementIds.has(a.id),
+      );
+      if (newAchievements.length > 0) {
+        await db.achievements.bulkAdd(newAchievements);
+      }
+
+      if (!(await db.pieceSkins.get(DEFAULT_PIECE_SKIN.id))) {
+        await db.pieceSkins.add(DEFAULT_PIECE_SKIN);
+      }
+
+      if (!(await db.boardThemes.get(DEFAULT_BOARD_THEME.id))) {
+        await db.boardThemes.add(DEFAULT_BOARD_THEME);
+      }
+    },
+  );
 }

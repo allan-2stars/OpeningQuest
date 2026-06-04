@@ -114,6 +114,12 @@ describe("userProfileRepo", () => {
     expect(updated?.totalXp).toBe(1200);
     expect(updated?.displayName).toBe("TestKnight");
   });
+
+  it("throws when updating a profile that does not exist", async () => {
+    await expect(
+      updateUserProfile("ghost_id", { level: 2 }),
+    ).rejects.toThrow("UserProfile not found: ghost_id");
+  });
 });
 
 describe("lessonProgressRepo", () => {
@@ -152,6 +158,12 @@ describe("lessonProgressRepo", () => {
     expect(updated?.status).toBe("mastered");
     expect(updated?.attempts).toBe(0);
   });
+
+  it("throws when updating progress that does not exist", async () => {
+    await expect(
+      updateLessonProgress("ghost_lesson", { masteryLevel: 1 }),
+    ).rejects.toThrow("LessonProgress not found: ghost_lesson");
+  });
 });
 
 describe("seedCoreData", () => {
@@ -178,6 +190,19 @@ describe("seedCoreData", () => {
 
     const achievements = await getAllAchievements();
     expect(achievements.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("preserves achievement unlock state across seed calls", async () => {
+    await seedCoreData();
+
+    await db.achievements.update("ach_first_lesson", {
+      unlockedAt: "2026-06-04T12:00:00.000Z",
+    });
+
+    await seedCoreData();
+
+    const ach = await getAchievement("ach_first_lesson");
+    expect(ach?.unlockedAt).toBe("2026-06-04T12:00:00.000Z");
   });
 });
 
@@ -236,7 +261,7 @@ describe("curriculumRepo", () => {
       id: "lesson_b",
       title: "Italian Game - Advanced",
       depth: 8,
-      lineId: "line_002",
+      lineId: "line_001",
     });
     await db.openingLines.put(line);
   });

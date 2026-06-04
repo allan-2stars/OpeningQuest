@@ -18,5 +18,6 @@ export async function updateUserProfile(
   id: string,
   updates: Partial<Omit<UserProfile, "id">>,
 ): Promise<void> {
-  await db.userProfile.update(id, updates);
+  const count = await db.userProfile.update(id, updates);
+  if (count === 0) throw new Error(`UserProfile not found: ${id}`);
 }

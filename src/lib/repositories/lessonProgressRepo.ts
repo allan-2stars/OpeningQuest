@@ -22,5 +22,6 @@ export async function updateLessonProgress(
   lessonId: string,
   updates: Partial<Omit<LessonProgress, "lessonId">>,
 ): Promise<void> {
-  await db.lessonProgress.update(lessonId, updates);
+  const count = await db.lessonProgress.update(lessonId, updates);
+  if (count === 0) throw new Error(`LessonProgress not found: ${lessonId}`);
 }

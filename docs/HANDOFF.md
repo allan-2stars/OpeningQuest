@@ -19,6 +19,53 @@ Notes:
 
 ---
 
+## REVIEW-002 Handoff
+
+Date:
+2026-06-04
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-002 - Core Data Layer Review
+
+Branch:
+main
+
+Commit:
+(pending)
+
+Files Changed:
+- src/lib/seed/seed.ts (achievement reset bug fix + transaction wrapping)
+- src/lib/repositories/userProfileRepo.ts (throw on missing-record update)
+- src/lib/repositories/lessonProgressRepo.ts (throw on missing-record update)
+- src/lib/date.ts (UTC/local timezone fix for todayDateString and daysFromNow)
+- src/lib/__tests__/repositories.test.ts (3 new tests + fixture fix)
+- docs/HANDOFF.md (TASK-002 commit hash fix)
+- docs/reviews/REVIEW-002-core-data-layer.md (created)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vitest run (28/28 passed, was 25/25)
+
+Known Issues:
+- DEFAULT_USER_PROFILE.createdAt frozen at module import time (see REVIEW-002 C-001)
+- trainingSessions and dailyQuests have no repos yet (see REVIEW-002 C-002)
+- rewardsRepo unlocked-only queries are full scans (see REVIEW-002 C-003)
+
+Next Recommended Task:
+TASK-003-design-system-components.md
+
+Notes:
+Fixed critical achievement-unlock erasure bug (bulkPut → add-only with transaction).
+Fixed silent no-op on update-missing-record in both profile and progress repos.
+Fixed UTC/local date bug in todayDateString and daysFromNow.
+Fixed test fixture inconsistency. Added 3 new regression tests.
+
+---
+
 ## TASK-002 Handoff
 
 Date:
@@ -34,7 +81,7 @@ Branch:
 main
 
 Commit:
-N/A (pending)
+c211e3f
 
 Files Changed:
 - tsconfig.json (project references fix per REVIEW-001 C-001)
