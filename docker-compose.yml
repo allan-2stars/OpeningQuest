@@ -1,0 +1,10 @@
+services:
+  opening-quest-web:
+    build: .
+    ports:
+      - "4317:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
