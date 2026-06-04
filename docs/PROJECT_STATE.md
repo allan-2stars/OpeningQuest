@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-001 Complete. Ready for TASK-002 Core Data Layer.
+TASK-002 Complete. Ready for TASK-003 Design System Components.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-002-core-data-layer.md
+TASK-003-design-system-components.md
 
 Assigned to:
 Windows Agent

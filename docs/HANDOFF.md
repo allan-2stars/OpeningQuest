@@ -19,6 +19,61 @@ Notes:
 
 ---
 
+## TASK-002 Handoff
+
+Date:
+2026-06-04
+
+Agent:
+Windows Agent
+
+Task:
+TASK-002 - Core Data Layer
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- tsconfig.json (project references fix per REVIEW-001 C-001)
+- vite.config.ts (vitest config)
+- docs/ARCHITECTURE.md (created stub)
+- docs/TECHNICAL_STANDARDS.md (created stub)
+- src/types/domain.ts (created — 12 domain types)
+- src/lib/date.ts (created)
+- src/lib/db.ts (created — 12 Dexie tables)
+- src/lib/test-setup.ts (created — fake-indexeddb)
+- src/lib/repositories/userProfileRepo.ts (created)
+- src/lib/repositories/lessonProgressRepo.ts (created)
+- src/lib/repositories/curriculumRepo.ts (created)
+- src/lib/repositories/rewardsRepo.ts (created)
+- src/lib/seed/defaults.ts (created)
+- src/lib/seed/seed.ts (created)
+- src/lib/__tests__/repositories.test.ts (created — 25 tests)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vite build (passed)
+- vitest run (25/25 passed)
+- docker compose up --build (HTTP 200 at localhost:4317)
+
+Known Issues:
+- REVIEW-001 C-003 (docker-compose.yml anonymous volume) still applies
+
+Next Recommended Task:
+TASK-003-design-system-components.md
+
+Notes:
+Core data layer complete. All 12 domain types per DATA_MODEL.md plus TrainingSession, DailyQuest.
+Four repository modules behind typed async functions — UI never touches IndexedDB directly.
+Seed data includes default user profile, 4 achievements, classic skin and board theme.
+Tests use fake-indexeddb for in-memory IndexedDB — no browser needed.
+
+---
+
 ## REVIEW-001 Handoff
 
 Date:
