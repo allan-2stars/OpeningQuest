@@ -34,7 +34,7 @@ Branch:
 main
 
 Commit:
-(pending)
+4edc4b3
 
 Files Changed:
 - vite.config.ts (HMR clientPort, watch polling, orientation fix)
