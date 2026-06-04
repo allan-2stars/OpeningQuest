@@ -16,7 +16,7 @@ export default defineConfig({
         theme_color: "#1e3a5f",
         background_color: "#0f172a",
         display: "standalone",
-        orientation: "landscape",
+        orientation: "any",
         start_url: "/",
         icons: [
           { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -32,5 +32,11 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     strictPort: true,
+    hmr: {
+      clientPort: 4317,
+    },
+    watch: {
+      usePolling: true,
+    },
   },
 });

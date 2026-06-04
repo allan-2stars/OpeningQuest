@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-001-project-bootstrap.md
+TASK-002-core-data-layer.md
 
 Assigned to:
 Windows Agent
