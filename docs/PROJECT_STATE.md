@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-004 Complete. Ready for TASK-005 Training Engine.
+TASK-005 Complete. Ready for TASK-006 Progression Engine.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-005-training-engine.md
+TASK-006-progression-engine.md
 
 Assigned to:
 Windows Agent

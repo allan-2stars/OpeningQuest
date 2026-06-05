@@ -123,6 +123,59 @@ Preflight fixes applied:
 
 ---
 
+## TASK-005 Handoff
+
+Date:
+2026-06-05
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-005 - Training Engine
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/training/types.ts (created — TrainingSessionState, MoveFeedback, TrainingSessionResult)
+- src/features/training/trainingEngine.ts (created — initSession, submitMove)
+- src/features/training/__tests__/trainingEngine.test.ts (created — 20 tests)
+- src/hooks/useTrainingSession.ts (created — loads lesson, manages session)
+- src/features/practice/Practice.tsx (rewired — move input, mode toggle, feedback, results)
+- src/lib/repositories/curriculumRepo.ts (added getLesson, getLessons)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed, /design-system tree-shaken from production JS)
+- vitest run (68/68: 28 repo + 18 component + 1 curriculum seed + 20 training engine + 1 curriculum seed)
+- docker compose up --build (HTTP 200 at /, /adventure, /practice/:lessonId)
+
+Known Issues:
+- Practice UI is text-input only; no chessboard component yet
+- Mode can only be changed at session start (before first move)
+- Training result is displayed but not persisted (TASK-006 will handle storage)
+- No review scheduling integration yet
+
+Next Recommended Task:
+TASK-006-progression-engine.md
+
+Notes:
+Training engine is pure-function, deterministic, and fully unit-tested. Uses chess.js for
+legal move validation. Guided mode wrong moves allow retry with no penalty. Instinct mode
+wrong moves fail the run immediately. Auto-plays opponent moves from the seeded opening line.
+Session result includes completed status, mistake count, perfect run flag, and move history.
+
+Practice page at /practice/:lessonId loads seeded curriculum data through repositories
+(no direct Dexie access), initializes a training session, accepts SAN move input, and
+displays feedback and completion results.
+
+---
+
 ## REVIEW-003 Handoff
 
 Date:

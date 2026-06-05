@@ -43,6 +43,19 @@ export async function getOpeningFamily(
   return db.openingFamilies.get(id);
 }
 
+export async function getLesson(
+  id: string,
+): Promise<Lesson | undefined> {
+  return db.lessons.get(id);
+}
+
+export async function getLessons(
+  ids: string[],
+): Promise<Lesson[]> {
+  const lessons = await db.lessons.bulkGet(ids);
+  return lessons.filter((l): l is Lesson => l !== undefined);
+}
+
 export async function getOpeningLine(
   id: string,
 ): Promise<OpeningLine | undefined> {
