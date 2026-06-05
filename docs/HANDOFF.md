@@ -138,7 +138,7 @@ Branch:
 main
 
 Commit:
-TBD
+089ed5b
 
 Files Changed:
 - src/features/training/trainingEngine.ts (auto-play loop try/catch)
