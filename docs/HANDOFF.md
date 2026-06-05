@@ -19,6 +19,51 @@ Notes:
 
 ---
 
+## REVIEW-004 Handoff
+
+Date:
+2026-06-05
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-004 — Adventure Map Review
+
+Branch:
+main
+
+Commit:
+TBD
+
+Files Changed:
+- src/lib/seed/curriculum.ts (QGA title typo fix)
+- src/components/LessonNode.tsx (📖 icon for available, 📘 icon for learning)
+- src/hooks/useAdventureMap.ts (masteredCount includes review_due)
+- src/features/adventure/Adventure.tsx (📘 Learning legend entry)
+- docs/HANDOFF.md (TASK-004 commit hash)
+- docs/reviews/REVIEW-004-adventure-map.md (created)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vitest run (48/48 passed)
+
+Known Issues:
+- C-001: Sequential world fetches multiply load latency (see REVIEW-004)
+- C-002: isFirstAvailable fallback only marks idx=0 available — within-world unlock not implemented (see REVIEW-004)
+- C-003: Legend and statusConfig are separate sources of truth (see REVIEW-004)
+
+Next Recommended Task:
+TASK-005-training-engine.md
+
+Notes:
+Fixed 5 items: QGA lesson title typo, masteredCount/allMastered semantic mismatch, missing
+available/learning icons in LessonNode statusConfig, missing "Learning" legend entry,
+and TASK-004 HANDOFF commit hash.
+
+---
+
 ## TASK-004 Handoff
 
 Date:
@@ -34,7 +79,7 @@ Branch:
 main
 
 Commit:
-N/A (pending)
+e92ee66
 
 Files Changed:
 - src/app/App.tsx (/design-system DEV guard, /practice/:lessonId route)

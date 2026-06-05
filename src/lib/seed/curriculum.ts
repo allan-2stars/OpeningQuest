@@ -126,7 +126,7 @@ export const CURRICULUM_LESSONS: Lesson[] = [
   { id: "lesson_w2_london_setup", variationId: "var_london_setup", title: "London Core Setup", side: "white", difficulty: "beginner", depth: 4, lineId: "line_w2_london_setup" },
   { id: "lesson_w2_london_dev", variationId: "var_london_dev", title: "London Development", side: "white", difficulty: "beginner", depth: 5, lineId: "line_w2_london_dev" },
   { id: "lesson_w2_london_responses", variationId: "var_london_responses", title: "London Responses", side: "white", difficulty: "beginner", depth: 6, lineId: "line_w2_london_responses" },
-  { id: "lesson_w2_qga", variationId: "var_qga", title: "QGD Accepted", side: "white", difficulty: "beginner", depth: 5, lineId: "line_w2_qga" },
+  { id: "lesson_w2_qga", variationId: "var_qga", title: "QGA Accepted", side: "white", difficulty: "beginner", depth: 5, lineId: "line_w2_qga" },
   { id: "lesson_w2_qgd", variationId: "var_qgd", title: "QGD Declined", side: "white", difficulty: "beginner", depth: 5, lineId: "line_w2_qgd" },
   { id: "lesson_w2_qg_dev", variationId: "var_qg_dev", title: "QGD Development", side: "white", difficulty: "beginner", depth: 6, lineId: "line_w2_qg_dev" },
   { id: "lesson_w2_ruy_main", variationId: "var_ruy_main", title: "Ruy Lopez Main", side: "white", difficulty: "beginner", depth: 5, lineId: "line_w2_ruy_main" },

@@ -154,6 +154,7 @@ function WorldMap({
       <div className="mt-8 flex flex-wrap gap-3 justify-center text-xs text-text-muted">
         <span className="flex items-center gap-1">🔒 Locked</span>
         <span className="flex items-center gap-1">📖 Available</span>
+        <span className="flex items-center gap-1">📘 Learning</span>
         <span className="flex items-center gap-1">⭐ Mastered</span>
         <span className="flex items-center gap-1">⏳ Review Due</span>
         <span className="flex items-center gap-1">👑 Boss</span>

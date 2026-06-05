@@ -11,8 +11,8 @@ type LessonNodeProps = {
 
 const statusConfig: Record<LessonStatus, { bg: string; border: string; ring: string; text: string; icon: string }> = {
   locked:     { bg: "bg-slate-800", border: "border-slate-600", ring: "ring-slate-600/30", text: "text-slate-500", icon: "🔒" },
-  available:  { bg: "bg-primary", border: "border-secondary", ring: "ring-secondary/40", text: "text-white", icon: "" },
-  learning:   { bg: "bg-primary-light", border: "border-warning", ring: "ring-warning/40", text: "text-white", icon: "" },
+  available:  { bg: "bg-primary", border: "border-secondary", ring: "ring-secondary/40", text: "text-white", icon: "📖" },
+  learning:   { bg: "bg-primary-light", border: "border-warning", ring: "ring-warning/40", text: "text-white", icon: "📘" },
   mastered:   { bg: "bg-success/30", border: "border-success", ring: "ring-success/30", text: "text-white", icon: "⭐" },
   review_due: { bg: "bg-warning/20", border: "border-warning", ring: "ring-warning/40", text: "text-white", icon: "⏳" },
 };

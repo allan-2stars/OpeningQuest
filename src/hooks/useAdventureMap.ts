@@ -90,7 +90,7 @@ export function useAdventureMap(): AdventureMapState {
             : null;
 
           const masteredCount = [...nodes, bossNode].filter(
-            (n) => n && n.status === "mastered",
+            (n) => n && (n.status === "mastered" || n.status === "review_due"),
           ).length;
           const totalCount = nodes.length + (bossNode ? 1 : 0);
 
