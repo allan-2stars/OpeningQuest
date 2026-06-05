@@ -8,6 +8,7 @@ import Collection from "../features/collection/Collection";
 import Profile from "../features/profile/Profile";
 import Settings from "../features/settings/Settings";
 import ImportExport from "../features/import-export/ImportExport";
+import DesignSystem from "../features/design-system/DesignSystem";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/import-export" element={<ImportExport />} />
+        <Route path="/design-system" element={<DesignSystem />} />
       </Routes>
     </AppShell>
   );

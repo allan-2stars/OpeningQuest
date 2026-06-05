@@ -19,6 +19,67 @@ Notes:
 
 ---
 
+## TASK-003 Handoff
+
+Date:
+2026-06-04
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-003 - Design System Components
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/index.css (expanded @theme with radii, shadows, animations, color tokens)
+- src/components/Button.tsx (created)
+- src/components/Card.tsx (created)
+- src/components/Modal.tsx (created)
+- src/components/ProgressBar.tsx (created)
+- src/components/Badge.tsx (created)
+- src/components/XPChip.tsx (created)
+- src/components/KeyChip.tsx (created)
+- src/components/LessonNode.tsx (created)
+- src/components/WorldCard.tsx (created)
+- src/components/PageShell.tsx (created)
+- src/components/EmptyState.tsx (created)
+- src/components/FeedbackBanner.tsx (created)
+- src/components/__tests__/components.test.tsx (created — 18 tests)
+- src/features/design-system/DesignSystem.tsx (created)
+- src/app/App.tsx (added /design-system route)
+- src/components/AppShell.tsx (added DS nav link)
+- vite.config.ts (no global environment change — per-file env directive)
+- package.json (added jsdom, @testing-library/react, @testing-library/jest-dom)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vite build (passed)
+- vitest run (46/46 passed: 28 repo + 18 component)
+- docker compose up --build (HTTP 200 at localhost:4317 and /design-system)
+
+Known Issues:
+- REVIEW-001 C-003 (docker-compose.yml anonymous volume) still applies
+- REVIEW-002 C-001 (DEFAULT_USER_PROFILE frozen timestamp) not yet addressed
+- Design system page at /design-system is dev-only — remove before launch
+
+Next Recommended Task:
+TASK-004-adventure-map.md
+
+Notes:
+All 12 components created with tablet-first sizing, accessible focus states, child-friendly styling.
+Design tokens expanded with animation keyframes, radii, shadows, and extended color palette.
+Component demo page at http://localhost:4317/design-system shows all components with variants.
+Components are pure presentational — no business logic, no Dexie access, no training engine.
+
+---
+
 ## REVIEW-002 Handoff
 
 Date:

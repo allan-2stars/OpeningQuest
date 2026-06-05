@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-002 Complete. Ready for TASK-003 Design System Components.
+TASK-003 Complete. Ready for TASK-004 Adventure Map.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-003-design-system-components.md
+TASK-004-adventure-map.md
 
 Assigned to:
 Windows Agent

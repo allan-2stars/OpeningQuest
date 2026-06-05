@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { to: "/profile", label: "Profile" },
   { to: "/settings", label: "Settings" },
   { to: "/import-export", label: "Import/Export" },
+  { to: "/design-system", label: "DS" },
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
