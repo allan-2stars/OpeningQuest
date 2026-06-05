@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import Button from "../Button.tsx";
 import Badge from "../Badge.tsx";
 import XPChip from "../XPChip.tsx";
@@ -89,6 +89,14 @@ describe("FeedbackBanner", () => {
     render(<FeedbackBanner type="error" message="Oops" dismissible />);
     expect(screen.getByLabelText("Dismiss")).toBeDefined();
   });
+
+  it("reappears when message changes after being dismissed", () => {
+    const { rerender } = render(<FeedbackBanner type="error" message="First" dismissible />);
+    fireEvent.click(screen.getByLabelText("Dismiss"));
+    expect(screen.queryByText("First")).toBeNull();
+    rerender(<FeedbackBanner type="error" message="Second" dismissible />);
+    expect(screen.getByText("Second")).toBeDefined();
+  });
 });
 
 describe("EmptyState", () => {
@@ -127,9 +135,10 @@ describe("LessonNode", () => {
     expect(screen.getByText("Depth 3")).toBeDefined();
   });
 
-  it("is not interactive when locked", () => {
-    const { container } = render(<LessonNode label="Locked" status="locked" depth={1} />);
-    expect(container.querySelector("button")).toBeNull();
+  it("is disabled when locked", () => {
+    render(<LessonNode label="Locked" status="locked" depth={1} />);
+    const btn = screen.getByRole("button", { name: /Locked/i });
+    expect((btn as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("is interactive when available", () => {

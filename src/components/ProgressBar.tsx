@@ -29,7 +29,7 @@ export default function ProgressBar({
   animated = true,
   className = "",
 }: ProgressBarProps) {
-  const pct = Math.min(100, Math.max(0, (value / max) * 100));
+  const pct = max === 0 ? 0 : Math.min(100, Math.max(0, (value / max) * 100));
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>

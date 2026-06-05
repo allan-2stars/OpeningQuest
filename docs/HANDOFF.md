@@ -19,6 +19,55 @@ Notes:
 
 ---
 
+## REVIEW-003 Handoff
+
+Date:
+2026-06-05
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-003 - Design System Components Review
+
+Branch:
+main
+
+Commit:
+(pending)
+
+Files Changed:
+- src/components/Modal.tsx (overlay click fix + aria-labelledby for accessibility)
+- src/components/FeedbackBanner.tsx (visible-reset fix, onDismiss ref pattern, autoDismissMs null guard)
+- src/components/LessonNode.tsx (always render button, remove invalid div disabled)
+- src/components/ProgressBar.tsx (max=0 guard for NaN)
+- src/components/__tests__/components.test.tsx (updated LessonNode test + new FeedbackBanner test)
+- docs/HANDOFF.md (TASK-003 commit hash fix)
+- docs/reviews/REVIEW-003-design-system-components.md (created)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vitest run (47/47 passed, was 46/46)
+- vite build (passed)
+
+Known Issues:
+- /design-system route and nav link ship in production with no DEV guard (see REVIEW-003 C-001)
+- Modal with no title has no accessible name and no close button (see REVIEW-003 C-002)
+- Feature placeholder pages use hand-rolled empty-state markup instead of EmptyState component (see REVIEW-003 C-003)
+
+Next Recommended Task:
+TASK-004-adventure-map.md (fix C-001 DEV guard early in that task)
+
+Notes:
+Fixed critical overlay-click bug in Modal (e.target check was wrong — backdrop click never fired).
+Fixed FeedbackBanner silent-dismiss bug (banner stayed hidden after message change).
+Fixed LessonNode invalid HTML (div disabled → button disabled).
+Fixed ProgressBar NaN on max=0.
+Fixed TASK-003 HANDOFF commit hash.
+
+---
+
 ## TASK-003 Handoff
 
 Date:
@@ -34,7 +83,7 @@ Branch:
 main
 
 Commit:
-N/A (pending)
+d29fad6
 
 Files Changed:
 - src/index.css (expanded @theme with radii, shadows, animations, color tokens)

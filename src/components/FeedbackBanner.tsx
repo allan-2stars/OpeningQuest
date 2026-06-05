@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 
 type FeedbackType = "success" | "error" | "warning" | "info";
 
@@ -28,16 +28,21 @@ export default function FeedbackBanner({
   onDismiss,
   className = "",
 }: FeedbackBannerProps) {
-  const [visible, setVisible] = useState(true);
+  const messageKey = `${type}:${message}`;
+  const [dismissedKey, setDismissedKey] = useState<string | null>(null);
+  const visible = dismissedKey !== messageKey;
+
+  const onDismissRef = useRef(onDismiss);
+  useEffect(() => { onDismissRef.current = onDismiss; });
 
   useEffect(() => {
-    if (!autoDismissMs) return;
+    if (autoDismissMs == null) return;
     const timer = setTimeout(() => {
-      setVisible(false);
-      onDismiss?.();
+      setDismissedKey(messageKey);
+      onDismissRef.current?.();
     }, autoDismissMs);
     return () => clearTimeout(timer);
-  }, [autoDismissMs, onDismiss]);
+  }, [autoDismissMs, messageKey]);
 
   if (!visible) return null;
 
@@ -55,7 +60,7 @@ export default function FeedbackBanner({
       </div>
       {dismissible && (
         <button
-          onClick={() => { setVisible(false); onDismiss?.(); }}
+          onClick={() => { setDismissedKey(messageKey); onDismiss?.(); }}
           className={`shrink-0 rounded p-0.5 ${text} opacity-60 hover:opacity-100 transition-opacity`}
           aria-label="Dismiss"
         >

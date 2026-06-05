@@ -35,16 +35,15 @@ export default function Modal({ open, onClose, title, children, footer }: ModalP
     <div
       ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
-      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-labelledby={title ? "modal-title" : undefined}
     >
-      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-xl border border-slate-700 bg-surface shadow-2xl animate-slide-up">
         {title && (
           <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3">
-            <h2 className="text-lg font-bold text-text-primary">{title}</h2>
+            <h2 id="modal-title" className="text-lg font-bold text-text-primary">{title}</h2>
             <button
               onClick={onClose}
               className="rounded-md p-1 text-text-muted hover:text-text-primary hover:bg-surface-light transition-colors"
