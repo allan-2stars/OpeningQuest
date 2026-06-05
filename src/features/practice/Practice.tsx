@@ -9,6 +9,14 @@ import EmptyState from "../../components/EmptyState.tsx";
 import { useTrainingSession } from "../../hooks/useTrainingSession.ts";
 import type { PracticeMode } from "../../types/domain.ts";
 
+const STATUS_LABELS: Record<string, string> = {
+  waiting: "Ready",
+  correct: "Correct!",
+  wrong: "Try Again",
+  complete: "Complete!",
+  failed: "Run Failed",
+};
+
 function PracticeContent({ lessonId }: { lessonId: string }) {
   const [mode, setMode] = useState<PracticeMode>("guided");
   const [input, setInput] = useState("");
@@ -91,7 +99,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
             </Button>
             <div className="flex-1" />
             <Badge variant={state.status === "complete" ? "success" : state.status === "failed" ? "error" : "default"}>
-              {state.status}
+              {STATUS_LABELS[state.status] ?? state.status}
             </Badge>
           </div>
         </Card>

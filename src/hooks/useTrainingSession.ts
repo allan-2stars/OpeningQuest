@@ -66,10 +66,14 @@ export function useTrainingSession(): UseTrainingSessionResult {
     (san: string) => {
       if (!state) return;
       const lessonId = activeLessonRef.current;
-      const { state: next, result: sessionResult } = submitMove(state, san, sanMoves);
-      setState(next);
-      if (sessionResult) {
-        setResult({ ...sessionResult, lessonId: lessonId ?? "" });
+      try {
+        const { state: next, result: sessionResult } = submitMove(state, san, sanMoves);
+        setState(next);
+        if (sessionResult) {
+          setResult({ ...sessionResult, lessonId: lessonId ?? "" });
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "An error occurred during practice");
       }
     },
     [state, sanMoves],

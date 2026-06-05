@@ -19,6 +19,8 @@ import {
   getVariationsByFamily,
   getOpeningFamily,
   getOpeningLine,
+  getLesson,
+  getLessons,
 } from "../repositories/curriculumRepo.ts";
 import {
   getAllAchievements,
@@ -322,6 +324,28 @@ describe("curriculumRepo", () => {
   it("gets an opening line", async () => {
     const l = await getOpeningLine("line_001");
     expect(l?.pgn).toBe("1. e4 e5 2. Nf3 Nc6 3. Bc4");
+  });
+
+  it("gets a lesson by id", async () => {
+    const l = await getLesson("lesson_a");
+    expect(l?.title).toBe("Italian Game Basics");
+  });
+
+  it("returns undefined for missing lesson", async () => {
+    const l = await getLesson("missing_id");
+    expect(l).toBeUndefined();
+  });
+
+  it("gets multiple lessons by ids", async () => {
+    const lessons = await getLessons(["lesson_a", "lesson_b"]);
+    expect(lessons).toHaveLength(2);
+    expect(lessons.map((l) => l.id).sort()).toEqual(["lesson_a", "lesson_b"]);
+  });
+
+  it("getLessons silently filters out missing ids", async () => {
+    const lessons = await getLessons(["lesson_a", "nonexistent"]);
+    expect(lessons).toHaveLength(1);
+    expect(lessons[0].id).toBe("lesson_a");
   });
 });
 

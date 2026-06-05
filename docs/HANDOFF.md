@@ -123,6 +123,53 @@ Preflight fixes applied:
 
 ---
 
+## REVIEW-005 Handoff
+
+Date:
+2026-06-05
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-005 — Training Engine Review
+
+Branch:
+main
+
+Commit:
+TBD
+
+Files Changed:
+- src/features/training/trainingEngine.ts (auto-play loop try/catch)
+- src/hooks/useTrainingSession.ts (handleMove error guard)
+- src/lib/__tests__/repositories.test.ts (getLesson + getLessons tests)
+- src/features/practice/Practice.tsx (STATUS_LABELS for badge display)
+- docs/HANDOFF.md (TASK-005 commit hash)
+- docs/reviews/REVIEW-005-training-engine.md (created)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vitest run (72/72 passed, was 68/68)
+
+Known Issues:
+- C-001: Mode change while "waiting" has no effect — visual mismatch (see REVIEW-005)
+- C-002: Move counter displays total plies, not user moves (see REVIEW-005)
+- C-003: Guided mode always produces perfect run — mastery design gap (see REVIEW-005)
+- C-004: Guided-mode wrong moves in history while mistakes=0 (see REVIEW-005)
+- C-005: makeResult always emits lessonId:"" — incomplete interface (see REVIEW-005)
+
+Next Recommended Task:
+TASK-006-progression-engine.md
+
+Notes:
+Fixed auto-play crash bug (uncaught throw from opponent move), added error recovery to
+handleMove, added missing getLesson/getLessons tests, improved status badge display labels,
+updated TASK-005 HANDOFF commit hash.
+
+---
+
 ## TASK-005 Handoff
 
 Date:
@@ -138,7 +185,7 @@ Branch:
 main
 
 Commit:
-N/A (pending)
+f3f45a3
 
 Files Changed:
 - src/features/training/types.ts (created — TrainingSessionState, MoveFeedback, TrainingSessionResult)

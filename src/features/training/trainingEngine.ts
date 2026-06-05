@@ -125,9 +125,13 @@ export function submitMove(
   let newIndex = state.currentMoveIndex + 1;
 
   // Auto-play opponent's next move (if any)
-  while (newIndex < sanMoves.length && !isUserTurn(newIndex, state.userSide)) {
-    chess.move(sanMoves[newIndex]);
-    newIndex++;
+  try {
+    while (newIndex < sanMoves.length && !isUserTurn(newIndex, state.userSide)) {
+      chess.move(sanMoves[newIndex]);
+      newIndex++;
+    }
+  } catch {
+    throw new Error(`Invalid opponent move in opening line at position ${newIndex}`);
   }
 
   const complete = newIndex >= sanMoves.length;
