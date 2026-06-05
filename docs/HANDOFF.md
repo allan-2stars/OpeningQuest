@@ -19,6 +19,65 @@ Notes:
 
 ---
 
+## TASK-004 Handoff
+
+Date:
+2026-06-05
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-004 - Adventure Map
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/app/App.tsx (/design-system DEV guard, /practice/:lessonId route)
+- src/components/AppShell.tsx (DS nav DEV guard)
+- src/components/Modal.tsx (aria-label fallback, titleless close button)
+- src/features/adventure/Adventure.tsx (rewritten — full adventure map)
+- src/features/practice/Practice.tsx (updated with lessonId param, EmptyState)
+- src/hooks/useAdventureMap.ts (created)
+- src/lib/seed/curriculum.ts (created — Worlds 1&2 seed data)
+- src/lib/seed/seedCurriculum.ts (created)
+- src/lib/seed/seed.ts (wired seedCurriculum into seedCoreData)
+- src/lib/__tests__/repositories.test.ts (+1 curriculum seed test)
+- docs/reviews/REVIEW-003-design-system-components.md (C-001, C-002 addressed)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed, 0 warnings)
+- vite build (passed, /design-system tree-shaken from production JS)
+- vitest run (48/48 passed)
+- docker compose up --build (HTTP 200 at /, /adventure; /design-system dev-only)
+
+Known Issues:
+- World progression uses simple all-mastered check; real progression engine TASK-006
+- Lesson nodes claim unlocked state from seed data only; no dynamic unlocking yet
+- Boss node is visual-only; boss battle logic is TASK-013
+- REVIEW-002 C-001 (frozen timestamp) still applies
+
+Next Recommended Task:
+TASK-005-training-engine.md
+
+Notes:
+Adventure map renders Worlds 1 & 2 from seeded curriculum. Lesson nodes show correct visual
+states for locked/available/mastered/review_due. Boss node gets crown indicator and
+scale boost. World selection via WorldCard grid. Snaking vertical path connects lesson
+nodes with left/right alternation. Locked lessons are disabled buttons. Available/current
+nodes navigate to /practice/:lessonId.
+
+Preflight fixes applied:
+- /design-system route gated behind import.meta.env.DEV (REVIEW-003 C-001)
+- Modal aria-label fallback for titleless usage (REVIEW-003 C-002)
+
+---
+
 ## REVIEW-003 Handoff
 
 Date:

@@ -1,11 +1,29 @@
+import { useParams } from "react-router-dom";
+import PageShell from "../../components/PageShell.tsx";
+import EmptyState from "../../components/EmptyState.tsx";
+
 export default function Practice() {
+  const { lessonId } = useParams<{ lessonId?: string }>();
+
+  if (lessonId) {
+    return (
+      <PageShell title="Practice">
+        <EmptyState
+          icon="♟"
+          title="Training session"
+          description={`Ready to practice lesson: ${lessonId}`}
+        />
+      </PageShell>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center gap-4 py-16">
-      <h2 className="text-3xl font-bold text-secondary">Practice</h2>
-      <p className="text-slate-400">Train your openings on the board.</p>
-      <div className="mt-8 rounded-lg border border-dashed border-slate-600 p-12 text-slate-500">
-        Chessboard placeholder
-      </div>
-    </div>
+    <PageShell title="Practice">
+      <EmptyState
+        icon="♟"
+        title="Practice Mode"
+        description="Select a lesson from the Adventure Map or Classic Mode to start practicing."
+      />
+    </PageShell>
   );
 }

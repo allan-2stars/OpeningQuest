@@ -6,6 +6,7 @@ import {
   DEFAULT_PIECE_SKIN,
   DEFAULT_BOARD_THEME,
 } from "./defaults.ts";
+import { seedCurriculum } from "./seedCurriculum.ts";
 
 export async function seedCoreData(): Promise<void> {
   await db.transaction(
@@ -35,4 +36,5 @@ export async function seedCoreData(): Promise<void> {
       }
     },
   );
+  await seedCurriculum();
 }

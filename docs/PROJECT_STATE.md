@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-003 Complete. Ready for TASK-004 Adventure Map.
+TASK-004 Complete. Ready for TASK-005 Training Engine.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-004-adventure-map.md
+TASK-005-training-engine.md
 
 Assigned to:
 Windows Agent

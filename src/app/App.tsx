@@ -18,11 +18,12 @@ export default function App() {
         <Route path="/adventure" element={<Adventure />} />
         <Route path="/classic" element={<Classic />} />
         <Route path="/practice" element={<Practice />} />
+        <Route path="/practice/:lessonId" element={<Practice />} />
         <Route path="/collection" element={<Collection />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/import-export" element={<ImportExport />} />
-        <Route path="/design-system" element={<DesignSystem />} />
+        {import.meta.env.DEV && <Route path="/design-system" element={<DesignSystem />} />}
       </Routes>
     </AppShell>
   );

@@ -204,6 +204,21 @@ describe("seedCoreData", () => {
     const ach = await getAchievement("ach_first_lesson");
     expect(ach?.unlockedAt).toBe("2026-06-04T12:00:00.000Z");
   });
+
+  it("seeds curriculum with worlds, lessons, and progress", async () => {
+    await seedCoreData();
+
+    const worlds = await getAllWorlds();
+    expect(worlds.length).toBeGreaterThanOrEqual(2);
+    expect(worlds[0].name).toBe("Knight Meadows");
+
+    const lessons = await db.lessons.toArray();
+    expect(lessons.length).toBeGreaterThanOrEqual(5);
+
+    const progress = await getAllLessonProgress();
+    expect(progress.length).toBeGreaterThanOrEqual(5);
+    expect(progress.find((p) => p.lessonId === "lesson_w1_italian_main")?.status).toBe("available");
+  });
 });
 
 describe("curriculumRepo", () => {
