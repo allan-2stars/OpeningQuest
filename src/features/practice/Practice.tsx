@@ -21,17 +21,21 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   const [mode, setMode] = useState<PracticeMode>("guided");
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const startedRef = useRef(false);
 
   const { state, lessonTitle, isLoading, error, handleMove, result, startSession } =
     useTrainingSession();
 
+  // Initial load only — remounting is handled by key={lessonId}
   useEffect(() => {
-    if (!startedRef.current) {
-      startedRef.current = true;
-      startSession(lessonId, mode);
-    }
-  }, [lessonId, mode, startSession]);
+    startSession(lessonId, mode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const switchMode = (newMode: PracticeMode) => {
+    if (newMode === mode) return;
+    setMode(newMode);
+    startSession(lessonId, newMode);
+  };
 
   const onSubmit = () => {
     const trimmed = input.trim();
@@ -56,7 +60,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
       <PageShell title="Practice">
         <FeedbackBanner type="error" message={error} />
         <div className="mt-4">
-          <Button variant="secondary" onClick={() => { startedRef.current = false; startSession(lessonId, mode); }}>Retry</Button>
+          <Button variant="secondary" onClick={() => startSession(lessonId, mode)}>Retry</Button>
         </div>
       </PageShell>
     );
@@ -71,10 +75,8 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   }
 
   const isTerminal = state.status === "complete" || state.status === "failed";
-  const restart = () => {
-    startedRef.current = false;
-    startSession(lessonId, mode);
-  };
+  const isWaiting = state.status === "waiting";
+  const canSwitchMode = isWaiting;
 
   return (
     <PageShell title={lessonTitle ?? "Practice"}>
@@ -86,14 +88,16 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
             <Button
               size="sm"
               variant={mode === "guided" ? "primary" : "ghost"}
-              onClick={() => { if (!state || state.status === "waiting") setMode("guided"); }}
+              onClick={() => { if (canSwitchMode) switchMode("guided"); }}
+              disabled={!canSwitchMode}
             >
               Guided
             </Button>
             <Button
               size="sm"
               variant={mode === "instinct" ? "primary" : "ghost"}
-              onClick={() => { if (!state || state.status === "waiting") setMode("instinct"); }}
+              onClick={() => { if (canSwitchMode) switchMode("instinct"); }}
+              disabled={!canSwitchMode}
             >
               Instinct
             </Button>
@@ -108,7 +112,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
         {!isTerminal && (
           <Card>
             <p className="text-sm text-text-secondary mb-2">
-              Move {state.currentMoveIndex + 1} of {state.totalMoves} —{" "}
+              Move {state.userMoveCount + 1} of {state.totalUserMoves} —{" "}
               {state.userSide === "white" ? "Playing as White" : "Playing as Black"}
             </p>
             <div className="flex gap-2">
@@ -164,8 +168,17 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
         {/* Restart */}
         {isTerminal && (
           <div className="flex gap-2">
-            <Button onClick={restart}>Practice Again</Button>
-            <Button variant="secondary" onClick={restart}>Change Mode</Button>
+            <Button onClick={() => startSession(lessonId, mode)}>Practice Again</Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                const newMode = mode === "guided" ? "instinct" : "guided";
+                setMode(newMode);
+                startSession(lessonId, newMode);
+              }}
+            >
+              Switch to {mode === "guided" ? "Instinct" : "Guided"}
+            </Button>
           </div>
         )}
       </div>

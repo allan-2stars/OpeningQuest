@@ -65,12 +65,12 @@ export function useTrainingSession(): UseTrainingSessionResult {
   const handleMove = useCallback(
     (san: string) => {
       if (!state) return;
-      const lessonId = activeLessonRef.current;
+      const lessonId = activeLessonRef.current ?? "";
       try {
-        const { state: next, result: sessionResult } = submitMove(state, san, sanMoves);
+        const { state: next, result: sessionResult } = submitMove(state, san, sanMoves, lessonId);
         setState(next);
         if (sessionResult) {
-          setResult({ ...sessionResult, lessonId: lessonId ?? "" });
+          setResult(sessionResult);
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "An error occurred during practice");

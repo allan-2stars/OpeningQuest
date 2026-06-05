@@ -7,7 +7,10 @@ export type TrainingStatus =
   | "complete"
   | "failed";
 
+export type FeedbackType = "accepted" | "wrong" | "opponent";
+
 export type MoveFeedback = {
+  type: FeedbackType;
   legal: boolean;
   correct: boolean;
   san: string;
@@ -21,6 +24,8 @@ export type TrainingSessionState = {
   userSide: Side;
   mode: PracticeMode;
   mistakes: number;
+  userMoveCount: number;
+  totalUserMoves: number;
   status: TrainingStatus;
   lastFeedback: MoveFeedback | null;
   history: MoveFeedback[];

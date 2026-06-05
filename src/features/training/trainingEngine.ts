@@ -4,9 +4,11 @@ import type {
   TrainingSessionState,
   TrainingSessionResult,
   MoveFeedback,
+  FeedbackType,
 } from "./types.ts";
 
 function buildFeedback(
+  type: FeedbackType,
   legal: boolean,
   correct: boolean,
   san: string,
@@ -14,13 +16,17 @@ function buildFeedback(
   mode: PracticeMode,
 ): MoveFeedback {
   if (!legal) {
-    return { legal: false, correct: false, san, message: "Illegal move. Try a different move." };
+    return { type: "wrong", legal: false, correct: false, san, message: "Illegal move. Try a different move." };
+  }
+  if (type === "opponent") {
+    return { type: "opponent", legal: true, correct: true, san, message: `Opponent played ${san}` };
   }
   if (correct) {
-    return { legal: true, correct: true, san, message: "Correct!" };
+    return { type: "accepted", legal: true, correct: true, san, message: "Correct!" };
   }
   if (mode === "guided") {
     return {
+      type: "wrong",
       legal: true,
       correct: false,
       san,
@@ -28,11 +34,16 @@ function buildFeedback(
     };
   }
   return {
+    type: "wrong",
     legal: true,
     correct: false,
     san,
     message: `Wrong move. The expected move was: ${expected}. Run failed.`,
   };
+}
+
+function totalUserMoves(sanMovesLength: number, userSide: Side): number {
+  return userSide === "white" ? Math.ceil(sanMovesLength / 2) : Math.floor(sanMovesLength / 2);
 }
 
 export function initSession(
@@ -54,6 +65,8 @@ export function initSession(
     userSide,
     mode,
     mistakes: 0,
+    userMoveCount: 0,
+    totalUserMoves: totalUserMoves(sanMoves.length, userSide),
     status: "waiting",
     lastFeedback: null,
     history: [],
@@ -64,6 +77,7 @@ export function submitMove(
   state: TrainingSessionState,
   san: string,
   sanMoves: string[],
+  lessonId: string,
 ): { state: TrainingSessionState; result?: TrainingSessionResult } {
   if (state.status === "complete" || state.status === "failed") {
     return { state };
@@ -77,14 +91,14 @@ export function submitMove(
   try {
     const moveResult = chess.move(san);
     if (!moveResult) {
-      const fb = buildFeedback(false, false, san, expected, state.mode);
+      const fb = buildFeedback("wrong", false, false, san, expected, state.mode);
       return {
         state: { ...state, lastFeedback: fb, status: "wrong" },
       };
     }
     playedSan = moveResult.san;
   } catch {
-    const fb = buildFeedback(false, false, san, expected, state.mode);
+    const fb = buildFeedback("wrong", false, false, san, expected, state.mode);
     return {
       state: { ...state, lastFeedback: fb, status: "wrong" },
     };
@@ -92,7 +106,7 @@ export function submitMove(
   const isCorrect = playedSan === expected;
 
   if (!isCorrect) {
-    const fb = buildFeedback(true, false, playedSan, expected, state.mode);
+    const fb = buildFeedback("wrong", true, false, playedSan, expected, state.mode);
     const history = [...state.history, fb];
 
     if (state.mode === "instinct") {
@@ -104,15 +118,16 @@ export function submitMove(
           status: "failed",
           history,
         },
-        result: makeResult(state, false, state.mistakes + 1, history),
+        result: makeResult(lessonId, state, false, state.mistakes + 1, history),
       };
     }
 
-    // Guided mode: don't advance, don't penalize
+    // Guided mode: wrong move counts as a mistake but allows retry
     return {
       state: {
         ...state,
         lastFeedback: fb,
+        mistakes: state.mistakes + 1,
         status: "wrong",
         history,
       },
@@ -120,14 +135,16 @@ export function submitMove(
   }
 
   // Correct move — advance
-  const fb = buildFeedback(true, true, playedSan, expected, state.mode);
+  const fb = buildFeedback("accepted", true, true, playedSan, expected, state.mode);
   const history = [...state.history, fb];
+  const newUserMoveCount = state.userMoveCount + 1;
   let newIndex = state.currentMoveIndex + 1;
 
-  // Auto-play opponent's next move (if any)
+  // Auto-play opponent's next moves, recording each in history
   try {
     while (newIndex < sanMoves.length && !isUserTurn(newIndex, state.userSide)) {
-      chess.move(sanMoves[newIndex]);
+      const oppSan = chess.move(sanMoves[newIndex]).san;
+      history.push(buildFeedback("opponent", true, true, oppSan, sanMoves[newIndex], state.mode));
       newIndex++;
     }
   } catch {
@@ -143,11 +160,12 @@ export function submitMove(
         ...state,
         fen: chess.fen(),
         currentMoveIndex: newIndex,
+        userMoveCount: newUserMoveCount,
         lastFeedback: fb,
         status: "complete",
         history,
       },
-      result: makeResult(state, true, state.mistakes, history, perfectRun),
+      result: makeResult(lessonId, state, true, state.mistakes, history, perfectRun),
     };
   }
 
@@ -156,6 +174,7 @@ export function submitMove(
       ...state,
       fen: chess.fen(),
       currentMoveIndex: newIndex,
+      userMoveCount: newUserMoveCount,
       lastFeedback: fb,
       status: "correct",
       history,
@@ -169,6 +188,7 @@ function isUserTurn(moveIndex: number, userSide: Side): boolean {
 }
 
 function makeResult(
+  lessonId: string,
   state: TrainingSessionState,
   completed: boolean,
   mistakes: number,
@@ -176,7 +196,7 @@ function makeResult(
   perfectRun = false,
 ): TrainingSessionResult {
   return {
-    lessonId: "",
+    lessonId,
     mode: state.mode,
     completed,
     mistakes,

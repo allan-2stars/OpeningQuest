@@ -123,6 +123,59 @@ Preflight fixes applied:
 
 ---
 
+## TASK-005A Handoff (REVIEW-005 Fixes)
+
+Date:
+2026-06-05
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-005A — REVIEW-005 Training Engine Correctness Fixes
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/training/types.ts (added FeedbackType, userMoveCount, totalUserMoves)
+- src/features/training/trainingEngine.ts (C-002 through C-005 fixes)
+- src/features/training/__tests__/trainingEngine.test.ts (rewritten — 31 tests, was 20)
+- src/hooks/useTrainingSession.ts (passes lessonId to submitMove directly)
+- src/features/practice/Practice.tsx (C-001 mode switch fix, C-002 move counter fix)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (81/81 passed: 28 repo + 18 component + 1 curriculum seed + 4 getLesson/getLessons + 30 training engine)
+- docker compose up --build (HTTP 200 at /, /practice/:lessonId)
+
+Fixed REVIEW-005 concerns:
+- C-001: Mode buttons call switchMode() which restarts session with new mode
+- C-002: Move counter now shows userMoveCount+1 of totalUserMoves (user moves, not plies)
+- C-003: Guided mode wrong moves count as mistakes
+- C-004: Guided runs with any wrong move produce perfectRun=false
+- C-005: lessonId is a submitMove parameter, never empty in results
+- History entries use type field: "accepted" | "wrong" | "opponent"
+- Opponent auto-play moves recorded in history
+
+Known Issues:
+- REVIEW-005 C-003 comment about mastery gate (instinct-only perfectRuns) deferred to TASK-006
+
+Next Recommended Task:
+TASK-006-progression-engine.md
+
+Notes:
+All five REVIEW-005 concerns resolved. Engine now distinguishes accepted moves, wrong
+attempts, and opponent auto-plays in history via the FeedbackType union. Practice page
+mode buttons restart sessions properly instead of silently ignoring mode changes.
+
+---
+
 ## REVIEW-005 Handoff
 
 Date:
