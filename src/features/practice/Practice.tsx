@@ -21,13 +21,17 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   const [mode, setMode] = useState<PracticeMode>("guided");
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const startedRef = useRef(false);
 
   const { state, lessonTitle, isLoading, error, handleMove, result, startSession } =
     useTrainingSession();
 
-  // Initial load only — remounting is handled by key={lessonId}
+  // startedRef prevents React StrictMode from double-invoking startSession on dev mount
   useEffect(() => {
-    startSession(lessonId, mode);
+    if (!startedRef.current) {
+      startedRef.current = true;
+      startSession(lessonId, mode);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -171,11 +175,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
             <Button onClick={() => startSession(lessonId, mode)}>Practice Again</Button>
             <Button
               variant="secondary"
-              onClick={() => {
-                const newMode = mode === "guided" ? "instinct" : "guided";
-                setMode(newMode);
-                startSession(lessonId, newMode);
-              }}
+              onClick={() => switchMode(mode === "guided" ? "instinct" : "guided")}
             >
               Switch to {mode === "guided" ? "Instinct" : "Guided"}
             </Button>

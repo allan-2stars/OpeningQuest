@@ -19,6 +19,49 @@ Notes:
 
 ---
 
+## REVIEW-005A Handoff
+
+Date:
+2026-06-06
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-005A — Training Engine Hardening Review
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/practice/Practice.tsx (F-001: startedRef guard, F-002: terminal button uses switchMode)
+- docs/HANDOFF.md (TASK-005A commit hash)
+- docs/reviews/REVIEW-005A-training-engine-hardening.md (created)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vitest run (81/81 passed)
+
+Known Issues:
+- C-001: Mode switch triggers full DB re-read + loading flash (see REVIEW-005A)
+- C-002: initSession zero-userMoves produces stuck session with "Move 1 of 0" (see REVIEW-005A)
+- C-003: handleMove stale closure / activeLessonRef mismatch (see REVIEW-005A)
+- C-004: buildFeedback type parameter ignored in !legal branch (see REVIEW-005A)
+
+Next Recommended Task:
+TASK-006-progression-engine.md
+
+Notes:
+StrictMode double-invocation of startSession fixed by re-introducing startedRef guard (without
+cleanup, preserving ref across virtual unmount/remount). Terminal mode-switch button refactored
+to call switchMode() instead of duplicating inline logic.
+
+---
+
 ## REVIEW-004 Handoff
 
 Date:
@@ -138,7 +181,7 @@ Branch:
 main
 
 Commit:
-N/A (pending)
+c8edb62
 
 Files Changed:
 - src/features/training/types.ts (added FeedbackType, userMoveCount, totalUserMoves)
