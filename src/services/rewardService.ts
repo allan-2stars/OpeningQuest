@@ -5,8 +5,6 @@ import { getUserProfile, updateUserProfile } from "../lib/repositories/userProfi
 import { getUnlockedAchievements, updateAchievement } from "../lib/repositories/rewardsRepo.ts";
 import { nowISO } from "../lib/date.ts";
 
-export type { RewardSummary } from "./rewardCalculator.ts";
-
 const DEFAULT_USER_ID = "user_default";
 
 export async function applyRewards(

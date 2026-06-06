@@ -47,12 +47,14 @@ export async function updatePieceSkin(
   id: string,
   updates: Partial<Omit<PieceSkin, "id">>,
 ): Promise<void> {
-  await db.pieceSkins.update(id, updates);
+  const count = await db.pieceSkins.update(id, updates);
+  if (count === 0) throw new Error(`PieceSkin not found: ${id}`);
 }
 
 export async function updateBoardTheme(
   id: string,
   updates: Partial<Omit<BoardTheme, "id">>,
 ): Promise<void> {
-  await db.boardThemes.update(id, updates);
+  const count = await db.boardThemes.update(id, updates);
+  if (count === 0) throw new Error(`BoardTheme not found: ${id}`);
 }

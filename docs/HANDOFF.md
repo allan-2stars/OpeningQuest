@@ -19,6 +19,50 @@ Notes:
 
 ---
 
+## REVIEW-007A Handoff
+
+Date:
+2026-06-06
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-007A — Reward Persistence Hardening Review
+
+Branch:
+main
+
+Commit:
+(pending)
+
+Files Changed:
+- src/services/__tests__/rewardCalculator.test.ts (F-001: added test for wrong-move XP exclusion in computeRewardSummary)
+- src/services/rewardService.ts (F-002: removed dead export type { RewardSummary } re-export)
+- src/lib/repositories/rewardsRepo.ts (F-003: updatePieceSkin/updateBoardTheme now throw on missing row, consistent with updateAchievement)
+- docs/reviews/REVIEW-007A-reward-persistence-hardening.md (created)
+- docs/HANDOFF.md (this entry)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (130/130 passed)
+
+Known Issues:
+- C-001: Partial persistence when updateAchievement throws — XP/keys already committed to profile, achievement not written; rewardSummary returns null so UI doesn't show XP was actually saved
+
+Next Recommended Task:
+TASK-008-opening-curriculum.md
+
+Notes:
+F-001 restores a test that was inadvertently dropped when computeSessionXp was removed:
+"wrong type entries don't count toward XP" is now tested against computeRewardSummary directly.
+F-002 removes a dead re-export (all callers import RewardSummary from rewardCalculator.ts directly).
+F-003 makes all three update functions in rewardsRepo.ts consistent — all throw on missing rows.
+
+---
+
 ## TASK-007A Handoff (Reward Persistence Hardening)
 
 Date:

@@ -121,6 +121,22 @@ describe("computeRewardSummary", () => {
     expect(summary.keys).toBe(KEY_MASTER_LESSON);
   });
 
+  it("counts only accepted+correct history entries toward XP, not wrong-move entries", () => {
+    const result = makeResult({
+      perfectRun: false,
+      completed: true,
+      history: [
+        { type: "accepted", legal: true, correct: true, san: "e4", message: "Correct!" },
+        { type: "wrong", legal: true, correct: false, san: "d4", message: "Wrong" },
+        { type: "accepted", legal: true, correct: true, san: "Nf3", message: "Correct!" },
+        { type: "opponent", legal: true, correct: true, san: "e5", message: "Opponent" },
+      ],
+    });
+    const old = makeProgress();
+    const summary = computeRewardSummary(result, old, old, new Set());
+    expect(summary.xp).toBe(2 * XP_PER_CORRECT_MOVE);
+  });
+
   it("does not award mastery bonus if already mastered before session", () => {
     const result = makeResult({ perfectRun: true });
     const old = makeProgress({ perfectRuns: 11, masteryLevel: 4, status: "mastered" });
