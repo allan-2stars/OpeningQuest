@@ -34,7 +34,7 @@ Branch:
 main
 
 Commit:
-(pending)
+4e03cde
 
 Files Changed:
 - src/services/__tests__/rewardCalculator.test.ts (F-001: added test for wrong-move XP exclusion in computeRewardSummary)
