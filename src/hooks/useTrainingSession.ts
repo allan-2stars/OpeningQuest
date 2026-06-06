@@ -4,6 +4,7 @@ import { initSession, submitMove } from "../features/training/trainingEngine.ts"
 import { processTrainingResult } from "../services/processTrainingResult.ts";
 import type { TrainingSessionState, TrainingSessionResult } from "../features/training/types.ts";
 import type { LessonProgress, PracticeMode } from "../types/domain.ts";
+import type { RewardSummary } from "../services/rewardCalculator.ts";
 
 type UseTrainingSessionResult = {
   state: TrainingSessionState | null;
@@ -13,6 +14,8 @@ type UseTrainingSessionResult = {
   handleMove: (san: string) => void;
   result: TrainingSessionResult | null;
   resultProgress: LessonProgress | null;
+  rewardSummary: RewardSummary | null;
+  rewardError: string | null;
   startSession: (lessonId: string, mode: PracticeMode) => void;
 };
 
@@ -24,6 +27,8 @@ export function useTrainingSession(): UseTrainingSessionResult {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TrainingSessionResult | null>(null);
   const [resultProgress, setResultProgress] = useState<LessonProgress | null>(null);
+  const [rewardSummary, setRewardSummary] = useState<RewardSummary | null>(null);
+  const [rewardError, setRewardError] = useState<string | null>(null);
   const activeLessonRef = useRef<string | null>(null);
 
   const startSession = useCallback((lessonId: string, mode: PracticeMode) => {
@@ -32,6 +37,8 @@ export function useTrainingSession(): UseTrainingSessionResult {
     setError(null);
     setResult(null);
     setResultProgress(null);
+    setRewardSummary(null);
+    setRewardError(null);
     setState(null);
 
     (async () => {
@@ -54,7 +61,6 @@ export function useTrainingSession(): UseTrainingSessionResult {
         setSanMoves(line.sanMoves);
         setState(initSession(line.sanMoves, lesson.side, mode));
         setError(null);
-        setResult(null);
       } catch (e) {
         if (activeLessonRef.current !== lessonId) return;
         setError(e instanceof Error ? e.message : "Failed to load lesson");
@@ -75,14 +81,17 @@ export function useTrainingSession(): UseTrainingSessionResult {
         setState(next);
         if (sessionResult) {
           setResult(sessionResult);
-          // Persist progression on session completion/failure
+          // Persist progression + rewards
           const capturedLessonId = activeLessonRef.current;
-          processTrainingResult(sessionResult).then(({ progress }) => {
-            if (activeLessonRef.current === capturedLessonId) {
-              setResultProgress(progress);
-            }
+          processTrainingResult(sessionResult).then(({ progress, rewardSummary: summary, rewardError: rerr }) => {
+            if (activeLessonRef.current !== capturedLessonId) return;
+            setResultProgress(progress);
+            if (summary) setRewardSummary(summary);
+            if (rerr) setRewardError(rerr);
           }).catch(() => {
-            // Progression persistence is best-effort; training result is still displayed
+            // Persistence failure — the training result is still visible
+            if (activeLessonRef.current !== capturedLessonId) return;
+            setRewardError("Failed to save progress.");
           });
         }
       } catch (e) {
@@ -92,5 +101,16 @@ export function useTrainingSession(): UseTrainingSessionResult {
     [state, sanMoves],
   );
 
-  return { state, lessonTitle, isLoading, error, handleMove, result, resultProgress, startSession };
+  return {
+    state,
+    lessonTitle,
+    isLoading,
+    error,
+    handleMove,
+    result,
+    resultProgress,
+    rewardSummary,
+    rewardError,
+    startSession,
+  };
 }

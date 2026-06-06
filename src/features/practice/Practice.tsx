@@ -24,7 +24,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const startedRef = useRef(false);
 
-  const { state, lessonTitle, isLoading, error, handleMove, result, resultProgress, startSession } =
+  const { state, lessonTitle, isLoading, error, handleMove, result, resultProgress, rewardSummary, rewardError, startSession } =
     useTrainingSession();
 
   // startedRef prevents React StrictMode from double-invoking startSession on dev mount
@@ -186,6 +186,36 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               )}
             </div>
           </Card>
+        )}
+
+        {/* Reward summary */}
+        {rewardSummary && (rewardSummary.xp > 0 || rewardSummary.keys > 0 || rewardSummary.unlockedAchievementIds.length > 0) && (
+          <Card header="Rewards">
+            <div className="space-y-2 text-sm">
+              {rewardSummary.xp > 0 && (
+                <p>
+                  <span className="text-text-muted">XP Earned:</span>{" "}
+                  <span className="text-secondary font-bold">+{rewardSummary.xp} XP</span>
+                </p>
+              )}
+              {rewardSummary.keys > 0 && (
+                <p>
+                  <span className="text-text-muted">Keys Earned:</span>{" "}
+                  <span className="text-warning font-bold">+{rewardSummary.keys}</span>
+                </p>
+              )}
+              {rewardSummary.unlockedAchievementIds.map((id) => (
+                <p key={id}>
+                  <Badge variant="success">New Achievement!</Badge>
+                </p>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Reward persistence error */}
+        {rewardError && (
+          <FeedbackBanner type="warning" message={rewardError} />
         )}
 
         {/* Restart */}

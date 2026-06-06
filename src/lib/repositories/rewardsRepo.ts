@@ -34,3 +34,24 @@ export async function getAllBoardThemes(): Promise<BoardTheme[]> {
 export async function getUnlockedBoardThemes(): Promise<BoardTheme[]> {
   return db.boardThemes.filter((t) => t.unlocked).toArray();
 }
+
+export async function updateAchievement(
+  id: string,
+  updates: Partial<Omit<Achievement, "id">>,
+): Promise<void> {
+  await db.achievements.update(id, updates);
+}
+
+export async function updatePieceSkin(
+  id: string,
+  updates: Partial<Omit<PieceSkin, "id">>,
+): Promise<void> {
+  await db.pieceSkins.update(id, updates);
+}
+
+export async function updateBoardTheme(
+  id: string,
+  updates: Partial<Omit<BoardTheme, "id">>,
+): Promise<void> {
+  await db.boardThemes.update(id, updates);
+}

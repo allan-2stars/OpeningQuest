@@ -19,6 +19,58 @@ Notes:
 
 ---
 
+## TASK-007 Handoff
+
+Date:
+2026-06-06
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-007 - Reward System
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/services/rewardCalculator.ts (created — computeSessionXp, computeAchievementTransitions, computeRewardSummary)
+- src/services/rewardService.ts (created — applyRewards: profile XP/keys + achievement unlock persistence)
+- src/services/processTrainingResult.ts (updated — calls applyRewards, returns RewardSummary + rewardError)
+- src/lib/repositories/rewardsRepo.ts (added updateAchievement, updatePieceSkin, updateBoardTheme)
+- src/hooks/useTrainingSession.ts (exposes rewardSummary + rewardError)
+- src/features/practice/Practice.tsx (displays reward summary card + persistence error banner)
+- src/services/__tests__/rewardCalculator.test.ts (created — 17 tests)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (134/134 passed)
+- docker compose up --build (HTTP 200)
+
+Known Issues:
+- REVIEW-006A C-001 (silent storage errors) partially addressed — reward errors now surfaced via rewardError
+- Boss victory (+250 XP, +3 keys) and world completion (+500 XP, +5 keys) functions exist but not yet wired
+- Cosmetic skins/themes have update functions in repo but no unlock rules yet (placeholder)
+- Reward persistence errors visible via rewardError banner; progress persistence errors still swallowed (REVIEW-006A C-001)
+
+Next Recommended Task:
+TASK-008-opening-curriculum.md
+
+Notes:
+XP awards: +1 per correct move, +25 perfect run, +100 first-time mastery.
+Keys: +1 first-time mastery.
+Achievements: first_lesson (first attempt), first_perfect_run, first_mastered, perfect_10.
+All achievement transitions are idempotent — alreadyUnlockedIds prevents re-awarding.
+Mastery XP/keys only fire once (oldProgress.masteryLevel < 4 && newProgress.masteryLevel >= 4).
+Reward summary displayed in Practice result area after session completion.
+
+---
+
 ## REVIEW-006A Handoff
 
 Date:

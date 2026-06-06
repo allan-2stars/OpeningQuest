@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-006 Complete. Ready for TASK-007 Reward System.
+TASK-007 Complete. Ready for TASK-008 Opening Curriculum.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-007-reward-system.md
+TASK-008-opening-curriculum.md
 
 Assigned to:
 Windows Agent
