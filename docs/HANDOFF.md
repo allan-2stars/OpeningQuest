@@ -19,6 +19,68 @@ Notes:
 
 ---
 
+## TASK-006 Handoff
+
+Date:
+2026-06-06
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-006 - Progression Engine
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/services/progressionEngine.ts (created — mastery, review, unlock rules)
+- src/services/processTrainingResult.ts (created — training→progression bridge)
+- src/services/__tests__/progressionEngine.test.ts (created — 28 tests)
+- src/features/training/types.ts (added totalUserMoves to TrainingSessionResult)
+- src/features/training/trainingEngine.ts (makeResult emits totalUserMoves)
+- src/hooks/useAdventureMap.ts (REVIEW-004 C-002 fix — progressive unlock)
+- docs/HANDOFF.md (this entry)
+- docs/PROJECT_STATE.md (status update)
+- docs/tasks/TASK-006-progression-engine.md (status update)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (109/109 passed)
+- docker compose up --build (HTTP 200 at /, /adventure, /practice/:lessonId)
+
+Known Issues:
+- processTrainingResult not yet wired to Practice page (no auto-persist on session end)
+- applyReviewResult uses daysFromNow for interval inference (non-deterministic in tests)
+- REVIEW-005A C-001/C-003/C-004 remain as deferred improvements
+- Key earning/spending helpers deferred to TASK-007
+- No Streak tracking (TASK-007)
+
+Next Recommended Task:
+TASK-007-reward-system.md
+
+Notes:
+Progression engine is pure-function, deterministic, and fully unit-tested.
+
+Mastery: 0 pr → 0, 1-3 → 1, 4-6 → 2, 7-9 → 3, 10+ → 4.
+10th perfect run triggers mastery: status → "mastered", 1-day review scheduled.
+Review intervals: 1, 3, 7, 14, 30, 60, 90, 180, 365 days.
+2 failed reviews reduce mastery by 1 level, reset failedReviewCount.
+Zero-userMoves (degenerate lessons) are safely rejected.
+Unlock helpers: canUnlockLesson (prerequisite check), canUnlockWorld (world gate).
+
+REVIEW-004 C-002 fixed: within-world progressive unlock no longer relies solely
+on seed data. applyProgressiveUnlock() does a second pass over lesson nodes,
+marking the first un-completed node as "available" when the preceding one
+is mastered/review_due.
+
+---
+
 ## REVIEW-005A Handoff
 
 Date:

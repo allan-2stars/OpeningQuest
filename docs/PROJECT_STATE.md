@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-005 Complete. Ready for TASK-006 Progression Engine.
+TASK-006 Complete. Ready for TASK-007 Reward System.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-006-progression-engine.md
+TASK-007-reward-system.md
 
 Assigned to:
 Windows Agent

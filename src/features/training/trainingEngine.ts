@@ -201,6 +201,7 @@ function makeResult(
     completed,
     mistakes,
     totalMoves: state.totalMoves,
+    totalUserMoves: state.totalUserMoves,
     perfectRun: completed && mistakes === 0 && perfectRun,
     history,
   };

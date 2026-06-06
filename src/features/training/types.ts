@@ -37,6 +37,7 @@ export type TrainingSessionResult = {
   completed: boolean;
   mistakes: number;
   totalMoves: number;
+  totalUserMoves: number;
   perfectRun: boolean;
   history: MoveFeedback[];
 };

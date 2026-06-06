@@ -28,10 +28,53 @@ type AdventureMapState = {
   error: string | null;
 };
 
-function deriveNodeStatus(lesson: Lesson, progressMap: Map<string, LessonProgress>, isFirstAvailable: boolean): LessonStatus {
+function deriveNodeStatus(lesson: Lesson, progressMap: Map<string, LessonProgress>): LessonStatus {
   const prog = progressMap.get(lesson.id);
   if (prog) return prog.status;
-  return isFirstAvailable ? "available" : "locked";
+  return "locked";
+}
+
+/**
+ * Second-pass progressive unlock: within an unlocked world, mark the first
+ * non-complete lesson as "available" if the immediately preceding lesson
+ * (or the start-of-world condition) is complete.
+ */
+function applyProgressiveUnlock(
+  nodes: MapLessonNode[],
+  bossNode: MapLessonNode | null,
+  progressMap: Map<string, LessonProgress>,
+): void {
+  // Determine the index of the first non-complete node
+  const allNodes = [...nodes];
+  if (bossNode) allNodes.push(bossNode);
+
+  let firstAvailableSet = false;
+  for (let i = 0; i < allNodes.length; i++) {
+    const node = allNodes[i];
+    const prog = progressMap.get(node.id);
+
+    // If this node already has explicit stored progress, skip — it's already known
+    if (prog && prog.status !== "locked") continue;
+
+    // If we haven't yet set an available and this node is still locked
+    if (!firstAvailableSet && node.status === "locked") {
+      // Check if the previous node is mastered/review_due (or i==0, start of world)
+      const prev = i > 0 ? allNodes[i - 1] : null;
+      const prevProg = prev ? progressMap.get(prev.id) : null;
+      const prevComplete = !prev || (prevProg && (prevProg.status === "mastered" || prevProg.status === "review_due"));
+
+      if (prevComplete) {
+        node.status = "available";
+        firstAvailableSet = true;
+        // Propagate status to the original node objects
+        if (i < nodes.length) {
+          nodes[i] = { ...nodes[i], status: "available" };
+        } else if (bossNode) {
+          Object.assign(bossNode, { status: "available" as LessonStatus });
+        }
+      }
+    }
+  }
 }
 
 export function useAdventureMap(): AdventureMapState {
@@ -68,26 +111,28 @@ export function useAdventureMap(): AdventureMapState {
           const regularLessons = lessons.filter((l) => l.id !== w.bossBattleId);
           const bossLesson = lessons.find((l) => l.id === w.bossBattleId) ?? null;
 
-          const nodes: MapLessonNode[] = regularLessons.map((lesson, idx) => {
-            const isFirstInWorld = idx === 0 && worldUnlocked;
-            return {
-              id: lesson.id,
-              title: lesson.title,
-              depth: lesson.depth,
-              status: deriveNodeStatus(lesson, progressMap, isFirstInWorld),
-              isBoss: false,
-            };
-          });
+          const nodes: MapLessonNode[] = regularLessons.map((lesson) => ({
+            id: lesson.id,
+            title: lesson.title,
+            depth: lesson.depth,
+            status: deriveNodeStatus(lesson, progressMap),
+            isBoss: false,
+          }));
 
           const bossNode: MapLessonNode | null = bossLesson
             ? {
                 id: bossLesson.id,
                 title: bossLesson.title,
                 depth: bossLesson.depth,
-                status: deriveNodeStatus(bossLesson, progressMap, false),
+                status: deriveNodeStatus(bossLesson, progressMap),
                 isBoss: true,
               }
             : null;
+
+          // Within-world progressive unlock — only runs if world is unlocked
+          if (worldUnlocked) {
+            applyProgressiveUnlock(nodes, bossNode, progressMap);
+          }
 
           const masteredCount = [...nodes, bossNode].filter(
             (n) => n && (n.status === "mastered" || n.status === "review_due"),
