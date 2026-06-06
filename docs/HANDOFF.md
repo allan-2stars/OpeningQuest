@@ -19,6 +19,52 @@ Notes:
 
 ---
 
+## REVIEW-007 Handoff
+
+Date:
+2026-06-06
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-007 — Reward System Review
+
+Branch:
+main
+
+Commit:
+(pending)
+
+Files Changed:
+- src/lib/seed/defaults.ts (F-001: added ach_first_perfect_run and ach_first_mastered to DEFAULT_ACHIEVEMENTS)
+- src/services/rewardService.ts (F-002: merged duplicate imports; F-003: getAllAchievements → getUnlockedAchievements)
+- docs/reviews/REVIEW-007-reward-system.md (created)
+- docs/HANDOFF.md (this entry)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (134/134 passed)
+
+Known Issues:
+- C-001: computeSessionXp dead code with misleading public API — callers get wrong XP (missing mastery bonus)
+- C-002: XP/keys silently dropped when user profile doesn't exist (getUserProfile returns undefined, if (profile) guard skips write)
+- C-003: updateAchievement uses Dexie update() not put() — no error signal on missing row; relies on seed invariant
+- C-004: Asymmetric error handling — upsertLessonProgress errors propagate as rewardError banner (pre-existing REVIEW-006A C-001)
+
+Next Recommended Task:
+TASK-008-opening-curriculum.md
+
+Notes:
+F-001 is the critical fix: two achievement IDs ("ach_first_perfect_run", "ach_first_mastered") were referenced
+in rewardCalculator.ts but absent from DEFAULT_ACHIEVEMENTS. Without the DB rows, Dexie's update() silently
+no-ops, alreadyUnlockedIds never includes them, and the achievements are re-reported as unlocked on every
+qualifying session indefinitely. F-002/F-003 are minor cleanup.
+
+---
+
 ## TASK-007 Handoff
 
 Date:

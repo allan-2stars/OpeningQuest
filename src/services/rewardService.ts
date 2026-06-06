@@ -1,9 +1,8 @@
 import type { TrainingSessionResult } from "../features/training/types.ts";
 import type { LessonProgress } from "../types/domain.ts";
-import { computeRewardSummary } from "./rewardCalculator.ts";
-import type { RewardSummary } from "./rewardCalculator.ts";
+import { computeRewardSummary, type RewardSummary } from "./rewardCalculator.ts";
 import { getUserProfile, updateUserProfile } from "../lib/repositories/userProfileRepo.ts";
-import { getAllAchievements, updateAchievement } from "../lib/repositories/rewardsRepo.ts";
+import { getUnlockedAchievements, updateAchievement } from "../lib/repositories/rewardsRepo.ts";
 import { nowISO } from "../lib/date.ts";
 
 export type { RewardSummary } from "./rewardCalculator.ts";
@@ -21,10 +20,8 @@ export async function applyRewards(
   newProgress: LessonProgress,
 ): Promise<RewardSummary> {
   // Read existing achievement state to prevent duplicates
-  const allAchievements = await getAllAchievements();
-  const alreadyUnlockedIds = new Set(
-    allAchievements.filter((a) => a.unlockedAt !== undefined).map((a) => a.id),
-  );
+  const unlockedAchievements = await getUnlockedAchievements();
+  const alreadyUnlockedIds = new Set(unlockedAchievements.map((a) => a.id));
 
   const summary = computeRewardSummary(
     result,

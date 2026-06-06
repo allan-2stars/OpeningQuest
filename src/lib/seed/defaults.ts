@@ -19,6 +19,18 @@ export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
     iconUrl: "/achievements/first-lesson.svg",
   },
   {
+    id: "ach_first_perfect_run",
+    name: "Perfect Form",
+    description: "Complete a lesson with no mistakes.",
+    iconUrl: "/achievements/first-perfect-run.svg",
+  },
+  {
+    id: "ach_first_mastered",
+    name: "Mastered",
+    description: "Reach mastery on your first lesson.",
+    iconUrl: "/achievements/first-mastered.svg",
+  },
+  {
     id: "ach_first_world",
     name: "World Champion",
     description: "Master every lesson in a world.",
