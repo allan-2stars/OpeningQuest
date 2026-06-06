@@ -34,7 +34,7 @@ Branch:
 main
 
 Commit:
-(pending)
+a5f2c74
 
 Files Changed:
 - src/services/progressionEngine.ts (F-001: mastered-lesson status guard on perfect run; F-002: mastered-lesson status guard on instinct failure)
