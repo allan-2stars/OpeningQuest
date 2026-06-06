@@ -34,7 +34,7 @@ Branch:
 main
 
 Commit:
-N/A (pending)
+da946ad
 
 Files Changed:
 - src/features/practice/Practice.tsx (F-001: startedRef guard, F-002: terminal button uses switchMode)
