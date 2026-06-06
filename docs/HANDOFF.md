@@ -19,6 +19,52 @@ Notes:
 
 ---
 
+## REVIEW-006 Handoff
+
+Date:
+2026-06-06
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-006 — Progression Engine Review
+
+Branch:
+main
+
+Commit:
+(pending)
+
+Files Changed:
+- src/services/progressionEngine.ts (F-001: mastered-lesson status guard on perfect run; F-002: mastered-lesson status guard on instinct failure)
+- src/hooks/useAdventureMap.ts (F-003: removed dead in-place mutation in applyProgressiveUnlock)
+- src/services/__tests__/progressionEngine.test.ts (3 new tests for F-001/F-002)
+- docs/HANDOFF.md (this entry)
+- docs/reviews/REVIEW-006-progression-engine.md (created)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vitest run (112/112 passed)
+
+Known Issues:
+- C-001: applyReviewResult interval detection uses local date string vs ISO timestamp — skips one review interval on every success (see REVIEW-006)
+- C-002: deriveLessonStatus early return on stored "review_due" never re-validates masteryLevel (see REVIEW-006)
+- C-003: processTrainingResult not wired to Practice page — progression engine is functionally inert during gameplay (see REVIEW-006)
+- C-004: canUnlockLesson (masteryLevel >= 4) and canUnlockWorld (status checks) use inconsistent completion signals (see REVIEW-006)
+
+Next Recommended Task:
+Wire processTrainingResult into Practice.tsx / useTrainingSession (C-003 is blocking all gameplay progression)
+
+Notes:
+F-001 and F-002 fix the most impactful correctness bugs: any instinct failure or extra perfect run
+on an already-mastered lesson would reset status to "learning", triggering false world-unlock
+regressions via canUnlockWorld's status-based check. Both paths now apply the same
+masteryLevel >= 4 guard that the completed-with-mistakes path already had.
+
+---
+
 ## TASK-006 Handoff
 
 Date:

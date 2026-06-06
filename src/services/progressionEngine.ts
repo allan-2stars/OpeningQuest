@@ -82,7 +82,7 @@ export function applyTrainingResult(
       updated.nextReviewAt = computeNextReviewDate(nowISO, 0);
       updated.failedReviewCount = 0;
     } else {
-      updated.status = "learning";
+      updated.status = progress.masteryLevel >= 4 ? "mastered" : "learning";
     }
   } else if (result.completed && !result.perfectRun) {
     // Completed with mistakes — still counts as an attempt but not a perfect run
@@ -91,7 +91,7 @@ export function applyTrainingResult(
   } else {
     // Failed (instinct) — just record the mistakes
     updated.mistakes = progress.mistakes + result.mistakes;
-    updated.status = "learning";
+    updated.status = progress.masteryLevel >= 4 ? "mastered" : "learning";
   }
 
   return updated;

@@ -118,6 +118,28 @@ describe("applyTrainingResult", () => {
     expect(result.status).toBe("learning");
   });
 
+  it("keeps mastered status on perfect run for already-mastered lesson", () => {
+    const p = makeProgress({ masteryLevel: 4, perfectRuns: 11, status: "mastered" });
+    const result = applyTrainingResult(p, makeResult({ perfectRun: true, completed: true }), NOW);
+    expect(result.perfectRuns).toBe(12);
+    expect(result.masteryLevel).toBe(4);
+    expect(result.status).toBe("mastered");
+  });
+
+  it("keeps mastered status on instinct failure for mastered lesson", () => {
+    const p = makeProgress({ masteryLevel: 4, perfectRuns: 10, status: "mastered" });
+    const result = applyTrainingResult(p, makeResult({ completed: false, perfectRun: false, mistakes: 1 }), NOW);
+    expect(result.masteryLevel).toBe(4);
+    expect(result.status).toBe("mastered");
+  });
+
+  it("keeps mastered status on non-perfect completion for mastered lesson", () => {
+    const p = makeProgress({ masteryLevel: 4, perfectRuns: 10, status: "mastered" });
+    const result = applyTrainingResult(p, makeResult({ completed: true, perfectRun: false, mistakes: 2 }), NOW);
+    expect(result.masteryLevel).toBe(4);
+    expect(result.status).toBe("mastered");
+  });
+
   it("handles zero userMoves degenerately", () => {
     const p = makeProgress({ attempts: 5, perfectRuns: 3 });
     const result = applyTrainingResult(p, makeResult({ totalUserMoves: 0, completed: false, perfectRun: false }), NOW);

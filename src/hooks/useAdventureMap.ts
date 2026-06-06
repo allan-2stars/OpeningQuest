@@ -64,9 +64,7 @@ function applyProgressiveUnlock(
       const prevComplete = !prev || (prevProg && (prevProg.status === "mastered" || prevProg.status === "review_due"));
 
       if (prevComplete) {
-        node.status = "available";
         firstAvailableSet = true;
-        // Propagate status to the original node objects
         if (i < nodes.length) {
           nodes[i] = { ...nodes[i], status: "available" };
         } else if (bossNode) {
