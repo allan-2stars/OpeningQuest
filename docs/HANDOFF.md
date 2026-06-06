@@ -19,6 +19,55 @@ Notes:
 
 ---
 
+## REVIEW-006A Handoff
+
+Date:
+2026-06-06
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-006A — Progression Wiring Review
+
+Branch:
+main
+
+Commit:
+(pending)
+
+Files Changed:
+- src/hooks/useTrainingSession.ts (F-001: stale-session guard in .then(); F-005: merged duplicate imports)
+- src/services/processTrainingResult.ts (F-002: degenerate path reads real DB progress)
+- src/hooks/useAdventureMap.ts (F-003: deriveNodeStatus wired to deriveLessonStatus; now parameter added)
+- src/features/practice/Practice.tsx (F-004: nextReviewAt formatted with localDateString)
+- src/lib/date.ts (exported localDateString for F-004)
+- docs/HANDOFF.md (this entry)
+- docs/reviews/REVIEW-006A-progression-wiring.md (created)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (passed)
+- vitest run (117/117 passed)
+
+Known Issues:
+- C-001: Silent .catch swallows IndexedDB quota errors with no user feedback (see REVIEW-006A)
+- C-002: Fire-and-forget persistence in handleMove is the wrong abstraction depth (see REVIEW-006A)
+- C-003: Adventure map may read stale data if user navigates back before processTrainingResult resolves (see REVIEW-006A)
+- C-004: applyProgressiveUnlock skip guard still reads raw prog.status rather than derived status (see REVIEW-006A)
+- REVIEW-006 C-001 (applyReviewResult date comparison interval bug) still deferred
+
+Next Recommended Task:
+TASK-007-reward-system.md
+
+Notes:
+F-001 (staleness guard) prevents old session progress bleeding into a freshly started session when
+the player clicks "Practice Again" quickly. F-002 shows real DB progress (not a zeroed stub) for
+degenerate lessons. F-003 wires deriveLessonStatus into the adventure map so review_due nodes
+finally show on the map. F-004 corrects the timezone display for next review date.
+
+---
+
 ## TASK-006A Handoff (Progression Wiring)
 
 Date:

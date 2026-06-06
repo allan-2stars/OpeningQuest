@@ -12,7 +12,7 @@ export function todayDateString(): string {
   return localDateString(new Date());
 }
 
-function localDateString(d: Date): string {
+export function localDateString(d: Date): string {
   return [
     d.getFullYear(),
     String(d.getMonth() + 1).padStart(2, "0"),

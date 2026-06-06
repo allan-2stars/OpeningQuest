@@ -3,8 +3,7 @@ import { getLesson, getOpeningLine } from "../lib/repositories/curriculumRepo.ts
 import { initSession, submitMove } from "../features/training/trainingEngine.ts";
 import { processTrainingResult } from "../services/processTrainingResult.ts";
 import type { TrainingSessionState, TrainingSessionResult } from "../features/training/types.ts";
-import type { PracticeMode } from "../types/domain.ts";
-import type { LessonProgress } from "../types/domain.ts";
+import type { LessonProgress, PracticeMode } from "../types/domain.ts";
 
 type UseTrainingSessionResult = {
   state: TrainingSessionState | null;
@@ -77,8 +76,11 @@ export function useTrainingSession(): UseTrainingSessionResult {
         if (sessionResult) {
           setResult(sessionResult);
           // Persist progression on session completion/failure
+          const capturedLessonId = activeLessonRef.current;
           processTrainingResult(sessionResult).then(({ progress }) => {
-            setResultProgress(progress);
+            if (activeLessonRef.current === capturedLessonId) {
+              setResultProgress(progress);
+            }
           }).catch(() => {
             // Progression persistence is best-effort; training result is still displayed
           });

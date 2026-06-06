@@ -12,9 +12,9 @@ export async function processTrainingResult(
   result: TrainingSessionResult,
 ): Promise<ProcessResult> {
   if (result.totalUserMoves === 0) {
-    // Degenerate lesson — do not persist or update stats
-    const stub = makeStubProgress(result.lessonId);
-    return { progress: stub };
+    // Degenerate lesson — do not persist or update stats; return real stored progress if any
+    const existing = await getLessonProgress(result.lessonId);
+    return { progress: existing ?? makeStubProgress(result.lessonId) };
   }
 
   const existing = await getLessonProgress(result.lessonId);

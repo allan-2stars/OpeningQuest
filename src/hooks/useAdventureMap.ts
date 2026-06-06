@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { getAllWorlds, getLessonsByWorld } from "../lib/repositories/curriculumRepo.ts";
 import { getAllLessonProgress } from "../lib/repositories/lessonProgressRepo.ts";
+import { deriveLessonStatus } from "../services/progressionEngine.ts";
+import { nowISO } from "../lib/date.ts";
 import type { World, Lesson, LessonProgress, LessonStatus } from "../types/domain.ts";
 
 export type MapLessonNode = {
@@ -28,9 +30,9 @@ type AdventureMapState = {
   error: string | null;
 };
 
-function deriveNodeStatus(lesson: Lesson, progressMap: Map<string, LessonProgress>): LessonStatus {
+function deriveNodeStatus(lesson: Lesson, progressMap: Map<string, LessonProgress>, now: string): LessonStatus {
   const prog = progressMap.get(lesson.id);
-  if (prog) return prog.status;
+  if (prog) return deriveLessonStatus(prog, now);
   return "locked";
 }
 
@@ -92,6 +94,7 @@ export function useAdventureMap(): AdventureMapState {
         if (cancelled) return;
 
         const progressMap = new Map(allProgress.map((p) => [p.lessonId, p]));
+        const now = nowISO();
 
         const mapWorlds: MapWorld[] = [];
 
@@ -113,7 +116,7 @@ export function useAdventureMap(): AdventureMapState {
             id: lesson.id,
             title: lesson.title,
             depth: lesson.depth,
-            status: deriveNodeStatus(lesson, progressMap),
+            status: deriveNodeStatus(lesson, progressMap, now),
             isBoss: false,
           }));
 
@@ -122,7 +125,7 @@ export function useAdventureMap(): AdventureMapState {
                 id: bossLesson.id,
                 title: bossLesson.title,
                 depth: bossLesson.depth,
-                status: deriveNodeStatus(bossLesson, progressMap),
+                status: deriveNodeStatus(bossLesson, progressMap, now),
                 isBoss: true,
               }
             : null;

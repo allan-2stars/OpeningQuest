@@ -7,6 +7,7 @@ import Card from "../../components/Card.tsx";
 import FeedbackBanner from "../../components/FeedbackBanner.tsx";
 import EmptyState from "../../components/EmptyState.tsx";
 import { useTrainingSession } from "../../hooks/useTrainingSession.ts";
+import { localDateString } from "../../lib/date.ts";
 import type { PracticeMode } from "../../types/domain.ts";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -178,7 +179,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
                   </p>
                   {resultProgress.masteryLevel >= 4 && resultProgress.nextReviewAt && (
                     <p><span className="text-text-muted">Next Review:</span>{" "}
-                      <span className="text-text-primary font-semibold">{resultProgress.nextReviewAt.split("T")[0]}</span>
+                      <span className="text-text-primary font-semibold">{localDateString(new Date(resultProgress.nextReviewAt))}</span>
                     </p>
                   )}
                 </>
