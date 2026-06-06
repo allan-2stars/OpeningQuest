@@ -19,6 +19,64 @@ Notes:
 
 ---
 
+## TASK-008 Handoff
+
+Date:
+2026-06-06
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-008 - Opening Curriculum Data
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/lib/seed/curriculum.ts (expanded to Worlds 1-3: 3 worlds, 8 families, 20 variations, 23 lessons, 23 opening lines)
+- src/lib/__tests__/curriculum.test.ts (created — 44 validation tests)
+- src/lib/__tests__/repositories.test.ts (updated assertions for expanded curriculum)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (174/174 passed: 33 repo + 18 component + 31 training engine + 28 progression + 12 reward calculator + 8 curriculum seed test updates + 44 curriculum validation)
+- docker compose up --build (HTTP 200 at /, /adventure)
+
+World 3 — Defender Fortress (Black defences, 7 lessons + boss):
+- Caro-Kann Defence: Main Line, Classical Setup, Exchange Variation
+- French Defence: Main Line, Exchange Variation
+- Scandinavian Defence: Main Line, Queen Development
+- Boss: Fortress Commander
+
+Curriculum validation tests:
+- Every lesson references an existing line and variation
+- Every world lessonId references an existing lesson
+- Boss lessons have valid bossBattleId in parent world
+- Every variation references an existing family
+- Every opening line replays through chess.js from start position (parameterised)
+- Every line has >= 4 moves
+- Seed is idempotent (no duplicate rows, no progress overwrite)
+- World constant exports match world data
+
+Known Issues:
+- World 3 lessons are Black-side — totalUserMoves calculation handles correctly per TASK-005 formula
+
+Next Recommended Task:
+TASK-009-pgn-import-export.md
+
+Notes:
+All 23 opening lines verified replayable by chess.js in curriculum.test.ts. World 3 uses
+Black-side openings, giving the training engine its first non-white userSide exercises.
+Boss nodes have requiredLessonIds for prerequisite gating (canUnlockLesson-compatible).
+
+---
+
 ## REVIEW-007A Handoff
 
 Date:

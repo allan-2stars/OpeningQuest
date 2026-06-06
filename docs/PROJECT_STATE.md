@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-007 Complete. Ready for TASK-008 Opening Curriculum.
+TASK-008 Complete. Ready for TASK-009 PGN Import/Export.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-008-opening-curriculum.md
+TASK-009-pgn-import-export.md
 
 Assigned to:
 Windows Agent

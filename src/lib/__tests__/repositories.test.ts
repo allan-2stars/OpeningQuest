@@ -211,14 +211,19 @@ describe("seedCoreData", () => {
     await seedCoreData();
 
     const worlds = await getAllWorlds();
-    expect(worlds.length).toBeGreaterThanOrEqual(2);
-    expect(worlds[0].name).toBe("Knight Meadows");
+    expect(worlds.length).toBeGreaterThanOrEqual(3);
+    const w1 = worlds.find((w) => w.name === "Knight Meadows");
+    expect(w1).toBeDefined();
+    expect(w1!.lessonIds.length).toBeGreaterThanOrEqual(5);
 
     const lessons = await db.lessons.toArray();
-    expect(lessons.length).toBeGreaterThanOrEqual(5);
+    expect(lessons.length).toBeGreaterThanOrEqual(20);
+    // World 3 lessons should exist
+    expect(lessons.find((l) => l.id === "lesson_w3_caro_main")).toBeDefined();
+    expect(lessons.find((l) => l.side === "black")).toBeDefined();
 
     const progress = await getAllLessonProgress();
-    expect(progress.length).toBeGreaterThanOrEqual(5);
+    expect(progress.length).toBeGreaterThanOrEqual(20);
     expect(progress.find((p) => p.lessonId === "lesson_w1_italian_main")?.status).toBe("available");
   });
 });
