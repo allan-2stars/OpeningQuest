@@ -19,6 +19,61 @@ Notes:
 
 ---
 
+## TASK-006A Handoff (Progression Wiring)
+
+Date:
+2026-06-06
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-006A — Wire Progression Engine into Practice Flow
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/services/progressionEngine.ts (C-002: deriveLessonStatus checks masteryLevel first; C-004: canUnlockWorld uses masteryLevel >= 4)
+- src/hooks/useAdventureMap.ts (C-004: applyProgressiveUnlock/masteredCount/allMastered use masteryLevel >= 4)
+- src/hooks/useTrainingSession.ts (C-003: wired processTrainingResult call on session completion)
+- src/features/practice/Practice.tsx (displays persisted progress: perfectRuns, masteryLevel, nextReviewAt)
+- src/services/__tests__/progressionEngine.test.ts (+5 tests: canUnlockWorld masteryLevel edge cases, deriveLessonStatus C-002 verification)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (117/117 passed)
+- docker compose up --build (HTTP 200 at /, /adventure, /practice/:lessonId)
+
+Fixed REVIEW-006 concerns:
+- C-003: processTrainingResult wired into useTrainingSession → progression persists during gameplay
+- C-004: canUnlockLesson and canUnlockWorld both use masteryLevel >= 4 as canonical completion signal
+- C-002: deriveLessonStatus no longer returns review_due for non-mastered lessons
+
+Completion signal consistency:
+- canUnlockLesson, canUnlockWorld, applyProgressiveUnlock, masteredCount, allMastered
+  all use masteryLevel >= 4 as the single canonical completion check
+- deriveLessonStatus re-derives from masteryLevel (not stored status string)
+- applyTrainingResult preserves mastered status on all practice outcomes (F-001, F-002 from REVIEW-006)
+
+Known Issues:
+- REVIEW-006 C-001 (applyReviewResult date comparison) not yet fixed — deferred to data model task
+
+Next Recommended Task:
+TASK-007-reward-system.md
+
+Notes:
+Practice now actually updates lesson progress. On session completion/failure, processTrainingResult
+persists progress via repositories. Adventure map reflects updated mastery when navigating back.
+Session result card in Practice shows updated perfectRuns, masteryLevel, and next review date.
+
+---
+
 ## REVIEW-006 Handoff
 
 Date:

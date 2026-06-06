@@ -58,10 +58,10 @@ function applyProgressiveUnlock(
 
     // If we haven't yet set an available and this node is still locked
     if (!firstAvailableSet && node.status === "locked") {
-      // Check if the previous node is mastered/review_due (or i==0, start of world)
+      // Check if the previous node is mastered (masteryLevel >= 4) or i==0 (start of world)
       const prev = i > 0 ? allNodes[i - 1] : null;
       const prevProg = prev ? progressMap.get(prev.id) : null;
-      const prevComplete = !prev || (prevProg && (prevProg.status === "mastered" || prevProg.status === "review_due"));
+      const prevComplete = !prev || (prevProg && prevProg.masteryLevel >= 4);
 
       if (prevComplete) {
         firstAvailableSet = true;
@@ -133,14 +133,14 @@ export function useAdventureMap(): AdventureMapState {
           }
 
           const masteredCount = [...nodes, bossNode].filter(
-            (n) => n && (n.status === "mastered" || n.status === "review_due"),
+            (n) => { const p = n && progressMap.get(n.id); return p && p.masteryLevel >= 4; },
           ).length;
           const totalCount = nodes.length + (bossNode ? 1 : 0);
 
           // Check if this world is fully complete (for unlocking next)
           if (worldUnlocked) {
             const allMastered = [...nodes, bossNode].every(
-              (n) => n && (n.status === "mastered" || n.status === "review_due"),
+              (n) => { const p = n && progressMap.get(n.id); return p && p.masteryLevel >= 4; },
             );
             prevWorldComplete = allMastered && totalCount > 0;
           }

@@ -6,6 +6,7 @@ import {
   canUnlockLesson,
   canUnlockWorld,
   computeNextReviewDate,
+  deriveLessonStatus,
   REVIEW_INTERVALS,
 } from "../progressionEngine.ts";
 import type {
@@ -257,12 +258,26 @@ describe("canUnlockLesson", () => {
 });
 
 describe("canUnlockWorld", () => {
-  it("unlocks when all lessons in prior world are mastered or review_due", () => {
+  it("unlocks when all lessons have masteryLevel >= 4", () => {
     const map = new Map([
       ["a", makeProgress({ lessonId: "a", masteryLevel: 4, status: "mastered" })],
       ["b", makeProgress({ lessonId: "b", masteryLevel: 4, status: "review_due" })],
     ]);
     expect(canUnlockWorld(["a", "b"], map)).toBe(true);
+  });
+
+  it("unlocks when masteryLevel >= 4 even if status is not mastered", () => {
+    const map = new Map([
+      ["a", makeProgress({ lessonId: "a", masteryLevel: 4, status: "learning" })],
+    ]);
+    expect(canUnlockWorld(["a"], map)).toBe(true);
+  });
+
+  it("blocks when review_due lesson has masteryLevel < 4", () => {
+    const map = new Map([
+      ["a", makeProgress({ lessonId: "a", masteryLevel: 3, status: "review_due" })],
+    ]);
+    expect(canUnlockWorld(["a"], map)).toBe(false);
   });
 
   it("blocks when any lesson is not complete", () => {
@@ -271,5 +286,42 @@ describe("canUnlockWorld", () => {
       ["b", makeProgress({ lessonId: "b", masteryLevel: 1, status: "learning" })],
     ]);
     expect(canUnlockWorld(["a", "b"], map)).toBe(false);
+  });
+});
+
+describe("deriveLessonStatus (C-002 fix)", () => {
+  it("returns review_due for mastered lesson past review date", () => {
+    const pastDate = new Date(NOW);
+    pastDate.setDate(pastDate.getDate() - 5);
+    const p = makeProgress({
+      masteryLevel: 4,
+      status: "mastered",
+      nextReviewAt: pastDate.toISOString(),
+    });
+    expect(deriveLessonStatus(p, NOW)).toBe("review_due");
+  });
+
+  it("returns mastered for stored review_due if review date is in the future (no longer due)", () => {
+    const futureDate = new Date(NOW);
+    futureDate.setDate(futureDate.getDate() + 10);
+    const p = makeProgress({
+      masteryLevel: 4,
+      status: "review_due",
+      nextReviewAt: futureDate.toISOString(),
+    });
+    expect(deriveLessonStatus(p, NOW)).toBe("mastered");
+  });
+
+  it("does not return review_due for non-mastered lesson even with stale status field", () => {
+    const pastDate = new Date(NOW);
+    pastDate.setDate(pastDate.getDate() - 5);
+    const p = makeProgress({
+      masteryLevel: 2,
+      perfectRuns: 3,
+      status: "review_due",
+      nextReviewAt: pastDate.toISOString(),
+    });
+    // masteryLevel < 4, so it should return learning even if stored status was review_due
+    expect(deriveLessonStatus(p, NOW)).toBe("learning");
   });
 });

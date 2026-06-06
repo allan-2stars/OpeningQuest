@@ -23,7 +23,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const startedRef = useRef(false);
 
-  const { state, lessonTitle, isLoading, error, handleMove, result, startSession } =
+  const { state, lessonTitle, isLoading, error, handleMove, result, resultProgress, startSession } =
     useTrainingSession();
 
   // startedRef prevents React StrictMode from double-invoking startSession on dev mount
@@ -165,6 +165,24 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               <p><span className="text-text-muted">Mode:</span>{" "}
                 <span className="text-text-primary font-semibold capitalize">{result.mode}</span>
               </p>
+              {resultProgress && (
+                <>
+                  <hr className="border-slate-700" />
+                  <p><span className="text-text-muted">Total Perfect Runs:</span>{" "}
+                    <span className="text-text-primary font-semibold">{resultProgress.perfectRuns}</span>
+                  </p>
+                  <p><span className="text-text-muted">Mastery Level:</span>{" "}
+                    <Badge variant={resultProgress.masteryLevel >= 4 ? "success" : resultProgress.masteryLevel >= 1 ? "secondary" : "default"}>
+                      {resultProgress.masteryLevel}
+                    </Badge>
+                  </p>
+                  {resultProgress.masteryLevel >= 4 && resultProgress.nextReviewAt && (
+                    <p><span className="text-text-muted">Next Review:</span>{" "}
+                      <span className="text-text-primary font-semibold">{resultProgress.nextReviewAt.split("T")[0]}</span>
+                    </p>
+                  )}
+                </>
+              )}
             </div>
           </Card>
         )}

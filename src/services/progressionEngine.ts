@@ -35,8 +35,6 @@ export function deriveLessonStatus(
   progress: LessonProgress,
   nowISO: string,
 ): LessonStatus {
-  if (progress.status === "review_due") return "review_due";
-
   if (progress.masteryLevel >= 4) {
     if (isReviewDue(progress.nextReviewAt, nowISO)) return "review_due";
     return "mastered";
@@ -159,7 +157,8 @@ export function canUnlockLesson(
 }
 
 /**
- * Check whether a world can be unlocked (all lessons in prior world are completed).
+ * Check whether all lessons in the previous world are complete.
+ * Uses masteryLevel >= 4 as the canonical completion signal.
  */
 export function canUnlockWorld(
   previousWorldLessonIds: string[],
@@ -167,6 +166,6 @@ export function canUnlockWorld(
 ): boolean {
   return previousWorldLessonIds.every((id) => {
     const p = progressMap.get(id);
-    return p && (p.status === "mastered" || p.status === "review_due");
+    return p && p.masteryLevel >= 4;
   });
 }

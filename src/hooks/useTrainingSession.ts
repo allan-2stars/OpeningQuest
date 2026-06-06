@@ -1,8 +1,10 @@
 import { useState, useCallback, useRef } from "react";
 import { getLesson, getOpeningLine } from "../lib/repositories/curriculumRepo.ts";
 import { initSession, submitMove } from "../features/training/trainingEngine.ts";
+import { processTrainingResult } from "../services/processTrainingResult.ts";
 import type { TrainingSessionState, TrainingSessionResult } from "../features/training/types.ts";
 import type { PracticeMode } from "../types/domain.ts";
+import type { LessonProgress } from "../types/domain.ts";
 
 type UseTrainingSessionResult = {
   state: TrainingSessionState | null;
@@ -11,6 +13,7 @@ type UseTrainingSessionResult = {
   error: string | null;
   handleMove: (san: string) => void;
   result: TrainingSessionResult | null;
+  resultProgress: LessonProgress | null;
   startSession: (lessonId: string, mode: PracticeMode) => void;
 };
 
@@ -21,6 +24,7 @@ export function useTrainingSession(): UseTrainingSessionResult {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TrainingSessionResult | null>(null);
+  const [resultProgress, setResultProgress] = useState<LessonProgress | null>(null);
   const activeLessonRef = useRef<string | null>(null);
 
   const startSession = useCallback((lessonId: string, mode: PracticeMode) => {
@@ -28,6 +32,7 @@ export function useTrainingSession(): UseTrainingSessionResult {
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setResultProgress(null);
     setState(null);
 
     (async () => {
@@ -71,6 +76,12 @@ export function useTrainingSession(): UseTrainingSessionResult {
         setState(next);
         if (sessionResult) {
           setResult(sessionResult);
+          // Persist progression on session completion/failure
+          processTrainingResult(sessionResult).then(({ progress }) => {
+            setResultProgress(progress);
+          }).catch(() => {
+            // Progression persistence is best-effort; training result is still displayed
+          });
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "An error occurred during practice");
@@ -79,5 +90,5 @@ export function useTrainingSession(): UseTrainingSessionResult {
     [state, sanMoves],
   );
 
-  return { state, lessonTitle, isLoading, error, handleMove, result, startSession };
+  return { state, lessonTitle, isLoading, error, handleMove, result, resultProgress, startSession };
 }
