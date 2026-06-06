@@ -8,7 +8,8 @@ import type {
 } from "../../types/domain.ts";
 
 export async function getAllWorlds(): Promise<World[]> {
-  return db.worlds.toArray();
+  const worlds = await db.worlds.toArray();
+  return worlds.sort((a, b) => a.order - b.order);
 }
 
 export async function getWorld(id: string): Promise<World | undefined> {

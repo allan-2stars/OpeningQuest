@@ -53,6 +53,7 @@ export const WORLD_3_BOSS_ID = "boss_w3_fortress_commander";
 export const CURRICULUM_WORLDS: World[] = [
   {
     id: "world_knight_meadows",
+    order: 1,
     name: "Knight Meadows",
     description: "Learn open games and piece development.",
     theme: "grassland",
@@ -62,6 +63,7 @@ export const CURRICULUM_WORLDS: World[] = [
   },
   {
     id: "world_royal_castle",
+    order: 2,
     name: "Royal Castle",
     description: "Master center control and classical openings.",
     theme: "castle",
@@ -71,6 +73,7 @@ export const CURRICULUM_WORLDS: World[] = [
   },
   {
     id: "world_defender_fortress",
+    order: 3,
     name: "Defender Fortress",
     description: "Play Black against 1. e4 with solid defences.",
     theme: "fortress",
@@ -201,14 +204,14 @@ export const CURRICULUM_LESSONS: Lesson[] = [
   { id: "lesson_w2_ruy_morphy", variationId: "var_ruy_morphy", title: "Morphy Defence", side: "white", difficulty: "beginner", depth: 6, lineId: "line_w2_ruy_morphy" },
   { id: "boss_w2_royal_guardian", variationId: "var_ruy_main", title: "Royal Guardian", side: "white", difficulty: "beginner", depth: 8, lineId: "line_w2_boss", requiredLessonIds: [...WORLD_2_LESSON_IDS] },
   // World 3 — Black-side defences
-  { id: "lesson_w3_caro_main", variationId: "var_caro_main", title: "Caro-Kann Main Line", side: "black", difficulty: "beginner", depth: 4, lineId: "line_w3_caro_main" },
+  { id: "lesson_w3_caro_main", variationId: "var_caro_main", title: "Caro-Kann Main Line", side: "black", difficulty: "beginner", depth: 3, lineId: "line_w3_caro_main" },
   { id: "lesson_w3_caro_classical", variationId: "var_caro_classical", title: "Caro-Kann Classical", side: "black", difficulty: "beginner", depth: 5, lineId: "line_w3_caro_classical" },
-  { id: "lesson_w3_caro_exchange", variationId: "var_caro_exchange", title: "Caro-Kann Exchange", side: "black", difficulty: "beginner", depth: 4, lineId: "line_w3_caro_exchange" },
-  { id: "lesson_w3_french_main", variationId: "var_french_main", title: "French Main Line", side: "black", difficulty: "beginner", depth: 4, lineId: "line_w3_french_main" },
-  { id: "lesson_w3_french_exchange", variationId: "var_french_exchange", title: "French Exchange", side: "black", difficulty: "beginner", depth: 4, lineId: "line_w3_french_exchange" },
-  { id: "lesson_w3_scan_main", variationId: "var_scan_main", title: "Scandinavian Main", side: "black", difficulty: "beginner", depth: 4, lineId: "line_w3_scan_main" },
-  { id: "lesson_w3_scan_queen", variationId: "var_scan_queen", title: "Scandinavian Queen", side: "black", difficulty: "beginner", depth: 5, lineId: "line_w3_scan_queen" },
-  { id: "boss_w3_fortress_commander", variationId: "var_caro_main", title: "Fortress Commander", side: "black", difficulty: "beginner", depth: 6, lineId: "line_w3_boss", requiredLessonIds: [...WORLD_3_LESSON_IDS] },
+  { id: "lesson_w3_caro_exchange", variationId: "var_caro_exchange", title: "Caro-Kann Exchange", side: "black", difficulty: "beginner", depth: 3, lineId: "line_w3_caro_exchange" },
+  { id: "lesson_w3_french_main", variationId: "var_french_main", title: "French Main Line", side: "black", difficulty: "beginner", depth: 3, lineId: "line_w3_french_main" },
+  { id: "lesson_w3_french_exchange", variationId: "var_french_exchange", title: "French Exchange", side: "black", difficulty: "beginner", depth: 3, lineId: "line_w3_french_exchange" },
+  { id: "lesson_w3_scan_main", variationId: "var_scan_main", title: "Scandinavian Main", side: "black", difficulty: "beginner", depth: 3, lineId: "line_w3_scan_main" },
+  { id: "lesson_w3_scan_queen", variationId: "var_scan_queen", title: "Scandinavian Queen", side: "black", difficulty: "beginner", depth: 4, lineId: "line_w3_scan_queen" },
+  { id: "boss_w3_fortress_commander", variationId: "var_caro_main", title: "Fortress Commander", side: "black", difficulty: "beginner", depth: 5, lineId: "line_w3_boss", requiredLessonIds: [...WORLD_3_LESSON_IDS] },
 ];
 
 // ── Opening Lines ───────────────────────────────────────────────────────

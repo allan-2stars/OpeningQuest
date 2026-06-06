@@ -217,6 +217,24 @@ describe("lesson progress distribution", () => {
   });
 });
 
+describe("world ordering", () => {
+  it("getAllWorlds returns worlds in progression order (not alphabetical key order)", async () => {
+    await seedCoreData();
+    const { getAllWorlds } = await import("../repositories/curriculumRepo.ts");
+    const worlds = await getAllWorlds();
+    expect(worlds.map((w) => w.id)).toEqual([
+      "world_knight_meadows",
+      "world_royal_castle",
+      "world_defender_fortress",
+    ]);
+  });
+
+  it("each world has a unique order field", () => {
+    const orders = CURRICULUM_WORLDS.map((w) => w.order);
+    expect(new Set(orders).size).toBe(CURRICULUM_WORLDS.length);
+  });
+});
+
 describe("curriculum constants consistency", () => {
   it("WORLD_1_LESSON_IDS match the lessons in world_knight_meadows", () => {
     const world = CURRICULUM_WORLDS.find((w) => w.id === "world_knight_meadows")!;

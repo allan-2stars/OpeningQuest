@@ -25,6 +25,7 @@ export type LineSource = "builtin" | "user" | "imported";
 
 export type World = {
   id: string;
+  order: number;
   name: string;
   description: string;
   theme: string;

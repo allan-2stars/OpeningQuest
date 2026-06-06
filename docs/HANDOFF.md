@@ -19,6 +19,53 @@ Notes:
 
 ---
 
+## REVIEW-008 Handoff
+
+Date:
+2026-06-06
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-008 — Opening Curriculum Review
+
+Branch:
+main
+
+Commit:
+(pending)
+
+Files Changed:
+- src/types/domain.ts (F-001: added `order: number` to World type)
+- src/lib/seed/curriculum.ts (F-001: order 1/2/3 on worlds; F-002: corrected depth for 7 Black-side lessons)
+- src/lib/repositories/curriculumRepo.ts (F-001: sort worlds by order in getAllWorlds)
+- src/lib/__tests__/curriculum.test.ts (F-001: 2 new world-ordering tests)
+- src/lib/__tests__/repositories.test.ts (F-001: added order:1 to World fixture)
+- docs/reviews/REVIEW-008-opening-curriculum.md (created)
+- docs/HANDOFF.md (this entry)
+
+Tests Run:
+- tsc --noEmit (passed)
+- eslint src (0 errors, 0 warnings)
+- vitest run (176/176 passed)
+
+Known Issues:
+- C-001: seedCurriculum uses table-level count===0 guards. Existing users who upgrade from World 1-2 to World 1-3 will not get progress rows seeded for World 3 lessons. Documented in review file.
+- C-002: Future curriculum additions (World 4+) cannot be seeded incrementally without clearing all tables. Document in review file; recommend switching to per-ID upsert pattern (bulkPut) when TASK-011+ adds new worlds.
+
+Next Recommended Task:
+TASK-009-pgn-import-export.md
+
+Notes:
+F-001 fixes a critical bug: world IDs sort alphabetically as defender_fortress < knight_meadows < royal_castle,
+causing World 3 to be always-unlocked and World 1 to require World 3 complete. The fix adds World.order
+and sorts in getAllWorlds() — no db schema version bump needed (non-indexed field).
+F-002 fixes metadata: Black-side lesson depth should equal floor(sanMoves.length/2) not ceil.
+Affected: caro_main, caro_exchange, french_main, french_exchange, scan_main (4→3), scan_queen (5→4), boss_w3 (6→5).
+
+---
+
 ## TASK-008 Handoff
 
 Date:

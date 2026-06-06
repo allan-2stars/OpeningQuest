@@ -231,6 +231,7 @@ describe("seedCoreData", () => {
 describe("curriculumRepo", () => {
   const world: World = {
     id: "world_1",
+    order: 1,
     name: "Knight Meadows",
     description: "A beginner world",
     theme: "grassland",
