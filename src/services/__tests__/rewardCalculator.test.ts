@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import {
-  computeSessionXp,
   computeAchievementTransitions,
   computeRewardSummary,
   XP_PER_CORRECT_MOVE,
@@ -49,45 +48,6 @@ function makeResult(overrides: Partial<TrainingSessionResult> = {}): TrainingSes
     ...overrides,
   };
 }
-
-describe("computeSessionXp", () => {
-  it("awards 0 XP for degenerate session (totalUserMoves = 0)", () => {
-    const result = makeResult({ totalUserMoves: 0, history: [] });
-    expect(computeSessionXp(result, false)).toBe(0);
-  });
-
-  it("awards XP for correct moves only", () => {
-    // 4 accepted entries in makeResult default history
-    const result = makeResult();
-    const xp = computeSessionXp(result, false);
-    expect(xp).toBe(4 * XP_PER_CORRECT_MOVE + XP_PERFECT_RUN);
-  });
-
-  it("awards +25 XP for perfect run", () => {
-    const result = makeResult({ perfectRun: true });
-    const xp = computeSessionXp(result, false);
-    expect(xp).toBe(4 * XP_PER_CORRECT_MOVE + XP_PERFECT_RUN);
-  });
-
-  it("does not award perfect run XP for non-perfect run", () => {
-    const result = makeResult({ perfectRun: false, completed: true, mistakes: 2 });
-    const xp = computeSessionXp(result, false);
-    expect(xp).toBe(4 * XP_PER_CORRECT_MOVE);
-  });
-
-  it("counts only accepted (correct) move entries in history", () => {
-    const result = makeResult({
-      history: [
-        { type: "accepted", legal: true, correct: true, san: "e4", message: "Correct!" },
-        { type: "wrong", legal: true, correct: false, san: "d4", message: "Wrong" },
-        { type: "accepted", legal: true, correct: true, san: "e4", message: "Correct!" },
-      ],
-      perfectRun: false,
-    });
-    const xp = computeSessionXp(result, false);
-    expect(xp).toBe(2 * XP_PER_CORRECT_MOVE);
-  });
-});
 
 describe("computeAchievementTransitions", () => {
   it("unlocks first-lesson achievement", () => {

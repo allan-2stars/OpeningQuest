@@ -19,6 +19,63 @@ Notes:
 
 ---
 
+## TASK-007A Handoff (Reward Persistence Hardening)
+
+Date:
+2026-06-06
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-007A — REVIEW-007 Reward Persistence Hardening
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/services/rewardCalculator.ts (C-001: removed dead computeSessionXp with broken API)
+- src/services/rewardService.ts (C-002: throw on missing user profile instead of silent skip)
+- src/lib/repositories/rewardsRepo.ts (C-003: updateAchievement throws on missing row)
+- src/services/__tests__/rewardCalculator.test.ts (removed 5 tests for removed function)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (129/129 passed)
+- docker compose up --build (HTTP 200)
+
+Fixed REVIEW-007 concerns:
+- C-001: computeSessionXp removed — dead code with misleading wasMastered parameter
+  that silently excluded the mastery bonus. computeRewardSummary remains the
+  canonical entry point for all reward calculation.
+- C-002: applyRewards now throws "User profile not found — seed data may not have
+  run" when profile is missing, instead of silently dropping XP/keys while
+  showing "+100 XP" in the UI.
+- C-003: updateAchievement now throws on missing row (matching the
+  updateUserProfile pattern), catching future seed-data gaps at the point
+  of failure.
+
+Known Issues:
+- REVIEW-006A C-001 through C-004 still tracked in HANDOFF
+- REVIEW-006 C-001 (applyReviewResult date comparison) still deferred
+- REVIEW-007 C-004 (asymmetric error handling) pre-existing, not addressed here
+
+Next Recommended Task:
+TASK-008-opening-curriculum.md
+
+Notes:
+All three REVIEW-007 concerns resolved. Reward calculator API is now clean
+(computeRewardSummary is the only calculation entry point). Missing profile
+and missing achievement rows now surface as explicit errors at the point
+of failure rather than silently discarding data.
+
+---
+
 ## REVIEW-007 Handoff
 
 Date:

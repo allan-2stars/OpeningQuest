@@ -39,7 +39,8 @@ export async function updateAchievement(
   id: string,
   updates: Partial<Omit<Achievement, "id">>,
 ): Promise<void> {
-  await db.achievements.update(id, updates);
+  const count = await db.achievements.update(id, updates);
+  if (count === 0) throw new Error(`Achievement not found: ${id}`);
 }
 
 export async function updatePieceSkin(

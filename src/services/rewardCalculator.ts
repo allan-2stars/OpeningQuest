@@ -90,44 +90,11 @@ export function computeAchievementTransitions(
 }
 
 /**
- * Compute XP earned from a single training session.
- * Only awards XP if the session completed (or failed — moves were still played).
- * Mastery bonus only fires when the lesson was NOT already mastered before.
- */
-export function computeSessionXp(
-  result: TrainingSessionResult,
-  wasMastered: boolean,
-): number {
-  if (result.totalUserMoves === 0) return 0;
-
-  let xp = 0;
-
-  // +1 XP per correct user move
-  const correctMoves = result.history.filter(
-    (f) => f.type === "accepted" && f.correct,
-  ).length;
-  xp += correctMoves * XP_PER_CORRECT_MOVE;
-
-  // +25 XP for perfect run
-  if (result.perfectRun) {
-    xp += XP_PERFECT_RUN;
-  }
-
-  // +100 XP for first-time mastery
-  if (result.completed && result.perfectRun && !wasMastered) {
-    // Check if this run would trigger mastery (10th perfect run)
-    // We rely on the caller to pass wasMastered correctly
-    // wasMastered means: before this session, masteryLevel was already >= 4
-  }
-  // The mastery bonus is handled separately in computeRewardSummary where we
-  // have access to both old and new progress.
-
-  return xp;
-}
-
-/**
  * Compute the full reward summary for a completed training session.
  * Compares old and new progress to determine what changed.
+ * This is the canonical entry point for reward calculation — it handles
+ * per-move XP, perfect-run bonuses, first-time mastery XP/keys, and
+ * achievement transitions in a single pass.
  */
 export function computeRewardSummary(
   result: TrainingSessionResult,
