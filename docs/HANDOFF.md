@@ -34,7 +34,7 @@ Branch:
 main
 
 Commit:
-(pending)
+5e9f665
 
 Files Changed:
 - src/hooks/useTrainingSession.ts (F-001: stale-session guard in .then(); F-005: merged duplicate imports)
