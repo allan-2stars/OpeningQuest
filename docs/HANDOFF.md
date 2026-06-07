@@ -19,6 +19,74 @@ Notes:
 
 ---
 
+## TASK-009 Handoff
+
+Date:
+2026-06-08
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-009 - PGN Import/Export and JSON Backup/Restore
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/services/pgnService.ts (created — parsePgn, exportPgn)
+- src/services/backupService.ts (created — exportBackup, importBackup)
+- src/services/__tests__/pgnBackup.test.ts (created — 21 tests)
+- src/lib/repositories/customOpeningRepo.ts (created — putOpeningLine, addImportedOpening, getImportedLines)
+- src/features/import-export/ImportExport.tsx (rewritten — PGN import/export, JSON backup/restore UI)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (197/197 passed: 33 repo + 18 component + 31 training + 28 progression + 12 reward + 44 curriculum + 10 curriculum seed + 21 pgn/backup)
+- docker compose up --build (HTTP 200 at /, /import-export)
+
+PGN import:
+- Paste PGN text with or without headers
+- Validates all moves through chess.js (parse + replay)
+- Extracts sanMoves, fenPositions, PGN
+- Stores as OpeningLine with source: "imported" or "user"
+- Creates supporting Lesson, Variation, OpeningFamily records for practice compatibility
+- Side selector (white/black) for which colour the user plays
+- Clear error messages for empty, invalid, or illegal PGN
+
+PGN export:
+- Export any imported/custom line to clipboard as PGN
+- Standard headers: Event (opening name), Site, Date, Round, White, Black, Result *
+- Exported PGN re-imports correctly (round-trip verified)
+
+JSON backup:
+- Exports all 12 tables + version metadata
+- Download as .json file
+- Restore: validates shape, version, required arrays
+- Clears and replaces all data (full replace, not merge)
+- Round-trip: export→wipe→restore preserves profile, progress, achievements
+
+Known Issues:
+- REVIEW-008 C-001/C-002 (seed upgrade path) still applies
+- PGN import only supports standard chess — no variant support
+- Backup restore is full replacement only (no merge choice UI)
+
+Next Recommended Task:
+TASK-010-collection-system.md
+
+Notes:
+All PGN parsing validated through chess.js. Imported openings create playable lessons
+at /practice/:lessonId. Backup round-trip preserves user profile, all lesson progress,
+achievements, and curriculum data. UI does not access Dexie directly — PGN/backup
+services handle all data access.
+
+---
+
 ## REVIEW-008 Handoff
 
 Date:

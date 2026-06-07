@@ -1,6 +1,6 @@
 # TASK-009 - PGN Import Export
 
-Status: Ready
+Status: Complete
 Priority: P2
 Assigned Agent: Windows Agent
 

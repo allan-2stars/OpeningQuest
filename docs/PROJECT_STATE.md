@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-008 Complete. Ready for TASK-009 PGN Import/Export.
+TASK-009 Complete. Ready for TASK-010 Collection System.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-009-pgn-import-export.md
+TASK-010-collection-system.md
 
 Assigned to:
 Windows Agent
