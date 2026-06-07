@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-009 Complete. Ready for TASK-010 Collection System.
+TASK-010 Complete. Ready for TASK-011 Daily Quests.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-010-collection-system.md
+TASK-011-daily-quests.md
 
 Assigned to:
 Windows Agent

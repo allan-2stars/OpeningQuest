@@ -19,6 +19,68 @@ Notes:
 
 ---
 
+## TASK-010 Handoff
+
+Date:
+2026-06-08
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-010 - Collection System
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/hooks/useCollection.ts (created — loads skins/themes from rewardsRepo, localStorage selection persistence)
+- src/features/collection/Collection.tsx (rewritten — piece skin grid + board theme grid)
+- src/features/collection/__tests__/Collection.test.tsx (created — 7 tests)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (204/204 passed)
+- docker compose up --build (HTTP 200 at /, /collection)
+
+Collection page:
+- Piece skins grid: shows name, pieceType, locked/unlocked/selected state
+- Board themes grid: shows name, description, light/dark colour swatches, locked/unlocked/selected state
+- Locked items shown as disabled buttons with 🔒 icon and "Locked" badge
+- Unlocked items show ♞ icon, clickable, with hover/focus styles
+- Selected item shows "Active" badge, highlighted border, selection ring
+- Selection persisted to localStorage
+- Loading spinner, error banner, and empty states covered
+- No direct Dexie access — all data loaded through rewardsRepo
+
+Tests:
+- Renders skins/themes from seed data
+- Loading spinner visible initially
+- Active tag shown on default unlocked items
+- Can select a different unlocked skin (Golden → Active)
+- Locked skin has disabled button
+- Locked theme has disabled button
+
+Known Issues:
+- REVIEW-008 C-001/C-002 (seed upgrade) still applies
+- No additional cosmestics beyond seed data defaults
+- Selection persisted via localStorage (not IndexedDB) — adequate for V1
+
+Next Recommended Task:
+TASK-011-daily-quests.md
+
+Notes:
+Collection system follows tablet-first, child-friendly design. Locked items are
+visible but disabled with clear 🔒 icon. Active selection persists across page
+navigation via localStorage. No shop/payments/social features.
+
+---
+
 ## REVIEW-009 Handoff
 
 Date:
