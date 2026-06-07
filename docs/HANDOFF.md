@@ -34,7 +34,7 @@ Branch:
 main
 
 Commit:
-(pending)
+d5ece97
 
 Files Changed:
 - src/features/import-export/ImportExport.tsx (F-001: useEffect init; F-004: consolidate pgnService imports)
