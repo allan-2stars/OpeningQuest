@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Collection from "../Collection.tsx";
@@ -12,9 +12,20 @@ function renderWithRouter(ui: React.ReactElement) {
   return render(<BrowserRouter>{ui}</BrowserRouter>);
 }
 
+// Provide a full localStorage mock — the jsdom env in Vitest 4.x exposes a stub
+// without standard Storage methods (clear/removeItem/etc.), so we inject one.
+function makeLocalStorageMock() {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
+  };
+}
+
 beforeEach(async () => {
-  // Clear localStorage so tests start fresh
-  localStorage.clear();
+  vi.stubGlobal("localStorage", makeLocalStorageMock());
 
   await db.delete();
   await db.open();

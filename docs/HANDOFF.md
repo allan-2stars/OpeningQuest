@@ -19,6 +19,51 @@ Notes:
 
 ---
 
+## REVIEW-010 Handoff
+
+Date:
+2026-06-08
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-010 — Collection System Review
+
+Branch:
+main
+
+Commit:
+(this commit)
+
+Files Changed:
+- src/features/collection/__tests__/Collection.test.tsx (F-001: vi.stubGlobal localStorage mock — all 7 tests were failing)
+- src/hooks/useCollection.ts (F-002: writeSelected on default selection; F-003: consolidated rewardsRepo imports)
+- docs/reviews/REVIEW-010-collection-system.md (created)
+- docs/HANDOFF.md (this entry)
+
+Tests Run:
+- tsc --noEmit (passed)
+- eslint src (0 errors, 0 warnings)
+- vitest run (204/204 passed)
+
+Known Issues:
+- C-001: localStorage skin/theme selection is not included in JSON backup/restore (TASK-009). After a restore, the hook auto-selects the first unlocked item — correct default, but may differ from user's explicit choice. Acceptable for V1.
+- C-002: CosmeticCard and BoardThemeCard are near-identical components. No shared abstraction yet. Acceptable for V1; generalise when a third cosmetic category is added.
+
+Next Recommended Task:
+TASK-011-daily-quests.md
+
+Notes:
+F-001 is the critical fix: all 7 Collection tests failed with "localStorage.clear is not a function"
+because Vitest 4.1.8's jsdom environment exposes a localStorage stub without standard Storage API
+methods. Fixed by injecting a full in-memory mock via vi.stubGlobal in beforeEach.
+F-002: useCollection auto-selected the first unlocked skin/theme on first visit but never wrote
+the selection to localStorage, so any future reader of oq_selected_skin_id would get null.
+F-003: two import lines from the same module consolidated to one.
+
+---
+
 ## TASK-010 Handoff
 
 Date:

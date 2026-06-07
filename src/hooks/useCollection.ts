@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { getAllPieceSkins } from "../lib/repositories/rewardsRepo.ts";
-import { getAllBoardThemes } from "../lib/repositories/rewardsRepo.ts";
+import { getAllPieceSkins, getAllBoardThemes } from "../lib/repositories/rewardsRepo.ts";
 import type { PieceSkin, BoardTheme } from "../types/domain.ts";
 
 const SELECTED_SKIN_KEY = "oq_selected_skin_id";
@@ -54,14 +53,20 @@ export function useCollection(): CollectionState {
         setSkins(loadedSkins);
         setThemes(loadedThemes);
 
-        // Default-select the first unlocked skin/theme if none selected
+        // Default-select the first unlocked skin/theme if none persisted yet
         if (!readSelected(SELECTED_SKIN_KEY)) {
           const first = loadedSkins.find((s) => s.unlocked);
-          if (first) setSelectedSkinId(first.id);
+          if (first) {
+            setSelectedSkinId(first.id);
+            writeSelected(SELECTED_SKIN_KEY, first.id);
+          }
         }
         if (!readSelected(SELECTED_THEME_KEY)) {
           const first = loadedThemes.find((t) => t.unlocked);
-          if (first) setSelectedThemeId(first.id);
+          if (first) {
+            setSelectedThemeId(first.id);
+            writeSelected(SELECTED_THEME_KEY, first.id);
+          }
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load collection");
