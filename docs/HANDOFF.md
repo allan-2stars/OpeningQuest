@@ -19,6 +19,57 @@ Notes:
 
 ---
 
+## REVIEW-009 Handoff
+
+Date:
+2026-06-08
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-009 — PGN Import/Export Review
+
+Branch:
+main
+
+Commit:
+(pending)
+
+Files Changed:
+- src/features/import-export/ImportExport.tsx (F-001: useEffect init; F-004: consolidate pgnService imports)
+- src/lib/repositories/customOpeningRepo.ts (F-002: correct depth formula; F-003: Dexie transaction)
+- src/services/backupService.ts (F-005: Dexie transaction wrapping importBackup restore)
+- docs/reviews/REVIEW-009-pgn-import-export.md (created)
+- docs/HANDOFF.md (this entry)
+
+Tests Run:
+- tsc --noEmit (passed)
+- eslint src (0 errors, 0 warnings)
+- vitest run (197/197 passed)
+
+Known Issues:
+- C-001: importBackup clears all tables including any future tables not in the backup format. Importing an old backup after a schema addition will silently wipe the new table. Documented in review file.
+- C-002: isValidBackupShape validates only 4 of the 14 BackupData fields. A backup with corrupt pieceSkins/variations/lessons arrays passes shape validation. Documented in review file.
+- C-003: Imported lessons have no LessonProgress row. Practice flow uses makeStubProgress fallback — functional but inconsistent with seeded lessons.
+
+Next Recommended Task:
+TASK-010-collection-system.md
+
+Notes:
+F-001: loadLines() was called directly in the render body without useEffect, causing
+multiple concurrent getImportedLines() calls on each parent re-render while the async
+fetch was in-flight. Fixed with a cancellable useEffect fetch.
+F-002: addImportedOpening set depth=line.sanMoves.length (total moves) instead of the
+user-facing move count. Same error as REVIEW-008's Black-side depth fix. Corrected to
+ceil(N/2) for White and floor(N/2) for Black.
+F-003: addImportedOpening's 4 sequential put()s could leave orphaned records on quota
+failure. Wrapped in db.transaction().
+F-005: importBackup's clear()+bulkPut() sequence had no transaction; a bulkPut failure
+left DB partially empty. Wrapped in db.transaction("rw", db.tables, ...) for atomic rollback.
+
+---
+
 ## TASK-009 Handoff
 
 Date:

@@ -1,15 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageShell from "../../components/PageShell.tsx";
 import Card from "../../components/Card.tsx";
 import Button from "../../components/Button.tsx";
 import Badge from "../../components/Badge.tsx";
 import FeedbackBanner from "../../components/FeedbackBanner.tsx";
-import { parsePgn } from "../../services/pgnService.ts";
-import { exportPgn } from "../../services/pgnService.ts";
+import { parsePgn, exportPgn } from "../../services/pgnService.ts";
 import { exportBackup, importBackup } from "../../services/backupService.ts";
 import { addImportedOpening, getImportedLines } from "../../lib/repositories/customOpeningRepo.ts";
-import type { Side } from "../../types/domain.ts";
-import type { OpeningLine } from "../../types/domain.ts";
+import type { Side, OpeningLine } from "../../types/domain.ts";
 
 type Tab = "import" | "export" | "backup";
 
@@ -19,7 +17,6 @@ export default function ImportExport() {
   const [side, setSide] = useState<Side>("white");
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [importedLines, setImportedLines] = useState<OpeningLine[]>([]);
-  const [loadedLines, setLoadedLines] = useState(false);
 
   const loadLines = async () => {
     try {
@@ -28,12 +25,15 @@ export default function ImportExport() {
     } catch {
       // best-effort
     }
-    setLoadedLines(true);
   };
 
-  if (!loadedLines) {
-    loadLines();
-  }
+  useEffect(() => {
+    let cancelled = false;
+    getImportedLines()
+      .then((lines) => { if (!cancelled) setImportedLines(lines); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const handleImport = async () => {
     setResult(null);

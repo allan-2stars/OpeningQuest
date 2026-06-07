@@ -68,14 +68,18 @@ export async function addImportedOpening(
     title: name,
     side,
     difficulty: "beginner",
-    depth: line.sanMoves.length,
+    depth: side === "white"
+      ? Math.ceil(line.sanMoves.length / 2)
+      : Math.floor(line.sanMoves.length / 2),
     lineId: line.id,
   };
 
-  await putOpeningLine(line);
-  await putOpeningFamily(family);
-  await putVariation(variation);
-  await putLesson(lesson);
+  await db.transaction("rw", [db.openingLines, db.openingFamilies, db.variations, db.lessons], async () => {
+    await putOpeningLine(line);
+    await putOpeningFamily(family);
+    await putVariation(variation);
+    await putLesson(lesson);
+  });
 
   return lessonId;
 }

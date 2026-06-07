@@ -110,15 +110,6 @@ export async function importBackup(json: string): Promise<RestoreResult> {
   try {
     let restored = 0;
 
-    // Clear all tables then restore in sequence
-    await Promise.all(db.tables.map((t) => t.clear()));
-
-    // Restore user profile
-    if (backup.userProfile) {
-      await db.userProfile.put(backup.userProfile as never);
-      restored++;
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const collections: [any, unknown[] | undefined][] = [
       [db.lessonProgress, backup.lessonProgress],
@@ -134,12 +125,22 @@ export async function importBackup(json: string): Promise<RestoreResult> {
       [db.dailyQuests, backup.dailyQuests],
     ];
 
-    for (const [table, rows] of collections) {
-      if (rows && rows.length > 0) {
-        await table.bulkPut(rows as never[]);
-        restored += rows.length;
+    // Wrap clear + restore in a single transaction so a failure rolls back entirely
+    await db.transaction("rw", db.tables, async () => {
+      await Promise.all(db.tables.map((t) => t.clear()));
+
+      if (backup.userProfile) {
+        await db.userProfile.put(backup.userProfile as never);
+        restored++;
       }
-    }
+
+      for (const [table, rows] of collections) {
+        if (rows && rows.length > 0) {
+          await table.bulkPut(rows as never[]);
+          restored += rows.length;
+        }
+      }
+    });
 
     return { ok: true, restored };
   } catch (e) {
