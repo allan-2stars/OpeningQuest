@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-010 Complete. Ready for TASK-011 Daily Quests.
+TASK-011 Complete. Ready for TASK-012 Review System.
 
 ## Summary
 
@@ -53,7 +53,7 @@ Platform:
 
 ## Next Task
 
-TASK-011-daily-quests.md
+TASK-012-review-system.md
 
 Assigned to:
 Windows Agent

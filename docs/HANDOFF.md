@@ -19,6 +19,74 @@ Notes:
 
 ---
 
+## TASK-011 Handoff
+
+Date:
+2026-06-08
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-011 — Chessboard Practice UX
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/practice/Practice.tsx (rewritten — chessboard-driven UX with react-chessboard)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (204/204 passed)
+- docker compose up --build (HTTP 200 at /, /adventure, /collection, /practice/:lessonId)
+
+Chessboard UX:
+- Interactive drag-and-drop chessboard centered in the practice page
+- Board auto-orientation: White at bottom for White lessons, Black at bottom for Black lessons
+- Flip Board button to toggle orientation
+- Pieces draggable during active session; disabled on session complete/failure
+- onPieceDrop converts from/to → SAN via chess.js, submits to training engine
+- Position controlled by training engine FEN — engine is the single source of truth
+- Illegal moves: red highlight on source square, piece returns
+- Correct moves: gold highlight on source/target, engine processes move, board auto-updates
+- Opponent auto-play moves reflected via FEN change from engine
+- Coordinates shown (a-h, 1-8)
+- Classic wood-coloured board (matches seed BoardTheme)
+
+Sidebar:
+- Mode selector (Guided/Instinct) — same behavior as before
+- Progress counter: user move count (userMoveCount, not all plies)
+- Text input fallback: collapsed by default, toggleable for debug
+- Feedback banner for correct/wrong/illegal moves
+- Session result card with completion, mistakes, perfect run, progress
+- Reward summary card (XP, keys, achievements)
+- Restart + Switch Mode buttons on session end
+
+Layout:
+- Tablet-first: board on top, sidebar on right (horizontal on lg+)
+- Board max width 560px, responsive
+- Sidebar width 288px on desktop, full width on mobile
+
+Known Issues:
+- REVIEW-008 C-001/C-002 (seed upgrade) still tracked
+
+Next Recommended Task:
+TASK-012-review-system.md (or the daily quests task from the task file)
+
+Notes:
+Primary UX is now board-based drag-and-drop. Training engine unchanged — all existing
+tests pass without modification. react-chessboard handles rendering; chess.js handles
+validation and SAN conversion. The engine's FEN prop drives board position — onPieceDrop
+always returns false so the board never manages its own internal position.
+
+---
+
 ## INVESTIGATION-001 — Seed Data Wiring Fix
 
 Date:
