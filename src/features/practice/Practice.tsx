@@ -37,7 +37,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   const [attemptedSquares, setAttemptedSquares] = useState<Record<string, CSSProperties>>({});
   const startedRef = useRef(false);
 
-  const { state, lessonTitle, isLoading, error, handleMove, result, resultProgress, rewardSummary, rewardError, startSession } =
+  const { state, lessonTitle, isLoading, error, handleMove, expectedSan, result, resultProgress, rewardSummary, rewardError, startSession } =
     useTrainingSession();
 
   const [boardOrientation, flipBoard] = useBoardOrientation(state?.userSide);
@@ -57,16 +57,8 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
     return () => clearTimeout(timer);
   }, [attemptedSquares]);
 
-  const submitMove = useCallback(
-    (san: string) => {
-      handleMove(san);
-    },
-    [handleMove],
-  );
-
   const onPieceDrop = useCallback(
-    (sourceSquare: string, targetSquare: string, _piece: string): boolean => {
-      void _piece;
+    (sourceSquare: string, targetSquare: string): boolean => {
       if (!state) return false;
 
       try {
@@ -84,12 +76,17 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
           return false;
         }
 
-        setAttemptedSquares({
-          [sourceSquare]: { backgroundColor: "rgba(230,180,34,0.3)" },
-          [targetSquare]: { backgroundColor: "rgba(230,180,34,0.3)" },
-        });
+        const isExpectedMove = moveResult.san === expectedSan;
+        setAttemptedSquares(
+          isExpectedMove
+            ? {
+                [sourceSquare]: { backgroundColor: "rgba(230,180,34,0.3)" },
+                [targetSquare]: { backgroundColor: "rgba(230,180,34,0.3)" },
+              }
+            : { [sourceSquare]: { backgroundColor: "rgba(239,68,68,0.3)" } },
+        );
 
-        submitMove(moveResult.san);
+        handleMove(moveResult.san);
       } catch {
         setAttemptedSquares({
           [sourceSquare]: { backgroundColor: "rgba(239,68,68,0.3)" },
@@ -98,7 +95,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
 
       return false;
     },
-    [state, submitMove],
+    [state, expectedSan, handleMove],
   );
 
   const switchMode = (newMode: PracticeMode) => {
@@ -110,7 +107,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   const handleTextSubmit = () => {
     const trimmed = textInput.trim();
     if (!trimmed || !state) return;
-    submitMove(trimmed);
+    handleMove(trimmed);
     setTextInput("");
   };
 

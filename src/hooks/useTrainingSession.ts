@@ -12,6 +12,7 @@ type UseTrainingSessionResult = {
   isLoading: boolean;
   error: string | null;
   handleMove: (san: string) => void;
+  expectedSan: string | null;
   result: TrainingSessionResult | null;
   resultProgress: LessonProgress | null;
   rewardSummary: RewardSummary | null;
@@ -107,6 +108,7 @@ export function useTrainingSession(): UseTrainingSessionResult {
     isLoading,
     error,
     handleMove,
+    expectedSan: state ? (sanMoves[state.currentMoveIndex] ?? null) : null,
     result,
     resultProgress,
     rewardSummary,

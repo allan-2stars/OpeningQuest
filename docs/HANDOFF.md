@@ -19,6 +19,49 @@ Notes:
 
 ---
 
+## REVIEW-011 Handoff
+
+Date:
+2026-06-08
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-011 — Chessboard Practice UX Review
+
+Branch:
+main
+
+Commit:
+(this commit)
+
+Files Changed:
+- src/hooks/useTrainingSession.ts (F-001: expose expectedSan for correct highlight colour)
+- src/features/practice/Practice.tsx (F-001: use expectedSan; F-002: remove void _piece; F-003: remove submitMove wrapper)
+- docs/reviews/REVIEW-011-chess-board-experience.md (created)
+- docs/HANDOFF.md (this entry)
+
+Tests Run:
+- tsc --noEmit (passed)
+- eslint src (0 errors, 0 warnings)
+- vitest run (204/204 passed)
+
+Known Issues:
+- C-001: Pawn promotion always defaults to queen — no promotion picker. Not triggered by any seed opening lines (depth 3–6). Defer to future task if long imported lines are added.
+- C-002: boardWidth is computed once at render time; board won't resize on tablet rotation without a ResizeObserver. Acceptable for V1.
+
+Next Recommended Task:
+TASK-012-review-system.md
+
+Notes:
+F-001 is the primary correctness fix: legal-but-wrong moves were showing gold highlights
+(same as correct moves) because highlights were set before the training engine evaluated
+the move. Fixed by exposing expectedSan from useTrainingSession so onPieceDrop can
+determine the correct colour before submitting. Wrong legal moves now show red.
+
+---
+
 ## TASK-011 Handoff
 
 Date:
