@@ -74,6 +74,47 @@ contains full evidence and chain-of-custody trace.
 
 ---
 
+## REVIEW-010A Handoff
+
+Date:
+2026-06-08
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+REVIEW-010A — Seed Data Wiring Review
+
+Branch:
+main
+
+Commit:
+(this commit)
+
+Files Changed:
+- docs/reviews/REVIEW-010A-seed-data-wiring.md (created)
+- docs/HANDOFF.md (this entry)
+
+Tests Run:
+- tsc --noEmit (passed)
+- eslint src/main.tsx (0 errors)
+- vitest run (204/204 passed)
+
+Known Issues:
+- C-001: boot() called without .catch() — unhandled rejection if createRoot/render throws (near-impossible in practice; non-fatal in all realistic failure modes).
+- C-002: No integration test for the seed→UI pipeline. All tests call seedCoreData() explicitly in setup, so the production entry point was never exercised. E2E coverage would have caught this immediately.
+
+Next Recommended Task:
+TASK-011-daily-quests.md
+
+Notes:
+Root cause correctly identified. Fix is minimal and correct: seedCoreData() called in
+an async boot() in main.tsx before the first React render. The function is idempotent —
+subsequent app loads complete the seed guards instantly. No architecture violations: no
+UI component accesses Dexie directly. All 204 tests pass.
+
+---
+
 ## REVIEW-010 Handoff
 
 Date:
