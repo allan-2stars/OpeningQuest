@@ -19,6 +19,61 @@ Notes:
 
 ---
 
+## INVESTIGATION-001 — Seed Data Wiring Fix
+
+Date:
+2026-06-08
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+INVESTIGATION-001 — Seed Data Not Visible in UI
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/main.tsx (call seedCoreData() at app startup before render)
+- docs/investigations/INVESTIGATION-001-seed-data-wiring.md (created)
+
+Root Cause:
+seedCoreData() was never called at application startup. The seed function existed and was
+fully tested (204 tests), but src/main.tsx did not import or invoke it. The app booted with
+an empty IndexedDB — no worlds, lessons, lines, profiles, achievements, piece skins,
+or board themes were ever inserted at runtime.
+
+Fix:
+Added an async boot() function in main.tsx that calls await seedCoreData() before
+createRoot(...).render(...). seedCoreData is idempotent (all guards: count===0,
+if (!existing)) — on subsequent app loads it returns instantly. Wrapped in try/catch
+so seed failure is non-fatal (empty states shown instead of app crash).
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (204/204 passed)
+- docker compose up --build (HTTP 200 at /, /adventure, /collection)
+
+Known Issues:
+- Review reports (REVIEW-008, REVIEW-010) did not catch this because they verify code
+  correctness at the repository/seed level but did not test full app bootstrap flow
+- No end-to-end test verifies the seed→UI pipeline exists
+
+Next Recommended Task:
+TASK-011-daily-quests.md
+
+Notes:
+Seed data now populates automatically on first app load. Subsequent loads skip seeding
+because all tables are non-empty. The INVESTIGATION-001 document in docs/investigations/
+contains full evidence and chain-of-custody trace.
+
+---
+
 ## REVIEW-010 Handoff
 
 Date:
