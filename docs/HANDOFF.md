@@ -19,6 +19,75 @@ Notes:
 
 ---
 
+## TASK-016 Handoff
+
+Date:
+2026-06-10
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-016 — Skin Visual Integration
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/lib/seed/defaults.ts (added 2 skins + 3 themes; per-ID delta arrays)
+- src/lib/seed/seed.ts (per-ID seeding for skins/themes matching achievement pattern)
+- src/hooks/useBoardCosmetics.ts (created — reads selected theme/skin from localStorage, loads from DB, returns square colors + piece tint)
+- src/features/practice/pieceRenderer.tsx (created — SVG Unicode tinted piece renderer for react-chessboard customPieces)
+- src/features/practice/Practice.tsx (wired useBoardCosmetics and buildCustomPieces into Chessboard)
+- src/features/collection/__tests__/Collection.test.tsx (updated for new seed skins/themes)
+
+Seeded cosmetics:
+- 3 piece skins: Classic (unlocked), Ocean Blue (unlocked), Royal Gold (locked)
+- 4 board themes: Classic (unlocked), Dark Wood (unlocked), Midnight (locked), Royal (locked)
+- All use per-ID delta seeding — existing installations pick up new rows
+
+Board theme integration:
+- Practice board square colours driven by selected theme from localStorage
+- Dark Wood theme visible immediately when equipped in Collection
+- Fallback to classic wood if no theme selected or theme not found
+
+Piece skin integration:
+- Tinted Unicode chess piece rendering via react-chessboard customPieces
+- Blue and Gold tints applied to piece characters
+- Classic skin uses native-rendered pieces (no customPieces — standard appearance)
+- Unknown skin IDs fall back to classic
+
+Collection updates:
+- CosmeticCard and BoardThemeCard display seeded skins/themes
+- Active badge for equipped item
+- Locked badge for locked items with disabled button
+- Dark Wood theme shows warm brown colour swatch
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (259/259 passed)
+- docker compose up --build (Docker serves on port 5173)
+
+Known Issues:
+- Custom piece rendering uses Unicode characters (♙♘♗♖♕♔♟♞♝♜♛♚) — not pixel-perfect SVG
+- No image assets for custom skins — purely colour-tinted via text rendering
+- Premove highlight styles remain red regardless of theme (intentional — they signal intent)
+
+Next Recommended Task:
+TASK-013-boss-battles.md
+
+Notes:
+The useBoardCosmetics hook handles the full load-select-fallback chain: read localStorage →
+query Dexie → extract colours → provide ready-to-use CSSProperties. The Practice page
+simply spreads cosmetics.darkSquareStyle and cosmetics.lightSquareStyle into
+react-chessboard props. Custom pieces only activate when pieceTint is non-undefined.
+
+---
+
 ## TASK-015 Handoff
 
 Date:

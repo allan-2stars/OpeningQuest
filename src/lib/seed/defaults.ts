@@ -59,6 +59,26 @@ export const DEFAULT_PIECE_SKIN: PieceSkin = {
   previewUrl: "/skins/classic.svg",
 };
 
+export const DEFAULT_PIECE_SKINS: PieceSkin[] = [
+  DEFAULT_PIECE_SKIN,
+  {
+    id: "skin_blue",
+    name: "Ocean Blue",
+    description: "Cool blue-tinted pieces.",
+    pieceType: "all",
+    unlocked: true,
+    previewUrl: "/skins/blue.svg",
+  },
+  {
+    id: "skin_gold",
+    name: "Royal Gold",
+    description: "Warm gold-tinted pieces.",
+    pieceType: "all",
+    unlocked: false,
+    previewUrl: "/skins/gold.svg",
+  },
+];
+
 export const DEFAULT_BOARD_THEME: BoardTheme = {
   id: "theme_classic",
   name: "Classic",
@@ -68,3 +88,34 @@ export const DEFAULT_BOARD_THEME: BoardTheme = {
   lightSquareColor: "#f0d9b5",
   darkSquareColor: "#b58863",
 };
+
+export const DEFAULT_BOARD_THEMES: BoardTheme[] = [
+  DEFAULT_BOARD_THEME,
+  {
+    id: "theme_wood",
+    name: "Dark Wood",
+    description: "Rich dark wood board.",
+    unlocked: true,
+    previewUrl: "/themes/wood.svg",
+    lightSquareColor: "#c8a882",
+    darkSquareColor: "#6b4226",
+  },
+  {
+    id: "theme_dark",
+    name: "Midnight",
+    description: "Deep blue and charcoal board.",
+    unlocked: false,
+    previewUrl: "/themes/dark.svg",
+    lightSquareColor: "#4a5568",
+    darkSquareColor: "#1a202c",
+  },
+  {
+    id: "theme_royal",
+    name: "Royal",
+    description: "Cream and purple royal board.",
+    unlocked: false,
+    previewUrl: "/themes/royal.svg",
+    lightSquareColor: "#faf5e8",
+    darkSquareColor: "#6b46c1",
+  },
+];

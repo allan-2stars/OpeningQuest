@@ -3,8 +3,8 @@ import { createUserProfile } from "../repositories/userProfileRepo.ts";
 import {
   DEFAULT_USER_PROFILE,
   DEFAULT_ACHIEVEMENTS,
-  DEFAULT_PIECE_SKIN,
-  DEFAULT_BOARD_THEME,
+  DEFAULT_PIECE_SKINS,
+  DEFAULT_BOARD_THEMES,
 } from "./defaults.ts";
 import { seedCurriculum } from "./seedCurriculum.ts";
 
@@ -27,12 +27,24 @@ export async function seedCoreData(): Promise<void> {
         await db.achievements.bulkAdd(newAchievements);
       }
 
-      if (!(await db.pieceSkins.get(DEFAULT_PIECE_SKIN.id))) {
-        await db.pieceSkins.add(DEFAULT_PIECE_SKIN);
+      const existingPieceSkinIds = new Set(
+        (await db.pieceSkins.toArray()).map((s) => s.id),
+      );
+      const newSkins = DEFAULT_PIECE_SKINS.filter(
+        (s) => !existingPieceSkinIds.has(s.id),
+      );
+      if (newSkins.length > 0) {
+        await db.pieceSkins.bulkAdd(newSkins);
       }
 
-      if (!(await db.boardThemes.get(DEFAULT_BOARD_THEME.id))) {
-        await db.boardThemes.add(DEFAULT_BOARD_THEME);
+      const existingBoardThemeIds = new Set(
+        (await db.boardThemes.toArray()).map((t) => t.id),
+      );
+      const newThemes = DEFAULT_BOARD_THEMES.filter(
+        (t) => !existingBoardThemeIds.has(t.id),
+      );
+      if (newThemes.length > 0) {
+        await db.boardThemes.bulkAdd(newThemes);
       }
     },
   );

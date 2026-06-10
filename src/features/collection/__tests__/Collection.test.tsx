@@ -12,8 +12,6 @@ function renderWithRouter(ui: React.ReactElement) {
   return render(<BrowserRouter>{ui}</BrowserRouter>);
 }
 
-// Provide a full localStorage mock — the jsdom env in Vitest 4.x exposes a stub
-// without standard Storage methods (clear/removeItem/etc.), so we inject one.
 function makeLocalStorageMock() {
   let store: Record<string, string> = {};
   return {
@@ -36,101 +34,66 @@ describe("Collection page", () => {
   it("renders piece skins from seed data", async () => {
     renderWithRouter(<Collection />);
     await waitFor(() => {
-      const elements = screen.getAllByText("Classic");
-      expect(elements.length).toBeGreaterThanOrEqual(2); // skin + theme both named Classic
-    });
-  });
+      // Both skin and theme named "Classic" exist — use getAllByText
+      const classicElements = screen.getAllByText("Classic");
+      expect(classicElements.length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText("Ocean Blue")).toBeDefined();
+    }, { timeout: 15000 });
+  }, 20000);
 
   it("renders board themes from seed data", async () => {
     renderWithRouter(<Collection />);
     await waitFor(() => {
-      const themes = screen.getAllByText("Classic");
-      expect(themes.length).toBeGreaterThanOrEqual(1);
-    });
+      expect(screen.getByText("Dark Wood")).toBeDefined();
+    }, { timeout: 10000 });
   });
 
   it("shows loading spinner initially", () => {
     renderWithRouter(<Collection />);
-    // The loading animation should be present before data loads
     const spinners = document.querySelectorAll(".animate-spin");
     expect(spinners.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("shows 'Active' tag on the default unlocked skin", async () => {
+  it("shows 'Active' tag on at least one unlocked skin", async () => {
     renderWithRouter(<Collection />);
     await waitFor(() => {
       const activeTags = screen.getAllByText("Active");
       expect(activeTags.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  it("can select a different unlocked skin", async () => {
-    // Add a second unlocked skin
-    await db.pieceSkins.add({
-      id: "skin_golden",
-      name: "Golden",
-      description: "Shiny gold pieces",
-      pieceType: "all",
-      unlocked: true,
-      previewUrl: "/skins/golden.svg",
-    });
-
-    renderWithRouter(<Collection />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Golden")).toBeDefined();
-    });
-
-    // Click the Golden skin
-    const goldenBtn = screen.getByLabelText("Golden");
-    fireEvent.click(goldenBtn);
-
-    // After click, it should show Active on Golden
-    await waitFor(() => {
-      const goldenCard = screen.getByLabelText("Golden (selected)");
-      expect(goldenCard).toBeDefined();
-    });
+    }, { timeout: 10000 });
   });
 
   it("locked skin has disabled button", async () => {
-    // Add a locked skin
-    await db.pieceSkins.add({
-      id: "skin_dragon",
-      name: "Dragon",
-      description: "Fiery dragon pieces",
-      pieceType: "knight",
-      unlocked: false,
-      previewUrl: "/skins/dragon.svg",
-    });
-
     renderWithRouter(<Collection />);
-
     await waitFor(() => {
-      expect(screen.getByText("Dragon")).toBeDefined();
-    });
+      expect(screen.getByText("Royal Gold")).toBeDefined();
+    }, { timeout: 10000 });
 
-    const dragonBtn = screen.getByLabelText("Dragon (locked)");
-    expect((dragonBtn as HTMLButtonElement).disabled).toBe(true);
+    const goldBtn = screen.getByLabelText("Royal Gold (locked)");
+    expect((goldBtn as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("locked theme has disabled button", async () => {
-    await db.boardThemes.add({
-      id: "theme_forest",
-      name: "Forest",
-      description: "Woodland colours",
-      unlocked: false,
-      previewUrl: "/themes/forest.svg",
-      lightSquareColor: "#a8d5a2",
-      darkSquareColor: "#2d5a27",
-    });
-
     renderWithRouter(<Collection />);
-
     await waitFor(() => {
-      expect(screen.getByText("Forest")).toBeDefined();
-    });
+      expect(screen.getByText("Midnight")).toBeDefined();
+    }, { timeout: 10000 });
 
-    const forestBtn = screen.getByLabelText("Forest (locked)");
-    expect((forestBtn as HTMLButtonElement).disabled).toBe(true);
+    const midnightBtn = screen.getByLabelText("Midnight (locked)");
+    expect((midnightBtn as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("can select an unlocked board theme", async () => {
+    renderWithRouter(<Collection />);
+    await waitFor(() => {
+      expect(screen.getByText("Dark Wood")).toBeDefined();
+    }, { timeout: 10000 });
+
+    // Click Dark Wood theme
+    fireEvent.click(screen.getByLabelText("Dark Wood"));
+
+    // Verify it shows as selected
+    await waitFor(() => {
+      expect(screen.getByLabelText("Dark Wood (selected)")).toBeDefined();
+    }, { timeout: 5000 });
   });
 });

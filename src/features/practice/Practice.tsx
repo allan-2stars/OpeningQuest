@@ -10,6 +10,8 @@ import FeedbackBanner from "../../components/FeedbackBanner.tsx";
 import EmptyState from "../../components/EmptyState.tsx";
 import { useTrainingSession } from "../../hooks/useTrainingSession.ts";
 import { useReviewSessionStore } from "../../stores/reviewSessionStore.ts";
+import { useBoardCosmetics } from "../../hooks/useBoardCosmetics.ts";
+import { buildCustomPieces } from "./pieceRenderer.tsx";
 import { localDateString } from "../../lib/date.ts";
 import type { PracticeMode } from "../../types/domain.ts";
 import type { CSSProperties } from "react";
@@ -53,6 +55,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   } = useTrainingSession();
 
   const [boardOrientation, flipBoard] = useBoardOrientation(state?.userSide);
+  const cosmetics = useBoardCosmetics();
 
   useEffect(() => {
     if (!startedRef.current) {
@@ -220,11 +223,11 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               onSquareClick={() => {}}
               onSquareRightClick={() => {}}
               customBoardStyle={{ borderRadius: "8px", overflow: "hidden" }}
-              customDarkSquareStyle={{ backgroundColor: "#b58863" }}
-              customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
+              customDarkSquareStyle={cosmetics.darkSquareStyle}
+              customLightSquareStyle={cosmetics.lightSquareStyle}
               customSquareStyles={attemptedSquares}
               customDropSquareStyle={{}}
-              customPieces={{}}
+              customPieces={cosmetics.hasCustomPieces ? buildCustomPieces(cosmetics.pieceTint!) : {}}
               customArrows={[]}
               customPremoveDarkSquareStyle={{}}
               customPremoveLightSquareStyle={{}}
