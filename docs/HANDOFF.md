@@ -19,6 +19,78 @@ Notes:
 
 ---
 
+## TASK-017A Handoff
+
+Date:
+2026-06-10
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-017A — Stockfish Analysis Foundation
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/analysis/types.ts (created — AnalysisResult, AnalysisError, AnalysisStatus)
+- src/features/analysis/stockfishWorker.ts (created — Web Worker with UCI protocol bridge)
+- src/features/analysis/stockfish.js.d.ts (created — type declarations for stockfish.js)
+- src/features/analysis/analysisService.ts (created — AnalysisService class with worker lifecycle)
+- src/features/analysis/__tests__/analysisService.test.ts (created — 19 tests)
+- package.json (added stockfish.js@10.0.2)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (279/279 passed)
+- docker compose up --build (Vite ready on 0.0.0.0:5173, Docker serves on port 4317)
+
+Architecture:
+  UI (future)
+  ↓
+  AnalysisService (analysisService.ts)
+  ↓
+  Web Worker (stockfishWorker.ts)
+  ↓
+  Stockfish WASM (stockfish.js@10.0.2)
+
+AnalysisService:
+- Singleton instance (analysisService) — single engine reused across calls
+- startEngine() — creates Worker, initializes Stockfish via UCI, resolves on "uciok"
+- analysePosition(fen, depth) → AnalysisResult { bestMove, evaluation, depth, pv }
+- getBestMove(fen) → string
+- getEvaluation(fen) → number (centipawns)
+- stopEngine() / terminateWorker() — clean worker teardown
+- FEN validation before engine start (avoids unnecessary worker creation)
+- Timeouts: 15s for engine init, 30s for move analysis
+
+Web Worker (stockfishWorker.ts):
+- Bundled by Vite as separate chunk
+- UCI protocol bridge: init → uci → ready → position fen → go depth N → bestmove
+- Handles ucinewgame for clean position reset between requests
+- stop/quit commands for cancellation and teardown
+
+Known Issues:
+- Stockfish worker not yet wired into any UI (infrastructure only)
+- No evaluation-to-human-readable conversion (centipawns only)
+- Worker startup is lazy — first analysis call triggers engine load (~1-3s cold start)
+- No FEN cache — repeated identical positions re-analyse
+
+Next Recommended Task:
+TASK-011-daily-quests.md or TASK-013-boss-battles.md
+
+Notes:
+This is infrastructure only — no UI changes. The analysisService singleton is ready
+for future UI integration (hint buttons, move evaluation overlays, post-game analysis).
+Worker is a Vite-bundled ES module worker; stockfish.js WASM is ~3MB gzipped.
+
+---
+
 ## TASK-016 Handoff
 
 Date:
