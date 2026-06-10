@@ -205,7 +205,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
             <Chessboard
               position={state.fen}
               boardOrientation={boardOrientation as "white" | "black"}
-            boardWidth={boardWidth}
+              boardWidth={boardWidth}
               onPieceDrop={onPieceDrop}
               arePiecesDraggable={!boardLocked}
               isDraggablePiece={() => true}
