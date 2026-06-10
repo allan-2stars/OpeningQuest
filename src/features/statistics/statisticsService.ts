@@ -1,8 +1,8 @@
-import { getAllWorlds, getLessonsByWorld } from "../../lib/repositories/curriculumRepo.ts";
+import { getAllWorlds, getLessonsByWorld, getLessons } from "../../lib/repositories/curriculumRepo.ts";
 import { getAllLessonProgress } from "../../lib/repositories/lessonProgressRepo.ts";
 import { getUserProfile } from "../../lib/repositories/userProfileRepo.ts";
 import { getAllAchievements } from "../../lib/repositories/rewardsRepo.ts";
-import { getTodayQuestState } from "../../features/quests/dailyQuestService.ts";
+import { getTodayQuestStateReadOnly } from "../../features/quests/dailyQuestService.ts";
 
 const DEFAULT_USER_ID = "user_default";
 
@@ -52,45 +52,39 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const profile = await getUserProfile(DEFAULT_USER_ID);
   const progressEntries = await getAllLessonProgress();
   const worlds = await getAllWorlds();
-  const questState = await getTodayQuestState();
+  // Read-only: does not create quest rows as a side effect
+  const questState = await getTodayQuestStateReadOnly();
 
   const totalXp = profile?.totalXp ?? 0;
   const totalKeys = profile?.keys ?? 0;
 
-  // Lessons: completed means attempted or mastered
+  // Completed = player has gained at least one mastery level (not just failed attempts)
   const lessonsCompleted = progressEntries.filter(
-    (p) => p.attempts > 0 || p.perfectRuns > 0,
+    (p) => p.masteryLevel >= 1,
   ).length;
   const lessonsUnlocked = progressEntries.filter(
     (p) => p.status !== "locked",
   ).length;
   const lessonsTotal = progressEntries.length;
 
-  // Reviews: mode === "review" in progress — approximate from
-  // mastered lessons with review_due status
   const dueReviews = progressEntries.filter(
     (p) => p.status === "review_due",
   ).length;
 
-  // Reviews completed: trainingSessions table not directly accessible
-  // from repos. Use attempt count on reviewed lessons.
-  const reviewsCompleted = progressEntries.reduce(
-    (acc, p) => acc + (p.attempts > 0 ? 1 : 0),
-    0,
-  );
+  // Approximate: lessons that have entered the spaced-repetition review cycle
+  const reviewsCompleted = progressEntries.filter(
+    (p) => p.masteryLevel >= 4,
+  ).length;
 
-  // Perfect runs
   const perfectRuns = progressEntries.reduce(
     (acc, p) => acc + p.perfectRuns,
     0,
   );
 
-  // Average mastery across all lessons
   const masteryAverage = lessonsTotal > 0
     ? roundOneDecimal(progressEntries.reduce((acc, p) => acc + p.masteryLevel, 0) / lessonsTotal)
     : 0;
 
-  // Worlds
   const worldsTotal = worlds.length;
   let worldsCompleted = 0;
   for (const world of worlds) {
@@ -102,10 +96,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     if (allMastered) worldsCompleted++;
   }
 
-  // Daily quests
-  const dailyQuestsCompletedToday = questState.quests.filter(
+  const dailyQuestsCompletedToday = questState?.quests.filter(
     (q) => q.completed,
-  ).length;
+  ).length ?? 0;
 
   return {
     totalXp,
@@ -167,49 +160,51 @@ export async function getWorldProgress(): Promise<WorldProgress[]> {
 export async function getRecentActivity(): Promise<RecentActivityItem[]> {
   const items: RecentActivityItem[] = [];
 
-  // 1. Lesson completions from progress
+  // 1. Lesson and review completions — one entry per lesson (no duplicates)
   const progressEntries = await getAllLessonProgress();
-  for (const p of progressEntries) {
-    if (p.lastPracticedAt && p.attempts > 0) {
+  const activeLessons = progressEntries.filter(
+    (p) => p.lastPracticedAt && p.masteryLevel >= 1,
+  );
+
+  if (activeLessons.length > 0) {
+    const fetchedLessons = await getLessons(activeLessons.map((p) => p.lessonId));
+    const titleById = new Map(fetchedLessons.map((l) => [l.id, l.title]));
+
+    for (const p of activeLessons) {
+      const title = titleById.get(p.lessonId) ?? p.lessonId;
+      // Mastered lessons are in the review cycle → review_completed
+      // In-progress lessons → lesson_completed
+      const type: RecentActivityItem["type"] =
+        p.masteryLevel >= 4 ? "review_completed" : "lesson_completed";
       items.push({
-        id: `lesson_${p.lessonId}_${p.lastPracticedAt}`,
-        type: "lesson_completed",
-        title: p.lessonId,
-        timestamp: p.lastPracticedAt,
+        id: `${type}_${p.lessonId}_${p.lastPracticedAt}`,
+        type,
+        title,
+        timestamp: p.lastPracticedAt!,
       });
     }
   }
 
-  // 2. Review completions: same data source, filtered for mastered+reviewed lessons
-  for (const p of progressEntries) {
-    if (p.masteryLevel >= 4 && p.lastPracticedAt) {
-      items.push({
-        id: `review_${p.lessonId}_${p.lastPracticedAt}`,
-        type: "review_completed",
-        title: p.lessonId,
-        timestamp: p.lastPracticedAt,
-      });
-    }
-  }
-
-  // 3. Quest completions from daily quest progress
+  // 2. Quest completions (read-only — does not create quest rows)
   try {
-    const questState = await getTodayQuestState();
-    for (const q of questState.quests) {
-      if (q.completed && q.completedAt) {
-        items.push({
-          id: `quest_${q.questId}_${q.completedAt}`,
-          type: "quest_completed",
-          title: q.title,
-          timestamp: q.completedAt,
-        });
+    const questState = await getTodayQuestStateReadOnly();
+    if (questState) {
+      for (const q of questState.quests) {
+        if (q.completed && q.completedAt) {
+          items.push({
+            id: `quest_${q.questId}_${q.completedAt}`,
+            type: "quest_completed",
+            title: q.title,
+            timestamp: q.completedAt,
+          });
+        }
       }
     }
   } catch {
     // Quests may not be initialized yet — safe to skip
   }
 
-  // 4. Achievement unlocks
+  // 3. Achievement unlocks
   try {
     const achievements = await getAllAchievements();
     for (const a of achievements) {
@@ -226,9 +221,6 @@ export async function getRecentActivity(): Promise<RecentActivityItem[]> {
     // Safe skip
   }
 
-  // Sort newest first
   items.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-
-  // Return latest 20
   return items.slice(0, 20);
 }

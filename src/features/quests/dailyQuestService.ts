@@ -128,6 +128,18 @@ export async function getTodayQuestState(): Promise<DailyQuestState> {
   return buildState(quests, bonus);
 }
 
+/**
+ * Read today's quest state without creating rows.
+ * Safe to call from read-only contexts (e.g. statistics service).
+ * Returns null if quests have not been initialized yet.
+ */
+export async function getTodayQuestStateReadOnly(): Promise<DailyQuestState | null> {
+  const quests = await getTodayQuests();
+  if (quests.length === 0) return null;
+  const bonus = await getTodayBonus();
+  return buildState(quests, bonus);
+}
+
 /** Claim reward for a single completed quest. Returns XP awarded. */
 export async function claimQuestReward(questId: string): Promise<number> {
   const quests = await ensureTodayQuests();
@@ -170,7 +182,7 @@ export async function claimAllQuestRewards(): Promise<{
 
   // Check all-complete bonus
   const refreshedQuests = await getTodayQuests();
-  const allComplete = refreshedQuests.length === 3 && refreshedQuests.every((q) => q.completed);
+  const allComplete = refreshedQuests.length === DAILY_QUEST_DEFINITIONS.length && refreshedQuests.every((q) => q.completed);
   const allClaimed = refreshedQuests.every((q) => q.rewardClaimed);
   let bonusKey = false;
 
