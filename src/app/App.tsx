@@ -9,6 +9,7 @@ import Profile from "../features/profile/Profile";
 import Settings from "../features/settings/Settings";
 import ImportExport from "../features/import-export/ImportExport";
 import ReviewComplete from "../features/review/ReviewComplete.tsx";
+import Statistics from "../features/statistics/Statistics.tsx";
 import DesignSystem from "../features/design-system/DesignSystem";
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/import-export" element={<ImportExport />} />
         <Route path="/review/complete" element={<ReviewComplete />} />
+        <Route path="/statistics" element={<Statistics />} />
         {import.meta.env.DEV && <Route path="/design-system" element={<DesignSystem />} />}
       </Routes>
     </AppShell>

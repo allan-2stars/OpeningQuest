@@ -1,6 +1,6 @@
 # TASK-014 - Classic Mode
 
-Status: Ready
+Status: Deferred (Statistics Dashboard MVP implemented first)
 Priority: P2
 Assigned Agent: Pi Agent or Windows Agent
 

@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { to: "/profile", label: "Profile" },
   { to: "/settings", label: "Settings" },
   { to: "/import-export", label: "Import/Export" },
+  { to: "/statistics", label: "Statistics" },
   ...(import.meta.env.DEV ? [{ to: "/design-system", label: "DS" }] : []),
 ];
 

@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-013 Complete. Daily Quests MVP implemented. Next: TASK-014 Classic Mode.
+TASK-014 Complete. Statistics Dashboard MVP implemented. Next: TASK-015 Polish & PWA Release.
 
 ## Summary
 

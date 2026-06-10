@@ -19,6 +19,66 @@ Notes:
 
 ---
 
+## TASK-014 Handoff
+
+Date:
+2026-06-10
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-014 — Statistics Dashboard MVP
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/statistics/statisticsService.ts (created — getDashboardStats, getWorldProgress, getRecentActivity)
+- src/features/statistics/Statistics.tsx (created — full dashboard UI)
+- src/features/statistics/__tests__/statisticsService.test.ts (created — 12 tests)
+- src/app/App.tsx (added /statistics route)
+- src/components/AppShell.tsx (added Statistics nav entry)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (250/250 passed)
+- docker compose up --build (Vite ready, port 5173 correct)
+
+Dashboard:
+- Summary cards: Total XP, Keys, Lessons Completed, Reviews
+- Progress section: Lessons (bar), Worlds (bar), Average Mastery (bar), Due Reviews
+- World breakdown: per-world completion % bar + avg mastery
+- Daily Quests summary: X/3 completed, link to Adventure
+- Recent activity: latest 20 items with type badges and relative timestamps
+- Empty state: "Welcome to Opening Quest" for new users
+- Info banner for new users on first visit
+
+Statistics service:
+- getDashboardStats() — aggregates all lesson progress, world completion, daily quests
+- getWorldProgress() — per-world completion %, mastery average
+- getRecentActivity() — derived from progress, quests, achievements (no event log needed)
+- All read-only — no data modification
+- Handles empty user state gracefully (zeroed stats, not crashes)
+
+Known Issues:
+- reviewsCompleted is approximate (counts lessons with attempts, not dedicated review sessions)
+- Recent activity derived from existing data rather than a dedicated event log
+- Statistics page refreshes on mount only — no auto-refresh
+
+Next Recommended Task:
+TASK-015-polish-and-pwa-release.md
+
+Notes:
+Statistics dashboard is read-only and UI-independent. All data flows through repository/service
+layers. No component accesses Dexie directly.
+
+---
+
 ## TASK-013 Handoff
 
 Date:
