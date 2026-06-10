@@ -16,7 +16,7 @@ export type LessonStatus =
   | "review_due";
 
 // Practice mode selected during a training session
-export type PracticeMode = "guided" | "instinct";
+export type PracticeMode = "guided" | "instinct" | "review";
 
 // Source of an opening line
 export type LineSource = "builtin" | "user" | "imported";

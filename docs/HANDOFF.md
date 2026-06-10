@@ -19,6 +19,62 @@ Notes:
 
 ---
 
+## TASK-012 Handoff
+
+Date:
+2026-06-10
+
+Agent:
+cc Pi (Secondary Pi Agent)
+
+Task:
+TASK-012 — Review Queue MVP
+
+Branch:
+main
+
+Commit:
+(this commit)
+
+Files Changed:
+- src/features/review/reviewSchedule.ts (created — calculateNextReviewDate)
+- src/features/review/reviewService.ts (created — getDueLessons, getReviewQueue, ReviewQueueItem)
+- src/features/review/ReviewComplete.tsx (created — completion screen)
+- src/features/review/__tests__/reviewSchedule.test.ts (created — 8 tests)
+- src/features/review/__tests__/reviewService.test.ts (created — 6 tests)
+- src/stores/reviewSessionStore.ts (created — Zustand store: queue, currentIndex, totalXpEarned)
+- src/types/domain.ts (added "review" to PracticeMode)
+- src/services/processTrainingResult.ts (review mode → applyReviewResult + XP_REVIEW_SUCCESS bonus)
+- src/app/App.tsx (added /review/complete route)
+- src/features/adventure/Adventure.tsx (added Today's Training card with review count and Start Review button)
+- src/features/practice/Practice.tsx (review session banner, Next Review / Finish Review / Skip to Next buttons)
+- docs/PROJECT_STATE.md (updated status)
+
+Tests Run:
+- tsc --noEmit (passed)
+- eslint src (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (221/221 passed — 17 new tests)
+
+Review Queue MVP:
+- calculateNextReviewDate: mastery level 0–3 → 1/3/7/14 days, level 4+ → 30 days
+- getDueLessons/getReviewQueue: returns LessonProgress where masteryLevel>=4 and nextReviewAt<=now, oldest-due-first
+- reviewSessionStore: Zustand store holding queue, currentIndex, totalXpEarned, isActive
+- Adventure page: "Today's Training" card shows Review Due count, new lessons count, estimated time, "Start Review" button
+- Practice page: review session banner showing "Review Session | X of Y"; review-specific action buttons after completion
+- ReviewComplete page at /review/complete: shows lessons reviewed and XP earned
+- Review mode in processTrainingResult: calls applyReviewResult (schedules next review interval on success, applies mastery decay on 2 failed reviews) + adds XP_REVIEW_SUCCESS (50 XP) bonus on completion
+- PracticeMode type extended to "guided" | "instinct" | "review"
+
+Known Issues:
+- Review session state lives in Zustand (in-memory only). If the user refreshes mid-review, the session is lost and they return to Adventure. The queue can be reloaded and restarted.
+- "Skip to Next" on a failed review lesson advances the queue without marking the lesson as reviewed — applyReviewResult records a failed review attempt but the interval does not advance.
+
+Next Recommended Task:
+TASK-013-boss-battle.md
+
+---
+
 ## INVESTIGATION-002 — Practice Page Blank Screen Fix
 
 Date:

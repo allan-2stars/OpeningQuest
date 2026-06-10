@@ -9,6 +9,7 @@ import Card from "../../components/Card.tsx";
 import FeedbackBanner from "../../components/FeedbackBanner.tsx";
 import EmptyState from "../../components/EmptyState.tsx";
 import { useTrainingSession } from "../../hooks/useTrainingSession.ts";
+import { useReviewSessionStore } from "../../stores/reviewSessionStore.ts";
 import { localDateString } from "../../lib/date.ts";
 import type { PracticeMode } from "../../types/domain.ts";
 import type { CSSProperties } from "react";
@@ -31,7 +32,16 @@ function useBoardOrientation(userSide: string | undefined): [string, () => void]
 
 function PracticeContent({ lessonId }: { lessonId: string }) {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<PracticeMode>("guided");
+
+  // Review session state — read from Zustand store
+  const isReviewActive = useReviewSessionStore((s) => s.isActive);
+  const reviewQueue = useReviewSessionStore((s) => s.queue);
+  const reviewIndex = useReviewSessionStore((s) => s.currentIndex);
+  const advanceReview = useReviewSessionStore((s) => s.advanceReview);
+  const reviewTotal = reviewQueue.length;
+  const isLastReview = isReviewActive && reviewIndex >= reviewTotal - 1;
+
+  const [mode, setMode] = useState<PracticeMode>(isReviewActive ? "review" : "guided");
   const [showTextInput, setShowTextInput] = useState(false);
   const [textInput, setTextInput] = useState("");
   const [attemptedSquares, setAttemptedSquares] = useState<Record<string, CSSProperties>>({});
@@ -113,6 +123,16 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
     if (!trimmed || !state) return;
     handleMove(trimmed);
     setTextInput("");
+  };
+
+  const handleNextReview = () => {
+    const xp = rewardSummary?.xp ?? 0;
+    advanceReview(xp);
+    if (isLastReview) {
+      navigate("/review/complete");
+    } else {
+      navigate(`/practice/${reviewQueue[reviewIndex + 1].lessonId}`);
+    }
   };
 
   // ── render states ───────────────────────────────────────────
@@ -224,8 +244,18 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
 
         {/* Sidebar */}
         <div className="flex flex-col gap-3 w-full lg:w-72 shrink-0">
-          {/* Mode selector — only when waiting */}
-          {isReady && (
+          {/* Review session banner */}
+          {isReviewActive && (
+            <div className="rounded-lg border border-secondary/30 bg-secondary/10 px-4 py-2 flex items-center justify-between">
+              <span className="text-sm font-semibold text-secondary">Review Session</span>
+              <span className="text-xs text-text-secondary">
+                {reviewIndex + 1} of {reviewTotal}
+              </span>
+            </div>
+          )}
+
+          {/* Mode selector — only when waiting, not in review mode */}
+          {isReady && !isReviewActive && (
             <Card>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-semibold text-text-secondary">Mode:</span>
@@ -419,7 +449,18 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
           {rewardError && <FeedbackBanner type="warning" message={rewardError} />}
 
           {/* ════════════ ACTION BUTTONS ════════════ */}
-          {isComplete && (
+          {isComplete && isReviewActive && (
+            <div className="flex flex-col gap-1">
+              <Button onClick={handleNextReview}>
+                {isLastReview ? "Finish Review" : "Next Review"}
+              </Button>
+              <Button variant="ghost" onClick={goToAdventure}>
+                Back to Adventure
+              </Button>
+            </div>
+          )}
+
+          {isComplete && !isReviewActive && (
             <div className="flex flex-col gap-1">
               <Button onClick={restart}>Practice Again</Button>
               <Button
@@ -434,7 +475,19 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
             </div>
           )}
 
-          {isFailed && (
+          {isFailed && isReviewActive && (
+            <div className="flex flex-col gap-1">
+              <Button onClick={restart}>Try Again</Button>
+              <Button variant="secondary" onClick={handleNextReview}>
+                {isLastReview ? "Finish Review" : "Skip to Next"}
+              </Button>
+              <Button variant="ghost" onClick={goToAdventure}>
+                Back to Adventure
+              </Button>
+            </div>
+          )}
+
+          {isFailed && !isReviewActive && (
             <div className="flex flex-col gap-1">
               <Button onClick={restart}>Try Again</Button>
               <Button

@@ -1,15 +1,31 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PageShell from "../../components/PageShell.tsx";
 import WorldCard from "../../components/WorldCard.tsx";
 import LessonNode from "../../components/LessonNode.tsx";
 import FeedbackBanner from "../../components/FeedbackBanner.tsx";
 import EmptyState from "../../components/EmptyState.tsx";
+import Card from "../../components/Card.tsx";
+import Button from "../../components/Button.tsx";
 import { useAdventureMap } from "../../hooks/useAdventureMap.ts";
 import type { MapWorld } from "../../hooks/useAdventureMap.ts";
+import { getDueLessons } from "../../features/review/reviewService.ts";
+import type { ReviewQueueItem } from "../../features/review/reviewService.ts";
+import { useReviewSessionStore } from "../../stores/reviewSessionStore.ts";
 
 export default function Adventure() {
   const navigate = useNavigate();
   const { worlds, selectedWorldId, selectWorld, isLoading, error } = useAdventureMap();
+  const startReview = useReviewSessionStore((s) => s.startReview);
+  const [reviewQueue, setReviewQueue] = useState<ReviewQueueItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getDueLessons()
+      .then((items) => { if (!cancelled) setReviewQueue(items); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const selectedWorld = worlds.find((w) => w.world.id === selectedWorldId) ?? null;
 
@@ -43,8 +59,44 @@ export default function Adventure() {
     );
   }
 
+  // Count available (unlocked, not-yet-started) lessons across all worlds
+  const newLessonsCount = worlds.reduce((acc, mw) => {
+    if (!mw.unlocked) return acc;
+    return acc + mw.nodes.filter((n) => n.status === "available").length;
+  }, 0);
+
+  const handleStartReview = () => {
+    startReview(reviewQueue);
+    navigate(`/practice/${reviewQueue[0].lessonId}`);
+  };
+
   return (
     <PageShell title="Adventure">
+      {/* Today's Training card */}
+      <Card className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-text-primary">Today's Training</p>
+            <p className="text-xs text-text-secondary">
+              Review Due: <span className="font-semibold text-text-primary">{reviewQueue.length}</span>
+              {newLessonsCount > 0 && (
+                <> &nbsp;·&nbsp; New Lessons: <span className="font-semibold text-text-primary">{newLessonsCount}</span></>
+              )}
+              {reviewQueue.length > 0 && (
+                <> &nbsp;·&nbsp; Est. Time: <span className="font-semibold text-text-primary">~{reviewQueue.length * 2} min</span></>
+              )}
+            </p>
+          </div>
+          <Button
+            size="sm"
+            disabled={reviewQueue.length === 0}
+            onClick={handleStartReview}
+          >
+            Start Review
+          </Button>
+        </div>
+      </Card>
+
       {/* World selector */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 mb-8">
         {worlds.map((mw) => (

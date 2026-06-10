@@ -1,8 +1,9 @@
 import type { TrainingSessionResult } from "../features/training/types.ts";
 import type { LessonProgress } from "../types/domain.ts";
 import { getLessonProgress, upsertLessonProgress } from "../lib/repositories/lessonProgressRepo.ts";
-import { applyTrainingResult } from "./progressionEngine.ts";
+import { applyTrainingResult, applyReviewResult } from "./progressionEngine.ts";
 import { applyRewards } from "./rewardService.ts";
+import { XP_REVIEW_SUCCESS } from "./rewardCalculator.ts";
 import type { RewardSummary } from "./rewardCalculator.ts";
 import { nowISO } from "../lib/date.ts";
 
@@ -28,7 +29,10 @@ export async function processTrainingResult(
   const existing = await getLessonProgress(result.lessonId);
   const oldProgress = existing ?? makeStubProgress(result.lessonId);
   const now = nowISO();
-  const updated = applyTrainingResult(oldProgress, result, now);
+  const updated =
+    result.mode === "review"
+      ? applyReviewResult(oldProgress, result.completed, now)
+      : applyTrainingResult(oldProgress, result, now);
   await upsertLessonProgress(updated);
 
   // Apply rewards (best-effort — we report errors rather than swallowing them)
@@ -38,6 +42,11 @@ export async function processTrainingResult(
     rewardSummary = await applyRewards(result, oldProgress, updated);
   } catch (e) {
     rewardError = e instanceof Error ? e.message : "Failed to apply rewards";
+  }
+
+  // Add review-session XP bonus on top of regular session rewards
+  if (result.mode === "review" && result.completed && rewardSummary) {
+    rewardSummary = { ...rewardSummary, xp: rewardSummary.xp + XP_REVIEW_SUCCESS };
   }
 
   return { progress: updated, rewardSummary, rewardError };
