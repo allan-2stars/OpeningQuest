@@ -104,7 +104,7 @@ describe("AnalysisPage", () => {
 
   it("shows analysis result when engine resolves", async () => {
     const { analysisService } = await import("../analysisService.ts");
-    analysisService.analysePosition.mockResolvedValue({
+    vi.mocked(analysisService.analysePosition).mockResolvedValue({
       bestMove: "e2e4",
       evaluation: 38,
       depth: 12,
@@ -126,7 +126,7 @@ describe("AnalysisPage", () => {
 
   it("shows error message on engine failure", async () => {
     const { analysisService } = await import("../analysisService.ts");
-    analysisService.analysePosition.mockRejectedValue(new Error("Engine timeout"));
+    vi.mocked(analysisService.analysePosition).mockRejectedValue(new Error("Engine timeout"));
 
     renderPage();
     fireEvent.click(screen.getByText("Load Starting Position"));
@@ -142,7 +142,7 @@ describe("AnalysisPage", () => {
   it("disables Analyse button while analysing", async () => {
     const { analysisService } = await import("../analysisService.ts");
     // Don't ever resolve the promise — keeps analysing state alive
-    analysisService.analysePosition.mockReturnValue(new Promise(() => {}));
+    vi.mocked(analysisService.analysePosition).mockReturnValue(new Promise(() => {}));
 
     renderPage();
     fireEvent.click(screen.getByText("Load Starting Position"));
@@ -170,7 +170,7 @@ describe("AnalysisPage", () => {
 
   it("displays error banner for bad FEN", async () => {
     const { analysisService } = await import("../analysisService.ts");
-    analysisService.analysePosition.mockRejectedValue(new Error("Bad FEN"));
+    vi.mocked(analysisService.analysePosition).mockRejectedValue(new Error("Bad FEN"));
 
     renderPage();
     fireEvent.click(screen.getByText("Start Engine"));

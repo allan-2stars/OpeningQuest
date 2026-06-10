@@ -16,7 +16,7 @@ engine.onmessage = (event: { data?: string } | string) => {
   const line = typeof event === "string" ? event : (event.data ?? "");
   if (typeof line !== "string" || !line) return;
 
-  if (line.startsWith("uciok")) {
+  if (line.startsWith("uciok") && !isReady) {
     isReady = true;
     self.postMessage({ type: "ready" });
   } else if (line.startsWith("bestmove")) {
@@ -48,5 +48,3 @@ self.onmessage = (event: MessageEvent<WorkerCommand>) => {
   }
 };
 
-// Start init immediately
-engine.postMessage("uci");

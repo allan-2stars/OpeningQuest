@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import PageShell from "../../components/PageShell.tsx";
 import Card from "../../components/Card.tsx";
 import Button from "../../components/Button.tsx";
@@ -26,6 +26,15 @@ export default function AnalysisPage() {
   const [errorText, setErrorText] = useState<string | null>(null);
   const [analysing, setAnalysing] = useState(false);
   const statusTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (statusTimerRef.current) {
+        clearInterval(statusTimerRef.current);
+        statusTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const updateStatus = () => {
     setStatus(analysisService.getStatus());

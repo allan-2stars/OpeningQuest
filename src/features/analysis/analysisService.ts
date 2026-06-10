@@ -21,6 +21,7 @@ export class AnalysisService {
   private pending: PendingRequest | null = null;
   private readyPromise: Promise<void> | null = null;
   private readyResolve: (() => void) | null = null;
+  private lastInfo: { depth: number; cp: number; pv: string[] } | null = null;
 
   /** Start the engine and wait for it to be ready. */
   startEngine(): Promise<void> {
@@ -60,6 +61,7 @@ export class AnalysisService {
         const msg = event.data;
         if (msg?.type === "ready") {
           this.readyResolve?.();
+          this.readyResolve = null;
           return;
         }
         this.handleEngineMessage(msg);
@@ -67,6 +69,7 @@ export class AnalysisService {
 
       this.worker!.onerror = () => {
         clearTimeout(timeout);
+        this.cancelPending();
         this.status = "error";
         reject({
           type: "engine_error",
@@ -164,6 +167,7 @@ export class AnalysisService {
         message: "Request cancelled.",
       } satisfies AnalysisError);
       this.pending = null;
+      this.lastInfo = null;
     }
     if (this.status === "analysing") {
       try { this.worker?.postMessage({ type: "stop" }); } catch { /* ignore */ }
@@ -183,11 +187,13 @@ export class AnalysisService {
       clearTimeout(this.pending.timer);
       this.status = "ready";
 
+      const info = this.lastInfo;
+      this.lastInfo = null;
       this.pending.resolve({
         bestMove,
-        evaluation: 0, // no info line before bestmove
-        depth: 0,
-        pv: [],
+        evaluation: info?.cp ?? 0,
+        depth: info?.depth ?? 0,
+        pv: info?.pv ?? [],
       });
       this.pending = null;
     } else if (msg.type === "info") {
@@ -222,10 +228,7 @@ export class AnalysisService {
     }
 
     if (cp !== undefined && depth > 0) {
-      // Got a usable info line — use it as the final result
-      // (multiple info lines arrive — last one with cp is most complete)
-      // We don't resolve here — we wait for bestmove — but we update
-      // the last-known info for the eventual bestmove handler.
+      this.lastInfo = { depth, cp, pv };
     }
   }
 }
