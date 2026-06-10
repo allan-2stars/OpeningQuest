@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import PageShell from "../../components/PageShell.tsx";
@@ -21,7 +21,6 @@ const STATUS_LABELS: Record<string, string> = {
   failed: "Run Failed",
 };
 
-// Initial orientation from lesson side, but user can flip
 function useBoardOrientation(userSide: string | undefined): [string, () => void] {
   const [flipped, setFlipped] = useState(false);
   const base = userSide === "black" ? "black" : "white";
@@ -31,14 +30,17 @@ function useBoardOrientation(userSide: string | undefined): [string, () => void]
 }
 
 function PracticeContent({ lessonId }: { lessonId: string }) {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<PracticeMode>("guided");
   const [showTextInput, setShowTextInput] = useState(false);
   const [textInput, setTextInput] = useState("");
   const [attemptedSquares, setAttemptedSquares] = useState<Record<string, CSSProperties>>({});
   const startedRef = useRef(false);
 
-  const { state, lessonTitle, isLoading, error, handleMove, expectedSan, result, resultProgress, rewardSummary, rewardError, startSession } =
-    useTrainingSession();
+  const {
+    state, lessonTitle, isLoading, error, handleMove, expectedSan,
+    result, resultProgress, rewardSummary, rewardError, startSession,
+  } = useTrainingSession();
 
   const [boardOrientation, flipBoard] = useBoardOrientation(state?.userSide);
 
@@ -50,7 +52,6 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Clear attempted-square highlights after a delay
   useEffect(() => {
     if (Object.keys(attemptedSquares).length === 0) return;
     const timer = setTimeout(() => setAttemptedSquares({}), 1200);
@@ -60,6 +61,9 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   const onPieceDrop = useCallback(
     (sourceSquare: string, targetSquare: string): boolean => {
       if (!state) return false;
+
+      const isTerminal = state.status === "complete" || state.status === "failed";
+      if (isTerminal) return false;
 
       try {
         const chess = new Chess(state.fen);
@@ -111,6 +115,8 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
     setTextInput("");
   };
 
+  // ── render states ───────────────────────────────────────────
+
   if (isLoading) {
     return (
       <PageShell title="Practice">
@@ -125,8 +131,13 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
     return (
       <PageShell title="Practice">
         <FeedbackBanner type="error" message={error} />
-        <div className="mt-4">
-          <Button variant="secondary" onClick={() => { startedRef.current = false; startSession(lessonId, mode); }}>Retry</Button>
+        <div className="mt-4 flex gap-2">
+          <Button variant="secondary" onClick={() => { startedRef.current = false; startSession(lessonId, mode); }}>
+            Retry
+          </Button>
+          <Button variant="ghost" onClick={() => navigate("/adventure")}>
+            Back to Adventure
+          </Button>
         </div>
       </PageShell>
     );
@@ -135,29 +146,40 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
   if (!state) {
     return (
       <PageShell title="Practice">
-        <EmptyState icon="♟" title="Unable to load lesson" />
+        <EmptyState
+          icon="♟"
+          title="Unable to load lesson"
+          actionLabel="Back to Adventure"
+          onAction={() => navigate("/adventure")}
+        />
       </PageShell>
     );
   }
 
+  // ── derived state ────────────────────────────────────────────
+
   const isTerminal = state.status === "complete" || state.status === "failed";
-  const isWaiting = state.status === "waiting";
-  const canSwitchMode = isWaiting;
+  const isComplete = state.status === "complete";
+  const isFailed = state.status === "failed";
+  const isReady = state.status === "waiting";
+
+  // Board is interactive only when session is active (not terminal, not loading, not error)
+  const boardLocked = isTerminal;
+  const boardWidth = typeof window !== "undefined"
+    ? Math.max(200, Math.min(560, window.innerWidth - 48))
+    : 480;
+
   const restart = () => {
     startedRef.current = false;
     startSession(lessonId, mode);
   };
 
-  // Determine if pieces should be draggable
-  const piecesDraggable = !isTerminal;
-  const boardWidth = typeof window !== "undefined"
-    ? Math.max(200, Math.min(560, window.innerWidth - 48))
-    : 480;
+  const goToAdventure = () => navigate("/adventure");
 
   return (
     <PageShell title={lessonTitle ?? "Practice"}>
       <div className="flex flex-col lg:flex-row gap-4 max-w-5xl">
-        {/* Chessboard — central, large */}
+        {/* Chessboard */}
         <div className="flex-1 flex flex-col items-center">
           <div className="w-full max-w-[560px]">
             <Chessboard
@@ -165,7 +187,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               boardOrientation={boardOrientation as "white" | "black"}
               boardWidth={boardWidth}
               onPieceDrop={onPieceDrop}
-              arePiecesDraggable={piecesDraggable}
+              arePiecesDraggable={!boardLocked}
               isDraggablePiece={() => true}
               getPositionObject={() => {}}
               onArrowsChange={() => {}}
@@ -189,55 +211,65 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               animationDuration={200}
               showBoardNotation
             />
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
               <Button size="sm" variant="ghost" onClick={flipBoard}>
                 Flip Board
               </Button>
               <span className="text-xs text-text-muted">
-                Playing as {boardOrientation === "white" ? "White" : "Black"} (lesson: {state.userSide})
+                Playing as {boardOrientation === "white" ? "White" : "Black"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Sidebar — controls, feedback, results */}
+        {/* Sidebar */}
         <div className="flex flex-col gap-3 w-full lg:w-72 shrink-0">
-          {/* Mode selector */}
-          <Card>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-semibold text-text-secondary">Mode:</span>
-              <Button
-                size="sm"
-                variant={mode === "guided" ? "primary" : "ghost"}
-                onClick={() => { if (canSwitchMode) switchMode("guided"); }}
-                disabled={!canSwitchMode}
-              >
-                Guided
-              </Button>
-              <Button
-                size="sm"
-                variant={mode === "instinct" ? "primary" : "ghost"}
-                onClick={() => { if (canSwitchMode) switchMode("instinct"); }}
-                disabled={!canSwitchMode}
-              >
-                Instinct
-              </Button>
-            </div>
-          </Card>
+          {/* Mode selector — only when waiting */}
+          {isReady && (
+            <Card>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-text-secondary">Mode:</span>
+                <Button
+                  size="sm"
+                  variant={mode === "guided" ? "primary" : "ghost"}
+                  onClick={() => switchMode("guided")}
+                >
+                  Guided
+                </Button>
+                <Button
+                  size="sm"
+                  variant={mode === "instinct" ? "primary" : "ghost"}
+                  onClick={() => switchMode("instinct")}
+                >
+                  Instinct
+                </Button>
+              </div>
+            </Card>
+          )}
 
-          {/* Progress */}
+          {/* Progress — always visible during active session */}
           <Card>
             <div className="text-sm space-y-1">
               <p className="text-text-secondary">
-                Move {state.userMoveCount + 1} of {state.totalUserMoves}
+                {isTerminal
+                  ? `Completed ${state.userMoveCount} of ${state.totalUserMoves} moves`
+                  : `Your move: ${state.userMoveCount + 1} of ${state.totalUserMoves}`}
               </p>
-              <Badge variant={state.status === "complete" ? "success" : state.status === "failed" ? "error" : "default"}>
+              <Badge
+                variant={
+                  isComplete
+                    ? "success"
+                    : isFailed
+                    ? "error"
+                    : "default"
+                }
+              >
                 {STATUS_LABELS[state.status] ?? state.status}
               </Badge>
             </div>
           </Card>
 
-          {/* Text input fallback (collapsed by default) */}
+          {/* Text input fallback */}
           <div>
             <button
               className="text-xs text-text-muted hover:text-text-secondary underline mb-1"
@@ -263,77 +295,131 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
             )}
           </div>
 
-          {/* Feedback from last move */}
+          {/* Move feedback */}
           {state.lastFeedback && (
             <FeedbackBanner
-              type={state.lastFeedback.correct ? "success" : state.lastFeedback.legal ? (state.mode === "guided" ? "warning" : "error") : "error"}
+              type={
+                state.lastFeedback.correct
+                  ? "success"
+                  : state.lastFeedback.legal
+                  ? state.mode === "guided"
+                    ? "warning"
+                    : "error"
+                  : "error"
+              }
               message={state.lastFeedback.message}
               dismissible
             />
           )}
 
-          {/* Session result */}
-          {result && (
-            <Card header="Session Result">
+          {/* ════════════ COMPLETION PANEL ════════════ */}
+          {isComplete && result && (
+            <Card
+              header={
+                result.perfectRun
+                  ? "✨ Perfect Run!"
+                  : "Lesson Complete"
+              }
+            >
               <div className="space-y-1 text-xs">
-                <p><span className="text-text-muted">Completed:</span>{" "}
-                  <Badge variant={result.completed ? "success" : "error"} size="sm">{result.completed ? "Yes" : "No"}</Badge>
+                <p>
+                  <Badge variant="success" size="sm">Completed</Badge>
                 </p>
-                <p><span className="text-text-muted">Mistakes:</span>{" "}
-                  <span className="text-text-primary font-semibold">{result.mistakes}</span>
-                </p>
-                <p><span className="text-text-muted">Perfect Run:</span>{" "}
-                  <Badge variant={result.perfectRun ? "success" : "default"} size="sm">{result.perfectRun ? "Yes" : "No"}</Badge>
-                </p>
+                {result.mistakes > 0 && (
+                  <p>
+                    <span className="text-text-muted">Mistakes: </span>
+                    <span className="text-text-primary font-semibold">{result.mistakes}</span>
+                  </p>
+                )}
                 {resultProgress && (
                   <>
                     <hr className="border-slate-700 my-1" />
-                    <p><span className="text-text-muted">Total PRs:</span>{" "}
+                    <p>
+                      <span className="text-text-muted">Perfect Runs: </span>
                       <span className="text-text-primary font-semibold">{resultProgress.perfectRuns}</span>
                     </p>
-                    <p><span className="text-text-muted">Mastery:</span>{" "}
-                      <Badge variant={resultProgress.masteryLevel >= 4 ? "success" : resultProgress.masteryLevel >= 1 ? "secondary" : "default"} size="sm">
-                        {resultProgress.masteryLevel}
+                    <p>
+                      <span className="text-text-muted">Mastery: </span>
+                      <Badge
+                        variant={
+                          resultProgress.masteryLevel >= 4
+                            ? "success"
+                            : resultProgress.masteryLevel >= 1
+                            ? "secondary"
+                            : "default"
+                        }
+                        size="sm"
+                      >
+                        Lv {resultProgress.masteryLevel}
                       </Badge>
                     </p>
                     {resultProgress.masteryLevel >= 4 && resultProgress.nextReviewAt && (
-                      <p><span className="text-text-muted">Next Review:</span>{" "}
-                        <span className="text-text-primary font-semibold">{localDateString(new Date(resultProgress.nextReviewAt))}</span>
+                      <p>
+                        <span className="text-text-muted">Next Review: </span>
+                        <span className="text-text-primary font-semibold">
+                          {localDateString(new Date(resultProgress.nextReviewAt))}
+                        </span>
+                      </p>
+                    )}
+                    {resultProgress.masteryLevel >= 4 && (
+                      <p>
+                        <Badge variant="success" size="sm">Mastered!</Badge>
                       </p>
                     )}
                   </>
                 )}
               </div>
+              {rewardSummary &&
+                (rewardSummary.xp > 0 ||
+                  rewardSummary.keys > 0 ||
+                  rewardSummary.unlockedAchievementIds.length > 0) && (
+                  <div className="mt-2 pt-2 border-t border-slate-700 space-y-1 text-xs">
+                    {rewardSummary.xp > 0 && (
+                      <p>
+                        <span className="text-secondary font-bold">
+                          +{rewardSummary.xp} XP
+                        </span>
+                      </p>
+                    )}
+                    {rewardSummary.keys > 0 && (
+                      <p>
+                        <span className="text-warning font-bold">
+                          +{rewardSummary.keys} Key{rewardSummary.keys > 1 ? "s" : ""}
+                        </span>
+                      </p>
+                    )}
+                    {rewardSummary.unlockedAchievementIds.map((id) => (
+                      <p key={id}>
+                        <Badge variant="success" size="sm">
+                          New Achievement!
+                        </Badge>
+                      </p>
+                    ))}
+                  </div>
+                )}
             </Card>
           )}
 
-          {/* Reward summary */}
-          {rewardSummary && (rewardSummary.xp > 0 || rewardSummary.keys > 0 || rewardSummary.unlockedAchievementIds.length > 0) && (
-            <Card header="Rewards">
+          {/* ════════════ FAILED PANEL ════════════ */}
+          {isFailed && result && (
+            <Card header="Run Failed">
               <div className="space-y-1 text-xs">
-                {rewardSummary.xp > 0 && (
-                  <p><span className="text-text-muted">XP Earned:</span>{" "}
-                    <span className="text-secondary font-bold">+{rewardSummary.xp} XP</span>
-                  </p>
-                )}
-                {rewardSummary.keys > 0 && (
-                  <p><span className="text-text-muted">Keys Earned:</span>{" "}
-                    <span className="text-warning font-bold">+{rewardSummary.keys}</span>
-                  </p>
-                )}
-                {rewardSummary.unlockedAchievementIds.map((id) => (
-                  <p key={id}><Badge variant="success" size="sm">New Achievement!</Badge></p>
-                ))}
+                <p>
+                  <Badge variant="error" size="sm">Failed</Badge>
+                </p>
+                <p>
+                  <span className="text-text-muted">Mistakes: </span>
+                  <span className="text-text-primary font-semibold">{result.mistakes}</span>
+                </p>
               </div>
             </Card>
           )}
 
-          {rewardError && (
-            <FeedbackBanner type="warning" message={rewardError} />
-          )}
+          {/* Reward persistence error */}
+          {rewardError && <FeedbackBanner type="warning" message={rewardError} />}
 
-          {/* Restart */}
-          {isTerminal && (
+          {/* ════════════ ACTION BUTTONS ════════════ */}
+          {isComplete && (
             <div className="flex flex-col gap-1">
               <Button onClick={restart}>Practice Again</Button>
               <Button
@@ -341,6 +427,24 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
                 onClick={() => switchMode(mode === "guided" ? "instinct" : "guided")}
               >
                 Switch to {mode === "guided" ? "Instinct" : "Guided"}
+              </Button>
+              <Button variant="ghost" onClick={goToAdventure}>
+                Back to Adventure
+              </Button>
+            </div>
+          )}
+
+          {isFailed && (
+            <div className="flex flex-col gap-1">
+              <Button onClick={restart}>Try Again</Button>
+              <Button
+                variant="secondary"
+                onClick={() => switchMode(mode === "guided" ? "instinct" : "guided")}
+              >
+                Switch to {mode === "guided" ? "Instinct" : "Guided"}
+              </Button>
+              <Button variant="ghost" onClick={goToAdventure}>
+                Back to Adventure
               </Button>
             </div>
           )}
