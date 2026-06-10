@@ -28,7 +28,7 @@ Agent:
 Windows Agent (cc DS)
 
 Task:
-INVESTIGATION-002 — Practice Page Blank Screen Bug Fix
+INVESTIGATION-002 — Practice Page Blank Screen Bug Fix (react-chessboard React 19 defaultProps)
 
 Branch:
 main
@@ -37,25 +37,26 @@ Commit:
 N/A (pending)
 
 Files Changed:
-- src/features/practice/Practice.tsx (added isDraggablePiece prop + boardWidth guard)
+- src/features/practice/Practice.tsx (pass all 11 function-valued + 1 object-valued props react-chessboard expects via defaultProps)
 - src/features/practice/__tests__/Practice.test.tsx (created — 3 integration tests)
-- docs/investigations/INVESTIGATION-002-practice-page-blank-screen.md (created)
+- docs/investigations/INVESTIGATION-002-practice-page-blank-screen.md (created + updated)
 
 Root Cause:
-react-chessboard 1.3.1 + React 19 defaultProps incompatibility. React 19 ignores
-defaultProps on function components. When isDraggablePiece is not explicitly passed,
-react-chessboard's internal useDrag collector calls undefined(piece), throwing
-TypeError during the render phase. This unmounts the entire React tree, leaving
-only the dark body background visible.
+React 19 ignores all defaultProps on function components. react-chessboard 1.3.1 defines
+12 defaultProps (11 functions + 1 object) that its internal render and effect hooks call
+unconditionally. When ANY of these is undefined due to defaultProps not being applied,
+the corresponding call — isDraggablePiece(piece), onArrowsChange(arrows),
+getPositionObject(pos), etc. — throws TypeError during render, unmounting the entire
+React tree and leaving only a blank screen.
+
+The first fix covered 2 of 12 defaults. The complete fix passes all 12 explicitly.
 
 Fix:
-1. Pass isDraggablePiece={() => true} explicitly to <Chessboard>
-2. Guard boardWidth with Math.max(200, ...) against edge case zero/negative values
-
-Tests Added:
-- renders Italian Main Line title after lesson loads
-- shows Flip Board button after chessboard renders successfully
-- shows mode selector (Guided/Instinct) after loading
+All 12 react-chessboard defaultProps are now passed explicitly:
+  isDraggablePiece, getPositionObject, onArrowsChange, onDragOverSquare,
+  onMouseOutSquare, onMouseOverSquare, onPieceClick, onPieceDragBegin,
+  onPieceDragEnd, onSquareClick, onSquareRightClick, customDropSquareStyle.
+Also guards boardWidth with Math.max(200, ...) belt-and-suspenders.
 
 Tests Run:
 - tsc -b (passed)
@@ -65,21 +66,16 @@ Tests Run:
 - docker compose up --build (HTTP 200 at /, /adventure, /practice/:lessonId)
 
 Known Issues:
-- react-chessboard 1.3.1 has full defaultProps incompatibility with React 19 (8+ props
-  affected: isDraggablePiece, customBoardStyle, customDarkSquareStyle, customLightSquareStyle,
-  customSquareStyles, customDropSquareStyle, dropOffBoardAction, snapToCursor).
-  All must be passed explicitly.
-- No error boundary in the app — any render-phase crash unmounts the entire tree
-  without showing an error UI to the user
+- react-chessboard 1.3.1 has full defaultProps incompatibility with React 19. Any
+  future use of <Chessboard> must pass ALL function-valued defaultProps explicitly.
+- No ErrorBoundary in the app — any render-phase crash unmounts the entire tree.
 
 Next Recommended Task:
 TASK-012-review-system.md
 
 Notes:
-The Chessboard integration test in Practice.test.tsx verifies the full rendering pipeline:
-seed → repository → hook → component → chessboard. The Flip Board button only renders
-after the chessboard mounts successfully, making it a reliable proxy for chessboard health.
-See docs/investigations/INVESTIGATION-002 for full investigation chain.
+See docs/investigations/INVESTIGATION-002 for full investigation chain, reproduction
+steps, crash traces, and the complete table of 12 affected defaultProps.
 
 ---
 

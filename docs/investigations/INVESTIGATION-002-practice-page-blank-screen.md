@@ -66,18 +66,27 @@ Conversely, passing `isDraggablePiece` explicitly fixes the crash:
 
 ## Fix
 
-Two changes:
-
-1. **File: `src/features/practice/Practice.tsx`** — Pass `isDraggablePiece` explicitly to `<Chessboard>`:
+**React 19 ignores ALL defaultProps on function components, not just `isDraggablePiece`.** Every function-valued default must be passed explicitly. The fix passes all 11 no-op handlers:
 
 ```tsx
 <Chessboard
   ...
   isDraggablePiece={() => true}
+  getPositionObject={() => {}}
+  onArrowsChange={() => {}}
+  onDragOverSquare={() => {}}
+  onMouseOutSquare={() => {}}
+  onMouseOverSquare={() => {}}
+  onPieceClick={() => {}}
+  onPieceDragBegin={() => {}}
+  onPieceDragEnd={() => {}}
+  onSquareClick={() => {}}
+  onSquareRightClick={() => {}}
+  customDropSquareStyle={{}}
 />
 ```
 
-2. **File: `src/features/practice/Practice.tsx`** — Guard `boardWidth` against degenerate values (belt-and-suspenders):
+Also guards `boardWidth` against degenerate values:
 
 ```tsx
 const boardWidth = typeof window !== "undefined"
@@ -85,14 +94,27 @@ const boardWidth = typeof window !== "undefined"
   : 480;
 ```
 
-## Regression Risk
+### Affected defaultProps (React 19 ignores all of these)
 
-Low. Both changes are purely additive:
-- `isDraggablePiece={() => true}` means all pieces are draggable, which matches the existing `arePiecesDraggable` behavior
-- The `Math.max(200, ...)` guard ensures boardWidth is never below 200px even in edge cases
+| Prop | Default | React 19 behavior |
+|------|---------|-------------------|
+| `isDraggablePiece` | `(args) => boolean` | **Crash** — `undefined(piece)` in useDrag collector |
+| `getPositionObject` | `(pos) => {}` | **Crash** — `undefined()` in passive effect |
+| `onArrowsChange` | `(arrows) => {}` | **Crash** — `undefined(arrows)` in passive effect |
+| `onDragOverSquare` | `(sq) => {}` | **Crash** — `undefined(sq)` in drag handler |
+| `onMouseOutSquare` | `(sq) => {}` | **Crash** — `undefined(sq)` in hover handler |
+| `onMouseOverSquare` | `(sq) => {}` | **Crash** — `undefined(sq)` in hover handler |
+| `onPieceClick` | `(piece) => {}` | **Crash** — `undefined(piece)` in click handler |
+| `onPieceDragBegin` | `(piece, sq) => {}` | **Crash** — `undefined()` in drag handler |
+| `onPieceDragEnd` | `(piece, sq) => {}` | **Crash** — `undefined()` in drag handler |
+| `onSquareClick` | `(sq) => {}` | **Crash** — `undefined(sq)` in click handler |
+| `onSquareRightClick` | `(sq) => {}` | **Crash** — `undefined(sq)` in right-click handler |
+| `customDropSquareStyle` | `{ boxShadow: ... }` | **Crash** — reading property of `undefined` |
 
-## Tests Added
+### First fix (partial — covered only 2 of 12)
 
-- Regression test: Practice page renders chessboard without crash
-- Regression test: Italian Main Line title appears after load
-- Chessboard smoke test with explicit `isDraggablePiece` prop
+The initial INVESTIGATION-002 fix added only `isDraggablePiece` and `getPositionObject`. This resolved the initial render crash, but `onArrowsChange`, `onDragOverSquare`, and the other defaults were still undefined. On any interaction that triggered one of those callbacks (hover, drag, mouse), the component crashed with the next missing function.
+
+### Complete fix
+
+All 11 function-valued defaultProps + 1 object-valued defaultProp are now passed explicitly as empty no-op functions / empty objects.

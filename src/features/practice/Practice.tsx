@@ -168,10 +168,20 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               arePiecesDraggable={piecesDraggable}
               isDraggablePiece={() => true}
               getPositionObject={() => {}}
+              onArrowsChange={() => {}}
+              onDragOverSquare={() => {}}
+              onMouseOutSquare={() => {}}
+              onMouseOverSquare={() => {}}
+              onPieceClick={() => {}}
+              onPieceDragBegin={() => {}}
+              onPieceDragEnd={() => {}}
+              onSquareClick={() => {}}
+              onSquareRightClick={() => {}}
               customBoardStyle={{ borderRadius: "8px", overflow: "hidden" }}
               customDarkSquareStyle={{ backgroundColor: "#b58863" }}
               customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
               customSquareStyles={attemptedSquares}
+              customDropSquareStyle={{}}
               animationDuration={200}
               showBoardNotation
             />
