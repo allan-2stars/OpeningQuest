@@ -19,7 +19,69 @@ Notes:
 
 ---
 
-## TASK-017A Handoff
+## TASK-017B Handoff
+
+Date:
+2026-06-10
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-017B — Analysis Debug Screen
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/analysis/AnalysisPage.tsx (created — developer-facing analysis debug page)
+- src/features/analysis/__tests__/AnalysisPage.test.tsx (created — 14 tests)
+- src/app/App.tsx (added /analysis route, DEV-guarded)
+- src/components/AppShell.tsx (added Analysis nav link, DEV-guarded)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (293/293 passed)
+- docker compose up --build (Vite ready, /analysis serves React app)
+
+Analysis Debug Page (/analysis — DEV-only):
+- Engine lifecycle controls: Start Engine / Stop Engine buttons
+- FEN input textarea with Load Starting Position and Clear buttons
+- Analyse button initiates Stockfish analysis
+- Analysis Output card showing: Status, Depth, Evaluation (centipawns),
+  Best Move, and Principal Variation (PV)
+- Engine status badge: Not Started / Starting... / Ready / Analysing... / Error / Stopped
+- Worker running indicator
+- Loading state: textarea changes disable, button shows "Analysing..."
+- Error handling: invalid FEN, engine timeout, worker failure
+- Empty state prompt before any analysis
+
+Tests (all mocked — no Stockfish execution):
+- Page title, engine controls, position controls render
+- Load Starting Position fills FEN textarea
+- Clear empties textarea
+- Start Engine transitions to Ready status
+- Stdin shows empty state prompt
+- Analysis result displays bestMove, evaluation, depth, PV
+- Error messages display on engine failure
+- Analysing state shows multiple indicators
+- Stop Engine transitions to Stopped status
+- Bad FEN error banner displays
+
+Known Issues:
+- Stockfish WASM (~3MB) loaded from node_modules — may need CDN for PWA
+- No keyboard shortcuts for Analyse
+- No FEN history
+
+Next Recommended Task:
+TASK-013-boss-battles.md
+
+---
+
 
 Date:
 2026-06-10

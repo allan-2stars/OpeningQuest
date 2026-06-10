@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-017A Complete. Stockfish analysis foundation in place. Next: Boss Battles or Daily Quests.
+TASK-017B Complete. Analysis debug screen in place. Next: Boss Battles.
 
 ## Summary
 
