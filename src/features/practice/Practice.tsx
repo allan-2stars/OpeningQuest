@@ -150,6 +150,9 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
 
   // Determine if pieces should be draggable
   const piecesDraggable = !isTerminal;
+  const boardWidth = typeof window !== "undefined"
+    ? Math.max(200, Math.min(560, window.innerWidth - 48))
+    : 480;
 
   return (
     <PageShell title={lessonTitle ?? "Practice"}>
@@ -160,9 +163,11 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
             <Chessboard
               position={state.fen}
               boardOrientation={boardOrientation as "white" | "black"}
-              boardWidth={Math.min(560, typeof window !== "undefined" ? window.innerWidth - 48 : 480)}
+              boardWidth={boardWidth}
               onPieceDrop={onPieceDrop}
               arePiecesDraggable={piecesDraggable}
+              isDraggablePiece={() => true}
+              getPositionObject={() => {}}
               customBoardStyle={{ borderRadius: "8px", overflow: "hidden" }}
               customDarkSquareStyle={{ backgroundColor: "#b58863" }}
               customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}

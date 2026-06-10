@@ -19,6 +19,70 @@ Notes:
 
 ---
 
+## INVESTIGATION-002 — Practice Page Blank Screen Fix
+
+Date:
+2026-06-10
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+INVESTIGATION-002 — Practice Page Blank Screen Bug Fix
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/practice/Practice.tsx (added isDraggablePiece prop + boardWidth guard)
+- src/features/practice/__tests__/Practice.test.tsx (created — 3 integration tests)
+- docs/investigations/INVESTIGATION-002-practice-page-blank-screen.md (created)
+
+Root Cause:
+react-chessboard 1.3.1 + React 19 defaultProps incompatibility. React 19 ignores
+defaultProps on function components. When isDraggablePiece is not explicitly passed,
+react-chessboard's internal useDrag collector calls undefined(piece), throwing
+TypeError during the render phase. This unmounts the entire React tree, leaving
+only the dark body background visible.
+
+Fix:
+1. Pass isDraggablePiece={() => true} explicitly to <Chessboard>
+2. Guard boardWidth with Math.max(200, ...) against edge case zero/negative values
+
+Tests Added:
+- renders Italian Main Line title after lesson loads
+- shows Flip Board button after chessboard renders successfully
+- shows mode selector (Guided/Instinct) after loading
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (207/207 passed)
+- docker compose up --build (HTTP 200 at /, /adventure, /practice/:lessonId)
+
+Known Issues:
+- react-chessboard 1.3.1 has full defaultProps incompatibility with React 19 (8+ props
+  affected: isDraggablePiece, customBoardStyle, customDarkSquareStyle, customLightSquareStyle,
+  customSquareStyles, customDropSquareStyle, dropOffBoardAction, snapToCursor).
+  All must be passed explicitly.
+- No error boundary in the app — any render-phase crash unmounts the entire tree
+  without showing an error UI to the user
+
+Next Recommended Task:
+TASK-012-review-system.md
+
+Notes:
+The Chessboard integration test in Practice.test.tsx verifies the full rendering pipeline:
+seed → repository → hook → component → chessboard. The Flip Board button only renders
+after the chessboard mounts successfully, making it a reliable proxy for chessboard health.
+See docs/investigations/INVESTIGATION-002 for full investigation chain.
+
+---
+
 ## REVIEW-011 Handoff
 
 Date:
