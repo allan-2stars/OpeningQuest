@@ -82,6 +82,22 @@ describe("Collection page", () => {
     expect((midnightBtn as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it("can select an unlocked piece skin", async () => {
+    renderWithRouter(<Collection />);
+    // skin_blue sorts before skin_classic in IndexedDB key order, so Ocean Blue is auto-selected
+    await waitFor(() => {
+      expect(screen.getByLabelText("Ocean Blue (selected)")).toBeDefined();
+    }, { timeout: 10000 });
+
+    // Click Classic skin (currently unselected) to verify skin selection works
+    fireEvent.click(screen.getByLabelText("Classic"));
+
+    // Ocean Blue should now be deselected (aria-label changes from "Ocean Blue (selected)" to "Ocean Blue")
+    await waitFor(() => {
+      expect(screen.getByLabelText("Ocean Blue")).toBeDefined();
+    }, { timeout: 5000 });
+  }, 20000);
+
   it("can select an unlocked board theme", async () => {
     renderWithRouter(<Collection />);
     await waitFor(() => {

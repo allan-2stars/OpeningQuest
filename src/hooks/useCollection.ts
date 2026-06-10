@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { getAllPieceSkins, getAllBoardThemes } from "../lib/repositories/rewardsRepo.ts";
 import type { PieceSkin, BoardTheme } from "../types/domain.ts";
 
-const SELECTED_SKIN_KEY = "oq_selected_skin_id";
-const SELECTED_THEME_KEY = "oq_selected_theme_id";
+export const SELECTED_SKIN_KEY = "oq_selected_skin_id";
+export const SELECTED_THEME_KEY = "oq_selected_theme_id";
 
 function readSelected(key: string): string | null {
   try {

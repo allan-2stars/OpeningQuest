@@ -19,12 +19,20 @@ export async function getAchievement(
   return db.achievements.get(id);
 }
 
+export async function getPieceSkin(id: string): Promise<PieceSkin | undefined> {
+  return db.pieceSkins.get(id);
+}
+
 export async function getAllPieceSkins(): Promise<PieceSkin[]> {
   return db.pieceSkins.toArray();
 }
 
 export async function getUnlockedPieceSkins(): Promise<PieceSkin[]> {
   return db.pieceSkins.filter((s) => s.unlocked).toArray();
+}
+
+export async function getBoardTheme(id: string): Promise<BoardTheme | undefined> {
+  return db.boardThemes.get(id);
 }
 
 export async function getAllBoardThemes(): Promise<BoardTheme[]> {

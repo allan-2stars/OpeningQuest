@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { db } from "../lib/db.ts";
+import { getPieceSkin, getBoardTheme } from "../lib/repositories/rewardsRepo.ts";
+import { SELECTED_SKIN_KEY, SELECTED_THEME_KEY } from "./useCollection.ts";
 import type { BoardTheme, PieceSkin } from "../types/domain.ts";
-
-const SELECTED_SKIN_KEY = "oq_selected_skin_id";
-const SELECTED_THEME_KEY = "oq_selected_theme_id";
 
 function readSelected(key: string): string | null {
   try {
@@ -44,7 +42,7 @@ const FALLBACK: BoardCosmetics = {
 async function loadTheme(id: string | null): Promise<BoardTheme | undefined> {
   if (!id) return undefined;
   try {
-    return await db.boardThemes.get(id);
+    return await getBoardTheme(id);
   } catch {
     return undefined;
   }
@@ -53,7 +51,7 @@ async function loadTheme(id: string | null): Promise<BoardTheme | undefined> {
 async function loadSkin(id: string | null): Promise<PieceSkin | undefined> {
   if (!id) return undefined;
   try {
-    return await db.pieceSkins.get(id);
+    return await getPieceSkin(id);
   } catch {
     return undefined;
   }
@@ -76,8 +74,9 @@ export function useBoardCosmetics(): BoardCosmetics {
 
       if (cancelled) return;
 
-      const hasCustomPieces = skin !== undefined && SKIN_TINT_MAP[skin.id] !== undefined;
-      const pieceTint = hasCustomPieces ? SKIN_TINT_MAP[skin.id] : undefined;
+      const tintEntry = skin !== undefined ? SKIN_TINT_MAP[skin.id] : undefined;
+      const hasCustomPieces = tintEntry !== undefined;
+      const pieceTint = hasCustomPieces ? tintEntry : undefined;
 
       setCosmetics({
         darkSquareStyle: theme

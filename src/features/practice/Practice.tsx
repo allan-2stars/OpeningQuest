@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
@@ -56,6 +56,10 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
 
   const [boardOrientation, flipBoard] = useBoardOrientation(state?.userSide);
   const cosmetics = useBoardCosmetics();
+  const customPieces = useMemo(
+    () => cosmetics.hasCustomPieces ? buildCustomPieces(cosmetics.pieceTint!) : {},
+    [cosmetics.hasCustomPieces, cosmetics.pieceTint],
+  );
 
   useEffect(() => {
     if (!startedRef.current) {
@@ -227,7 +231,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               customLightSquareStyle={cosmetics.lightSquareStyle}
               customSquareStyles={attemptedSquares}
               customDropSquareStyle={{}}
-              customPieces={cosmetics.hasCustomPieces ? buildCustomPieces(cosmetics.pieceTint!) : {}}
+              customPieces={customPieces}
               customArrows={[]}
               customPremoveDarkSquareStyle={{}}
               customPremoveLightSquareStyle={{}}
