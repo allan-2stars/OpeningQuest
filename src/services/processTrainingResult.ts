@@ -5,6 +5,7 @@ import { applyTrainingResult, applyReviewResult } from "./progressionEngine.ts";
 import { applyRewards } from "./rewardService.ts";
 import { XP_REVIEW_SUCCESS } from "./rewardCalculator.ts";
 import type { RewardSummary } from "./rewardCalculator.ts";
+import { recordQuestEvent } from "../features/quests/dailyQuestService.ts";
 import { nowISO } from "../lib/date.ts";
 
 export type ProcessResult = {
@@ -47,6 +48,22 @@ export async function processTrainingResult(
   // Add review-session XP bonus on top of regular session rewards
   if (result.mode === "review" && result.completed && rewardSummary) {
     rewardSummary = { ...rewardSummary, xp: rewardSummary.xp + XP_REVIEW_SUCCESS };
+  }
+
+  // Record daily quest events (best-effort — don't let quest failures block progression)
+  try {
+    if (result.completed) {
+      if (result.mode === "review") {
+        await recordQuestEvent({ type: "review_completed" });
+      } else {
+        await recordQuestEvent({ type: "new_lesson_practiced" });
+      }
+    }
+    if (rewardSummary && rewardSummary.xp > 0) {
+      await recordQuestEvent({ type: "xp_earned", amount: rewardSummary.xp });
+    }
+  } catch {
+    // Quest event recording is best-effort — progression continues even if quests fail
   }
 
   return { progress: updated, rewardSummary, rewardError };

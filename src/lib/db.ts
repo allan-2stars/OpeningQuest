@@ -12,6 +12,8 @@ import type {
   PieceSkin,
   BoardTheme,
   DailyQuest,
+  DailyQuestProgress,
+  DailyQuestBonus,
 } from "../types/domain.ts";
 
 export class OpeningQuestDB extends Dexie {
@@ -27,6 +29,8 @@ export class OpeningQuestDB extends Dexie {
   pieceSkins!: Table<PieceSkin, string>;
   boardThemes!: Table<BoardTheme, string>;
   dailyQuests!: Table<DailyQuest, string>;
+  dailyQuestProgress!: Table<DailyQuestProgress, string>;
+  dailyQuestBonus!: Table<DailyQuestBonus, string>;
 
   constructor() {
     super("OpeningQuestDB");
@@ -43,6 +47,22 @@ export class OpeningQuestDB extends Dexie {
       pieceSkins: "id",
       boardThemes: "id",
       dailyQuests: "id, date",
+    });
+    this.version(2).stores({
+      worlds: "id",
+      openingFamilies: "id",
+      variations: "id, openingFamilyId",
+      lessons: "id, variationId",
+      openingLines: "id",
+      userProfile: "id",
+      lessonProgress: "lessonId",
+      trainingSessions: "id, lessonId, startedAt",
+      achievements: "id",
+      pieceSkins: "id",
+      boardThemes: "id",
+      dailyQuests: "id, date",
+      dailyQuestProgress: "id, date, questId",
+      dailyQuestBonus: "id, date",
     });
   }
 }

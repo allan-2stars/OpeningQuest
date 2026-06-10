@@ -7,22 +7,44 @@ import FeedbackBanner from "../../components/FeedbackBanner.tsx";
 import EmptyState from "../../components/EmptyState.tsx";
 import Card from "../../components/Card.tsx";
 import Button from "../../components/Button.tsx";
+import Badge from "../../components/Badge.tsx";
 import { useAdventureMap } from "../../hooks/useAdventureMap.ts";
 import type { MapWorld } from "../../hooks/useAdventureMap.ts";
 import { getDueLessons } from "../../features/review/reviewService.ts";
 import type { ReviewQueueItem } from "../../features/review/reviewService.ts";
 import { useReviewSessionStore } from "../../stores/reviewSessionStore.ts";
+import {
+  getTodayQuestState,
+  claimQuestReward,
+  claimAllQuestRewards,
+} from "../../features/quests/dailyQuestService.ts";
+import type { QuestWithState } from "../../features/quests/dailyQuestService.ts";
 
 export default function Adventure() {
   const navigate = useNavigate();
   const { worlds, selectedWorldId, selectWorld, isLoading, error } = useAdventureMap();
   const startReview = useReviewSessionStore((s) => s.startReview);
   const [reviewQueue, setReviewQueue] = useState<ReviewQueueItem[]>([]);
+  const [questState, setQuestState] = useState<QuestWithState[]>([]);
+  const [bonusClaimed, setBonusClaimed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     getDueLessons()
       .then((items) => { if (!cancelled) setReviewQueue(items); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    getTodayQuestState()
+      .then((state) => {
+        if (!cancelled) {
+          setQuestState(state.quests);
+          setBonusClaimed(state.bonus?.claimed ?? false);
+        }
+      })
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
@@ -96,6 +118,30 @@ export default function Adventure() {
           </Button>
         </div>
       </Card>
+
+      {/* Daily Quests */}
+      {questState.length > 0 && (
+        <DailyQuestCard
+          quests={questState}
+          bonusClaimed={bonusClaimed}
+          onClaim={(questId) => {
+            claimQuestReward(questId).then(() => {
+              getTodayQuestState().then((s) => {
+                setQuestState(s.quests);
+                setBonusClaimed(s.bonus?.claimed ?? false);
+              });
+            });
+          }}
+          onClaimAll={() => {
+            claimAllQuestRewards().then(() => {
+              getTodayQuestState().then((s) => {
+                setQuestState(s.quests);
+                setBonusClaimed(s.bonus?.claimed ?? false);
+              });
+            });
+          }}
+        />
+      )}
 
       {/* World selector */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 mb-8">
@@ -212,5 +258,65 @@ function WorldMap({
         <span className="flex items-center gap-1">👑 Boss</span>
       </div>
     </div>
+  );
+}
+
+function DailyQuestCard({
+  quests,
+  bonusClaimed,
+  onClaim,
+  onClaimAll,
+}: {
+  quests: QuestWithState[];
+  bonusClaimed: boolean;
+  onClaim: (questId: string) => void;
+  onClaimAll: () => void;
+}) {
+  const allComplete = quests.every((q) => q.completed);
+
+  return (
+    <Card header="Daily Quests" className="mb-6">
+      <div className="space-y-2">
+        {quests.map((q) => (
+          <div
+            key={q.questId}
+            className="flex items-center justify-between gap-2 text-xs"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-text-primary font-semibold truncate">{q.title}</p>
+              <p className="text-text-muted">
+                {q.progress}/{q.target}
+                {q.completed && !q.rewardClaimed && (
+                  <> · <Badge variant="success" size="sm">Done!</Badge></>
+                )}
+                {q.rewardClaimed && (
+                  <> · <Badge variant="secondary" size="sm">Claimed</Badge></>
+                )}
+              </p>
+            </div>
+            {q.completed && !q.rewardClaimed && (
+              <Button size="sm" variant="primary" onClick={() => onClaim(q.questId)}>
+                Claim +{q.rewardXp}
+              </Button>
+            )}
+          </div>
+        ))}
+
+        {/* All-complete bonus */}
+        <hr className="border-slate-700" />
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <p className="text-text-secondary">
+            {allComplete && bonusClaimed
+              ? "Daily bonus claimed ✓"
+              : "Complete all daily quests to earn +1 key"}
+          </p>
+          {allComplete && !bonusClaimed && (
+            <Button size="sm" variant="primary" onClick={onClaimAll}>
+              Claim All
+            </Button>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }

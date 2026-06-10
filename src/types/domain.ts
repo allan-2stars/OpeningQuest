@@ -152,3 +152,36 @@ export type DailyQuest = {
   completed: boolean;
   xpReward: number;
 };
+
+// Daily quest progress (TASK-013) — richer model for daily quest system
+export type DailyQuestProgress = {
+  /** Composite key: `${date}_${questId}` */
+  id: string;
+  /** Local date YYYY-MM-DD */
+  date: string;
+  /** Quest definition ID */
+  questId: string;
+  /** Display title */
+  title: string;
+  /** Current progress count */
+  progress: number;
+  /** Target count to complete */
+  target: number;
+  /** Whether progress >= target */
+  completed: boolean;
+  /** Whether the XP reward has been claimed */
+  rewardClaimed: boolean;
+  /** ISO timestamp when the quest was completed */
+  completedAt?: string;
+  /** ISO timestamp when the reward was claimed */
+  rewardClaimedAt?: string;
+};
+
+/** Tracks whether the all-complete daily bonus key has been claimed for a given date */
+export type DailyQuestBonus = {
+  /** Key: date_YYYY-MM-DD */
+  id: string;
+  date: string;
+  claimed: boolean;
+  claimedAt?: string;
+};

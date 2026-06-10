@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-012 Complete. Review Queue MVP implemented.
+TASK-013 Complete. Daily Quests MVP implemented. Next: TASK-014 Classic Mode.
 
 ## Summary
 

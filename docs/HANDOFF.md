@@ -19,6 +19,63 @@ Notes:
 
 ---
 
+## TASK-013 Handoff
+
+Date:
+2026-06-10
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-013 — Daily Quests MVP
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/types/domain.ts (added DailyQuestProgress + DailyQuestBonus types)
+- src/lib/db.ts (added dailyQuestProgress + dailyQuestBonus tables, version 2 schema)
+- src/features/quests/dailyQuestDefinitions.ts (created — 3 quest definitions)
+- src/features/quests/dailyQuestRepo.ts (created — getTodayQuests, getTodayBonus, upsert)
+- src/features/quests/dailyQuestService.ts (created — ensureTodayQuests, recordQuestEvent, claimQuestReward, claimAllQuestRewards)
+- src/features/quests/__tests__/dailyQuestService.test.ts (created — 17 tests)
+- src/features/adventure/Adventure.tsx (added Daily Quests card with claim buttons)
+- src/services/processTrainingResult.ts (wired daily quest event recording)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vite build (passed)
+- vitest run (238/238 passed)
+- docker compose up --build (HTTP 200 at /, /adventure, /practice/:lessonId)
+
+Daily Quests:
+- 3 fixed daily quests: Complete 1 review, Practice 1 new lesson, Earn 50 XP
+- each completed quest grants +25 XP on claim
+- all 3 completed + claimed → +1 key bonus (once per day)
+- quest progress capped at target, duplicate events not over-completed
+- quest reward XP excluded from earn_xp_50 (source: "quest_reward" guard)
+- events recorded from processTrainingResult (review_completed, new_lesson_practiced, xp_earned)
+- UI card on Adventure page with progress bars, claim buttons, all-complete bonus
+
+Known Issues:
+- Quest rewards could be double-claimed if user taps Claim twice quickly before DB write
+- No quest reset mechanism — stale quests from previous days cleaned up lazily
+
+Next Recommended Task:
+TASK-014-classic-mode.md
+
+Notes:
+Quest system uses local YYYY-MM-DD date for daily reset matching user device timezone.
+All quest persistence through dedicated repo (dailyQuestRepo.ts). Events fire from
+processTrainingResult — no UI component accesses Dexie directly.
+
+---
+
 ## TASK-012 Handoff
 
 Date:
