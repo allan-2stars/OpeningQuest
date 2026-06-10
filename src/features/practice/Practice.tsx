@@ -182,6 +182,10 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
               customSquareStyles={attemptedSquares}
               customDropSquareStyle={{}}
+              customPieces={{}}
+              customArrows={[]}
+              customPremoveDarkSquareStyle={{}}
+              customPremoveLightSquareStyle={{}}
               animationDuration={200}
               showBoardNotation
             />
