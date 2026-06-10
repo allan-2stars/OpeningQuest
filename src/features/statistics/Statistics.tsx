@@ -96,7 +96,7 @@ export default function Statistics() {
 
       <div className="flex flex-col gap-6 max-w-5xl">
         {/* Summary cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
           <StatCard label="Total XP" value={stats.totalXp.toLocaleString()} color="text-secondary" />
           <StatCard label="Keys" value={stats.totalKeys.toLocaleString()} color="text-warning" />
           <StatCard label="Lessons Completed" value={`${stats.lessonsCompleted}`} color="text-success" />
@@ -105,7 +105,7 @@ export default function Statistics() {
 
         {/* Progress section */}
         <Card header="Progress">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-sm">
             <div>
               <p className="text-text-muted text-xs">Lessons</p>
               <p className="text-text-primary font-bold text-lg">

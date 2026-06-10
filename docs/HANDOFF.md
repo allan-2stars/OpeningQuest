@@ -19,6 +19,66 @@ Notes:
 
 ---
 
+## TASK-015 Handoff
+
+Date:
+2026-06-10
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-015 — Responsive Polish
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/components/AppShell.tsx (responsive header: overflow-x-auto, smaller padding/gaps on mobile, shrink-0 nav)
+- src/features/practice/Practice.tsx (sidebar width lg:w-72→80, consistent gap spacing)
+- src/features/statistics/Statistics.tsx (responsive grid gaps, sm:grid-cols-4 for summary cards)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (259/259 passed)
+- docker compose up --build (Docker serves HTML, Vite ready on 0.0.0.0:5173)
+
+Responsive fixes applied:
+
+AppShell (mobile/tablet header):
+- overflow-x-auto for horizontal scrolling nav on narrow screens
+- Smaller padding (px-4 py-2) and text (text-lg→sm:text-xl) on mobile
+- Nav items use px-2 sm:px-3, text-xs sm:text-sm, whitespace-nowrap
+- Main content padding: p-3 sm:p-4 lg:p-6
+
+Practice page:
+- Sidebar width: lg:w-80 (was 72) for better content display
+- Board already responsive via boardWidth calculation (Math.min(560, window.innerWidth - 48))
+- Side-by-side layout on lg+, stacked on smaller screens
+
+Statistics page:
+- Summary cards: gap-2 sm:gap-3
+- Progress grid: gap-3 sm:gap-4
+
+Known Issues:
+- PGN Import/Export page not yet optimized for narrow screens
+- Adventure map node spacing remains desktop-first (functional at all widths)
+- No responsive image optimization for piece previews in Collection
+
+Next Recommended Task:
+TASK-014-classic-mode.md or further polish tasks
+
+Notes:
+This pass focused on the three most-used pages: Practice, Adventure, and Statistics.
+AppShell header now scrolls horizontally on narrow screens instead of wrapping.
+No design system changes — all fixes use existing Tailwind utilities.
+
+---
+
 ## TASK-014 Handoff
 
 Date:

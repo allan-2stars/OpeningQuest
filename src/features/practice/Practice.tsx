@@ -205,7 +205,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
             <Chessboard
               position={state.fen}
               boardOrientation={boardOrientation as "white" | "black"}
-              boardWidth={boardWidth}
+            boardWidth={boardWidth}
               onPieceDrop={onPieceDrop}
               arePiecesDraggable={!boardLocked}
               isDraggablePiece={() => true}
@@ -243,7 +243,7 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
         </div>
 
         {/* Sidebar */}
-        <div className="flex flex-col gap-3 w-full lg:w-72 shrink-0">
+        <div className="flex flex-col gap-3 w-full lg:w-80 shrink-0">
           {/* Review session banner */}
           {isReviewActive && (
             <div className="rounded-lg border border-secondary/30 bg-secondary/10 px-4 py-2 flex items-center justify-between">
