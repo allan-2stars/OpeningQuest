@@ -15,6 +15,7 @@ import type {
   DailyQuestProgress,
   DailyQuestBonus,
 } from "../types/domain.ts";
+import type { OpeningSessionResult } from "../features/openings/types.ts";
 
 export class OpeningQuestDB extends Dexie {
   worlds!: Table<World, string>;
@@ -31,6 +32,7 @@ export class OpeningQuestDB extends Dexie {
   dailyQuests!: Table<DailyQuest, string>;
   dailyQuestProgress!: Table<DailyQuestProgress, string>;
   dailyQuestBonus!: Table<DailyQuestBonus, string>;
+  openingSessionResults!: Table<OpeningSessionResult, string>;
 
   constructor() {
     super("OpeningQuestDB");
@@ -48,7 +50,7 @@ export class OpeningQuestDB extends Dexie {
       boardThemes: "id",
       dailyQuests: "id, date",
     });
-    this.version(2).stores({
+    this.version(3).stores({
       worlds: "id",
       openingFamilies: "id",
       variations: "id, openingFamilyId",
@@ -63,6 +65,7 @@ export class OpeningQuestDB extends Dexie {
       dailyQuests: "id, date",
       dailyQuestProgress: "id, date, questId",
       dailyQuestBonus: "id, date",
+      openingSessionResults: "id, lessonId, playedAt",
     });
   }
 }

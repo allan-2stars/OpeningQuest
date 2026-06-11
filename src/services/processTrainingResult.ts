@@ -7,6 +7,13 @@ import { XP_REVIEW_SUCCESS } from "./rewardCalculator.ts";
 import type { RewardSummary } from "./rewardCalculator.ts";
 import { recordQuestEvent } from "../features/quests/dailyQuestService.ts";
 import { nowISO } from "../lib/date.ts";
+import { evaluateOpeningLine } from "../features/openings/openingLineTracker.ts";
+import {
+  buildSessionResult,
+  saveOpeningSessionResult,
+} from "../features/openings/openingSessionRepo.ts";
+import { getLesson } from "../lib/repositories/curriculumRepo.ts";
+import { getOpeningLine } from "../lib/repositories/curriculumRepo.ts";
 
 export type ProcessResult = {
   progress: LessonProgress;
@@ -64,6 +71,38 @@ export async function processTrainingResult(
     }
   } catch {
     // Quest event recording is best-effort — progression continues even if quests fail
+  }
+
+  // Record opening exit tracking for completed sessions (best-effort)
+  try {
+    const lesson = await getLesson(result.lessonId);
+    const line = lesson ? await getOpeningLine(lesson.lineId) : undefined;
+
+    if (lesson && line) {
+      // Extract only the user's accepted moves from history
+      const userMoves = result.history
+        .filter((h) => h.type === "accepted" || h.type === "wrong")
+        .filter((h) => h.correct)
+        .map((h) => h.san);
+
+      const status = evaluateOpeningLine(
+        result.lessonId,
+        line.sanMoves,
+        userMoves,
+      );
+
+      const sessionResult = buildSessionResult(
+        result.lessonId,
+        result.completed,
+        status.exited,
+        status.exitPly,
+        status.exitMoveSan,
+        status.expectedMoveSan,
+      );
+      await saveOpeningSessionResult(sessionResult);
+    }
+  } catch {
+    // Best-effort — session tracking failure must not block progression
   }
 
   return { progress: updated, rewardSummary, rewardError };

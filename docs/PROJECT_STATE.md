@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-017B Complete. Analysis debug screen in place. Next: Boss Battles.
+TASK-017C Complete. Opening exit detection infrastructure in place.
 
 ## Summary
 

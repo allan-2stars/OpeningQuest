@@ -19,7 +19,84 @@ Notes:
 
 ---
 
-## TASK-017B Handoff
+## TASK-017C Handoff
+
+Date:
+2026-06-11
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-017C — Opening Exit Detection
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/openings/types.ts (created — OpeningLineStatus, OpeningSessionResult, OpeningExitStats)
+- src/features/openings/openingLineTracker.ts (created — evaluateOpeningLine pure function)
+- src/features/openings/openingSessionRepo.ts (created — saveOpeningSessionResult, getOpeningExitStats, getRecentSessionResults, buildSessionResult)
+- src/features/openings/__tests__/openingLineTracker.test.ts (created — 14 tests)
+- src/lib/db.ts (v3 schema — added openingSessionResults table)
+- src/services/processTrainingResult.ts (wired opening exit tracking on session completion)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (307/307 passed)
+- docker compose up --build (Docker build pending — should serve on port 4317)
+
+Architecture:
+  Training Session Result (processTrainingResult)
+  ↓
+  extract user moves from result.history
+  ↓
+  evaluateOpeningLine(lessonId, expectedMoves, playedMoves)
+  ↓
+  OpeningLineStatus { inLine, exited, exitPly, exitMoveSan, expectedMoveSan }
+  ↓
+  buildSessionResult(session data) → saveOpeningSessionResult()
+  ↓
+  openingSessionResults table (Dexie v3)
+
+Tracker (`evaluateOpeningLine`):
+- Pure function — no side effects, no engine, no UI
+- Compares playedMoves against expectedMoves move-by-move
+- Detects exit at first deviation
+- Returns 1-indexed exitPly, exitMoveSan, expectedMoveSan
+- Empty played sequence = inLine=true (hasn't deviated yet)
+
+Session repo (`openingSessionRepo`):
+- `buildSessionResult()` — constructs the record from tracker output
+- `saveOpeningSessionResult()` — persists to Dexie
+- `getOpeningExitStats()` — returns { totalSessions, completedInLine, exitedEarly }
+- `getRecentSessionResults(limit)` — latest 20, newest first
+- All best-effort — failures don't block progression
+
+Integration:
+- Wired into `processTrainingResult` (existing progression pipeline)
+- Only fires on completed or instinct-failed sessions
+- Extracts user's accepted moves from `result.history`
+- Loads expected line from curriculum via `getLesson` + `getOpeningLine`
+- Best-effort try/catch — tracker failure must not block progression persistence
+
+Known Issues:
+- Exit detection only records the first deviation; multiple exits within a single guided session are not tracked per-attempt
+- No UI for exit stats yet (infrastructure only)
+
+Next Recommended Task:
+TASK-018 (AI review / exit visualization) or TASK-013-boss-battles.md
+
+Notes:
+No visible UI changes. No Stockfish usage. No AI. The openingSessionResults table
+is ready for TASK-018 analytics/visualization integration.
+
+---
+
 
 Date:
 2026-06-10
