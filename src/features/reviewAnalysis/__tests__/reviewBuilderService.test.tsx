@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { db } from "../../../lib/db.ts";
 import { seedCoreData } from "../../../lib/seed/seed.ts";
@@ -11,6 +11,16 @@ import { saveReviewResult, getReviewResult } from "../reviewResultsRepo.ts";
 import type { TrainingSessionResult } from "../../../features/training/types.ts";
 import type { OpeningLineStatus } from "../../../features/openings/types.ts";
 import "fake-indexeddb/auto";
+
+function makeLocalStorageMock() {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
+  };
+}
 
 function makeSessionResult(overrides?: Partial<TrainingSessionResult>): TrainingSessionResult {
   return {
@@ -39,16 +49,6 @@ const IN_LINE_STATUS: OpeningLineStatus = {
   totalPly: 7,
   inLine: true,
   exited: false,
-};
-
-const EXIT_STATUS: OpeningLineStatus = {
-  openingId: "lesson_test",
-  totalPly: 7,
-  inLine: false,
-  exited: true,
-  exitPly: 5,
-  exitMoveSan: "a4",
-  expectedMoveSan: "Bc4",
 };
 
 describe("buildReviewResult", () => {
@@ -104,10 +104,10 @@ describe("buildReviewResult", () => {
 });
 
 beforeEach(async () => {
+  vi.stubGlobal("localStorage", makeLocalStorageMock());
   await db.delete();
   await db.open();
   await seedCoreData();
-  localStorage.clear();
 });
 
 describe("reviewResultsRepo", () => {
@@ -166,7 +166,7 @@ describe("ReviewResultPage", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Session Review")).toBeDefined();
+      expect(screen.getByText("How Did You Do?")).toBeDefined();
     }, { timeout: 5000 });
 
     // Summary counts should show

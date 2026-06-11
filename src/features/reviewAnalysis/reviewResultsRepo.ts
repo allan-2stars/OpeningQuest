@@ -5,7 +5,7 @@ export async function saveReviewResult(result: LessonReviewResult): Promise<void
   await db.openingSessionResults.put({
     id: `review_${result.lessonId}`,
     lessonId: result.lessonId,
-    completed: true,
+    completed: result.completed,
     openingExitDetected: result.summary.watchOuts > 0 || result.summary.oopses > 0,
     playedAt: result.completedAt,
   });

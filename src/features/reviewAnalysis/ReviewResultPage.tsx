@@ -9,7 +9,6 @@ import CoachPanel from "../coach/CoachPanel.tsx";
 import { getCoachMessage } from "../coach/coachService.ts";
 import { getReviewResult } from "./reviewResultsRepo.ts";
 import type { LessonReviewResult } from "./reviewBuilderService.ts";
-import type { ReviewedMove } from "./types.ts";
 import type { CoachMessage } from "../coach/types.ts";
 
 export default function ReviewResultPage() {
@@ -18,7 +17,7 @@ export default function ReviewResultPage() {
   const [review, setReview] = useState<LessonReviewResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMove, setSelectedMove] = useState<ReviewedMove | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!lessonId) return;
@@ -26,7 +25,12 @@ export default function ReviewResultPage() {
 
     (async () => {
       try {
-        const result = await getReviewResult(lessonId);
+        let result = await getReviewResult(lessonId);
+        // Race guard: review may still be saving after lesson completion — retry once
+        if (!result && !cancelled) {
+          await new Promise<void>((r) => setTimeout(r, 500));
+          if (!cancelled) result = await getReviewResult(lessonId);
+        }
         if (!cancelled) setReview(result);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load review");
@@ -82,21 +86,15 @@ export default function ReviewResultPage() {
     );
   }
 
+  const selectedMove = selectedIndex !== null ? review.moves[selectedIndex] : null;
   const coachMessage: CoachMessage | null = selectedMove
     ? getCoachMessage(selectedMove.classification, selectedMove.reasonCode)
     : null;
 
-  const timelineItems = review.moves.map((m) => ({
-    moveSan: m.moveSan,
-    classification: m.classification,
-    reasonCode: m.reasonCode,
-    onClick: () => setSelectedMove(m),
-  }));
-
   return (
-    <PageShell title="Session Review">
+    <PageShell title="How Did You Do?">
       <div className="flex flex-col lg:flex-row gap-4 max-w-5xl">
-        {/* Left: Timeline + summary */}
+        {/* Left: Move list + summary */}
         <div className="flex-1 flex flex-col gap-4">
           {/* Summary cards */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -107,26 +105,26 @@ export default function ReviewResultPage() {
             <SummaryBadge icon="❌" label="Oops" count={review.summary.oopses} variant="error" />
           </div>
 
-          {/* Interactive timeline */}
-          <Card header="Move Timeline">
-            {timelineItems.length > 0 ? (
+          {/* Interactive move list */}
+          <Card header="Your Moves">
+            {review.moves.length > 0 ? (
               <div className="rounded-xl border border-slate-700 bg-surface overflow-hidden">
-                {timelineItems.map((item, idx) => (
+                {review.moves.map((move, idx) => (
                   <button
-                    key={`${item.moveSan}-${idx}`}
-                    onClick={item.onClick}
+                    key={idx}
+                    onClick={() => setSelectedIndex(idx)}
                     className={`w-full text-left flex items-center gap-3 py-3 px-4 border-b border-slate-700 last:border-b-0
                       transition-colors hover:bg-surface-light
-                      ${selectedMove?.moveSan === item.moveSan ? "bg-primary/10 ring-1 ring-secondary/30" : ""}`}
+                      ${selectedIndex === idx ? "bg-primary/10 ring-1 ring-secondary/30" : ""}`}
                   >
                     <span className="text-xl shrink-0" aria-hidden="true">
-                      {item.classification === "SMART_MOVE" ? "⭐" :
-                       item.classification === "GOOD_MOVE" ? "👍" :
-                       item.classification === "SAFE_MOVE" ? "🛡" :
-                       item.classification === "WATCH_OUT" ? "👀" : "❌"}
+                      {move.classification === "SMART_MOVE" ? "⭐" :
+                       move.classification === "GOOD_MOVE" ? "👍" :
+                       move.classification === "SAFE_MOVE" ? "🛡" :
+                       move.classification === "WATCH_OUT" ? "👀" : "❌"}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-text-primary">{item.moveSan}</p>
+                      <p className="text-sm font-bold text-text-primary">{move.moveSan}</p>
                     </div>
                   </button>
                 ))}
@@ -139,7 +137,7 @@ export default function ReviewResultPage() {
 
         {/* Right: Coach panel */}
         <div className="w-full lg:w-72 shrink-0">
-          <Card header="Coach">
+          <Card header="Sir Knight Says">
             {selectedMove ? (
               <div className="space-y-2">
                 <CoachPanel message={coachMessage} />

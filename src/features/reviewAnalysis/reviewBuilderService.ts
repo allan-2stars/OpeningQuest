@@ -15,6 +15,7 @@ export type ReviewSummary = {
 export type LessonReviewResult = {
   lessonId: string;
   completedAt: string;
+  completed: boolean;
   moves: ReviewedMove[];
   summary: ReviewSummary;
 };
@@ -49,6 +50,7 @@ export function buildReviewResult(
   return {
     lessonId: result.lessonId,
     completedAt,
+    completed: result.completed,
     moves,
     summary,
   };
@@ -90,8 +92,9 @@ function getReasonForMove(
     return "SOLID_MOVE";
   }
 
-  // Wrong move
-  if (openingStatus?.exited) {
+  // Wrong move — exitMoveSan always comes from a correct played move, so this guard
+  // is a safety net for symmetry with classifyMoveSnapshot
+  if (openingStatus?.exited && move.san === openingStatus.exitMoveSan) {
     return "OPENING_EXIT";
   }
   return "LARGE_EVAL_DROP";

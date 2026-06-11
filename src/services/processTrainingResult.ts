@@ -107,24 +107,26 @@ export async function processTrainingResult(
     }
   }
 
-  // Build and persist a session review result (best-effort)
-  try {
-    const lesson = await getLesson(result.lessonId);
-    const line = lesson ? await getOpeningLine(lesson.lineId) : undefined;
+  // Build and persist a session review result for completed sessions (best-effort)
+  if (result.completed) {
+    try {
+      const lesson = await getLesson(result.lessonId);
+      const line = lesson ? await getOpeningLine(lesson.lineId) : undefined;
 
-    // Derive opening status from the session result already collected
-    const allCorrectMoves = result.history
-      .filter((h) => h.correct)
-      .map((h) => h.san);
+      // Derive opening status from the session result already collected
+      const allCorrectMoves = result.history
+        .filter((h) => h.correct)
+        .map((h) => h.san);
 
-    const openingStatus = line
-      ? evaluateOpeningLine(result.lessonId, line.sanMoves, allCorrectMoves)
-      : undefined;
+      const openingStatus = line
+        ? evaluateOpeningLine(result.lessonId, line.sanMoves, allCorrectMoves)
+        : undefined;
 
-    const review = buildReviewResult(result, now, openingStatus);
-    await saveReviewResult(review);
-  } catch {
-    // Best-effort — review persistence failure must not block progression
+      const review = buildReviewResult(result, now, openingStatus);
+      await saveReviewResult(review);
+    } catch {
+      // Best-effort — review persistence failure must not block progression
+    }
   }
 
   return { progress: updated, rewardSummary, rewardError };
