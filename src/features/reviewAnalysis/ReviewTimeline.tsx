@@ -1,11 +1,8 @@
-import type { MoveClassification, ReasonCode } from "./types.ts";
+import type { ReviewedMove } from "./types.ts";
 import { getClassificationLabel, getReasonLabel } from "./reviewLabels.ts";
 
-export type ReviewedMoveViewModel = {
-  moveSan: string;
-  classification: MoveClassification;
-  reasonCode: ReasonCode;
-};
+/** Alias for ReviewedMove — kept for consumer imports. */
+export type ReviewedMoveViewModel = ReviewedMove;
 
 function ReviewTimelineItem({ item }: { item: ReviewedMoveViewModel }) {
   const classLabel = getClassificationLabel(item.classification);
@@ -16,7 +13,7 @@ function ReviewTimelineItem({ item }: { item: ReviewedMoveViewModel }) {
       <span className="text-xl shrink-0" aria-hidden="true">{classLabel.icon}</span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-text-primary">{item.moveSan}</p>
-        <p className="text-xs text-text-secondary">{classLabel.label} · {reasonLabel}</p>
+        <p className="text-sm text-text-secondary">{classLabel.label} · {reasonLabel}</p>
       </div>
     </div>
   );

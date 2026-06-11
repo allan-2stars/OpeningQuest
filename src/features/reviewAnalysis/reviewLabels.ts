@@ -22,7 +22,7 @@ const REASON_MAP: Record<ReasonCode, string> = {
   BEST_MOVE:        "Best Move Found",
   OPENING_EXIT:     "Left the Opening Line",
   EVAL_DROP:        "Position Became Harder",
-  LARGE_EVAL_DROP:  "Big Position Change",
+  LARGE_EVAL_DROP:  "Position Got Much Worse",
   SOLID_MOVE:       "Safe and Sound",
   SAFE_MOVE:        "Safe Choice",
 };

@@ -96,7 +96,7 @@ describe("ReviewTimeline", () => {
 
     // Reason labels should be visible
     expect(screen.getByText(/Opening Path/)).toBeDefined();
-    expect(screen.getByText(/Big Position Change/)).toBeDefined();
+    expect(screen.getByText(/Position Got Much Worse/)).toBeDefined();
   });
 
   it("renders all five classification types", () => {
