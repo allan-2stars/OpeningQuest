@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-017C Complete. Opening exit detection infrastructure in place.
+TASK-018A Complete. Move classification foundation in place.
 
 ## Summary
 

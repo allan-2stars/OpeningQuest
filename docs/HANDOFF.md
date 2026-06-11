@@ -19,7 +19,70 @@ Notes:
 
 ---
 
-## TASK-017C Handoff
+## TASK-018A Handoff
+
+Date:
+2026-06-11
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-018A — Move Classification Foundation
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/reviewAnalysis/types.ts (created — MoveClassification, ClassifierInput, MoveClassificationResult, ReviewedMove)
+- src/features/reviewAnalysis/moveClassifier.ts (created — classifyMove pure function, 7-rule chain)
+- src/features/reviewAnalysis/__tests__/moveClassifier.test.ts (created — 20 tests)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (327/327 passed)
+- docker compose up --build (pending)
+
+Classification rules (first-match priority):
+1. moveSan === expectedMoveSan → SMART_MOVE / OPENING_MOVE
+2. moveSan === bestMoveSan → SMART_MOVE / BEST_MOVE
+3. openingExitDetected → WATCH_OUT / OPENING_EXIT
+4. evalDrop >= 150 → OOPS / LARGE_EVAL_DROP
+5. evalDrop >= 50 → WATCH_OUT / EVAL_DROP
+6. evalDrop < 30 → GOOD_MOVE / SOLID_MOVE
+7. Fallback → SAFE_MOVE / SAFE_MOVE
+
+Where evalDrop = |evaluationBefore - evaluationAfter| (centipawns)
+
+Tests cover:
+- Opening move detection (rule 1 priority)
+- Best move detection (rule 2)
+- Opening exit (rule 3 over eval drop)
+- Large eval drop >= 150 (OOPS)
+- Moderate eval drop >= 50 (WATCH_OUT)
+- Good move < 30 drop (GOOD_MOVE)
+- Fallback (SAFE_MOVE)
+- Priority chain: Rule 1 > Rule 2, Rule 3 > Rule 4, Rule 1 > Rule 3 through double-classifier edge
+
+Known Issues:
+- No persistent review sessions — classification is per-call only
+- No integration with TASK-017C opening exit (separate modules, combined at call site)
+
+Next Recommended Task:
+TASK-013-boss-battles.md or integration task combining 017A+017C+018A into AI Review UI
+
+Notes:
+Pure classification layer only. No UI changes. No DB changes. No Stockfish calls.
+Ready for TASK-018B UI integration. The classifyMove function is designed to be
+called with data from both the training engine (expectedMoveSan) and
+the Stockfish analysis service (bestMoveSan, evaluationBefore/After).
+
+---
+
 
 Date:
 2026-06-11
