@@ -19,7 +19,78 @@ Notes:
 
 ---
 
-## TASK-018A Handoff
+## TASK-018B Handoff
+
+Date:
+2026-06-11
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-018B — Review Timeline UI (Demo)
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/reviewAnalysis/reviewLabels.ts (created — classification→icon+label, reason→label mappings)
+- src/features/reviewAnalysis/ReviewTimeline.tsx (created — scrollable timeline component)
+- src/features/reviewAnalysis/ReviewDemoPage.tsx (created — /review-demo DEV-only page)
+- src/features/reviewAnalysis/__tests__/ReviewTimeline.test.tsx (created — 12 tests)
+- src/app/App.tsx (added /review-demo DEV-guarded route)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (344/344 passed)
+
+Label mappings:
+  Classification → icon + label:
+    SMART_MOVE → ⭐ Smart Move
+    GOOD_MOVE  → 👍 Good Move
+    SAFE_MOVE  → 🛡 Safe Move
+    WATCH_OUT  → 👀 Watch Out
+    OOPS       → ❌ Oops
+
+  Reason codes → child-friendly labels:
+    OPENING_MOVE    → "On the Opening Path"
+    BEST_MOVE       → "Best Move Found"
+    OPENING_EXIT    → "Left the Opening Line"
+    EVAL_DROP       → "Position Became Harder"
+    LARGE_EVAL_DROP → "Big Position Change"
+    SOLID_MOVE      → "Safe and Sound"
+    SAFE_MOVE       → "Safe Choice"
+
+Components:
+- ReviewTimeline — accepts ReviewedMoveViewModel[], renders stacked card list
+  with icon, move SAN, classification, and reason. Empty state with custom messages.
+- ReviewTimelineItem — single row: icon | move | classification · reason
+- ReviewDemoPage — /review-demo (DEV-only) showing sample timeline + empty state
+
+Tests: label mappings for all classifications/reasons, SMART_MOVE icon, OOPS icon,
+reason label child-friendliness (no cp/centi/eval jargon), timeline empty state,
+custom empty messages, move rendering with labels, all 5 classification types, and
+review-demo page title and content.
+
+Known Issues:
+- No persistence — demo only, static sample data
+- No integration with real session data (future TASK-018C)
+- No touch-specific timeline layout — desktop-first, adequate on tablet
+
+Next Recommended Task:
+TASK-018C (wire real session data into timeline)
+
+Notes:
+Child-friendly labels throughout. No centipawns, depth, eval-swing, or engine
+jargon in user-facing text. DEV-only route — not exposed in production navigation.
+ReviewTimeline component is reusable — accepts any ReviewedMoveViewModel[].
+
+---
+
 
 Date:
 2026-06-11
