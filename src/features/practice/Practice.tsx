@@ -476,6 +476,12 @@ function PracticeContent({ lessonId }: { lessonId: string }) {
               >
                 Switch to {mode === "guided" ? "Instinct" : "Guided"}
               </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate(`/review-result/${lessonId}`)}
+              >
+                Review My Moves
+              </Button>
               <Button variant="ghost" onClick={goToAdventure}>
                 Back to Adventure
               </Button>

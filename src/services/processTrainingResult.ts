@@ -13,6 +13,8 @@ import {
   saveOpeningSessionResult,
 } from "../features/openings/openingSessionRepo.ts";
 import { getLesson, getOpeningLine } from "../lib/repositories/curriculumRepo.ts";
+import { buildReviewResult } from "../features/reviewAnalysis/reviewBuilderService.ts";
+import { saveReviewResult } from "../features/reviewAnalysis/reviewResultsRepo.ts";
 
 export type ProcessResult = {
   progress: LessonProgress;
@@ -103,6 +105,26 @@ export async function processTrainingResult(
     } catch {
       // Best-effort — session tracking failure must not block progression
     }
+  }
+
+  // Build and persist a session review result (best-effort)
+  try {
+    const lesson = await getLesson(result.lessonId);
+    const line = lesson ? await getOpeningLine(lesson.lineId) : undefined;
+
+    // Derive opening status from the session result already collected
+    const allCorrectMoves = result.history
+      .filter((h) => h.correct)
+      .map((h) => h.san);
+
+    const openingStatus = line
+      ? evaluateOpeningLine(result.lessonId, line.sanMoves, allCorrectMoves)
+      : undefined;
+
+    const review = buildReviewResult(result, now, openingStatus);
+    await saveReviewResult(review);
+  } catch {
+    // Best-effort — review persistence failure must not block progression
   }
 
   return { progress: updated, rewardSummary, rewardError };

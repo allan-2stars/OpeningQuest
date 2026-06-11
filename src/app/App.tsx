@@ -14,6 +14,7 @@ import DesignSystem from "../features/design-system/DesignSystem";
 import AnalysisPage from "../features/analysis/AnalysisPage.tsx";
 import ReviewDemoPage from "../features/reviewAnalysis/ReviewDemoPage.tsx";
 import CoachDemoPage from "../features/coach/CoachDemoPage.tsx";
+import ReviewResultPage from "../features/reviewAnalysis/ReviewResultPage.tsx";
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/import-export" element={<ImportExport />} />
         <Route path="/review/complete" element={<ReviewComplete />} />
+        <Route path="/review-result/:lessonId" element={<ReviewResultPage />} />
         <Route path="/statistics" element={<Statistics />} />
         {import.meta.env.DEV && <Route path="/design-system" element={<DesignSystem />} />}
         {import.meta.env.DEV && <Route path="/analysis" element={<AnalysisPage />} />}

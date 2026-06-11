@@ -19,6 +19,102 @@ Notes:
 
 ---
 
+## TASK-018D Handoff
+
+Date:
+2026-06-11
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-018D — Review Session Integration
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/reviewAnalysis/reviewBuilderService.ts (created — buildReviewResult, LessonReviewResult, ReviewSummary)
+- src/features/reviewAnalysis/reviewResultsRepo.ts (created — saveReviewResult, getReviewResult, getLatestReviewResults)
+- src/features/reviewAnalysis/ReviewResultPage.tsx (created — interactive review page with timeline + coach)
+- src/features/reviewAnalysis/__tests__/reviewBuilderService.test.tsx (created — 9 tests)
+- src/services/processTrainingResult.ts (wired review generation on session completion)
+- src/features/practice/Practice.tsx (added "Review My Moves" button to completion panel)
+- src/app/App.tsx (added /review-result/:lessonId route)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (370/370 passed)
+
+Integration flow:
+  1. Practice/Review session completes
+  2. processTrainingResult builds LessonReviewResult via buildReviewResult()
+  3. Result persisted to localStorage (full review) + IndexedDB (session marker)
+  4. Practice completion panel shows "Review My Moves" button
+  5. User navigates to /review-result/:lessonId
+  6. Interactive timeline displays move classifications (⭐👍🛡👀❌)
+  7. Summary cards show counts per classification type
+  8. Clicking a move updates the Coach Panel with Sir Knight feedback
+  9. Both completed and instinct-failed sessions generate reviews
+
+Review result model:
+  LessonReviewResult {
+    lessonId, completedAt,
+    moves: ReviewedMove[],         // from TASK-018A
+    summary: { smartMoves, goodMoves, safeMoves, watchOuts, oopses }
+  }
+
+Review builder (reviewBuilderService.ts):
+- Pure function: buildReviewResult(sessionResult, time, openingStatus)
+- Uses openingLineStatus to determine classification context
+- Opening-correct moves → SMART_MOVE
+- Non-opening correct moves → GOOD_MOVE
+- Opening exit moves → WATCH_OUT
+- Wrong moves → OOPS
+- Always produces a review — no blocking preconditions
+
+ReviewResultsRepo:
+- saveReviewResult: persists full review to localStorage, session marker to IndexedDB
+- getReviewResult: loads from localStorage + validates against IndexedDB session marker
+- getLatestReviewResults: deduplicated by lessonId, newest first
+
+ReviewResultPage:
+- Left column: 5 summary badges (⭐👍🛡👀❌ with counts) + interactive move timeline
+- Right column: Coach panel with Sir Knight, updates on move click
+- Empty state: Coach panel fallback + "Back to Adventure" button
+- Error state: Error banner + retry button
+- Bottom buttons: "Back to Adventure" + "Practice Again"
+
+Tests:
+- buildReviewResult with in-line status → SMART_MOVE for all correct moves
+- buildReviewResult with exit status → WATCH_OUT for exit move
+- summary counts add up to total moves
+- saveReviewResult + getReviewResult round-trip
+- null lookup for nonexistent review
+- summary count persistence
+- empty state rendering
+- review page with saved data rendering
+
+Known Issues:
+- Review stored in localStorage (stringified JSON) — may be lost on browser clear
+- No review for lessons with zero user moves (degenerate session check in processTrainingResult)
+- Timeline click tracking uses moveSan for selection; ambiguous if same SAN appears twice
+
+Next Recommended Task:
+TASK-013-boss-battles.md
+
+Notes:
+Review integration uses the coach (TASK-018C), classification layer (TASK-018A),
+and opening exit detection (TASK-017C) together for the first time. The "Review My Moves"
+button in the Practice completion panel is the entry point for players to see their
+session analysis. No AI, LLM, or Stockfish calls — pure data-driven review.
+
+---
+
 ## TASK-018C Handoff
 
 Date:
