@@ -50,6 +50,22 @@ export class OpeningQuestDB extends Dexie {
       boardThemes: "id",
       dailyQuests: "id, date",
     });
+    this.version(2).stores({
+      worlds: "id",
+      openingFamilies: "id",
+      variations: "id, openingFamilyId",
+      lessons: "id, variationId",
+      openingLines: "id",
+      userProfile: "id",
+      lessonProgress: "lessonId",
+      trainingSessions: "id, lessonId, startedAt",
+      achievements: "id",
+      pieceSkins: "id",
+      boardThemes: "id",
+      dailyQuests: "id, date",
+      dailyQuestProgress: "id, date, questId",
+      dailyQuestBonus: "id, date",
+    });
     this.version(3).stores({
       worlds: "id",
       openingFamilies: "id",

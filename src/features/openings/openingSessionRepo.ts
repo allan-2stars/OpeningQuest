@@ -13,7 +13,7 @@ export async function getOpeningExitStats(): Promise<OpeningExitStats> {
 
   return {
     totalSessions: all.length,
-    completedInLine: all.filter((r) => !r.openingExitDetected).length,
+    completedInLine: all.filter((r) => r.completed && !r.openingExitDetected).length,
     exitedEarly: all.filter((r) => r.openingExitDetected).length,
   };
 }

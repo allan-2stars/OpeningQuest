@@ -12,8 +12,7 @@ import {
   buildSessionResult,
   saveOpeningSessionResult,
 } from "../features/openings/openingSessionRepo.ts";
-import { getLesson } from "../lib/repositories/curriculumRepo.ts";
-import { getOpeningLine } from "../lib/repositories/curriculumRepo.ts";
+import { getLesson, getOpeningLine } from "../lib/repositories/curriculumRepo.ts";
 
 export type ProcessResult = {
   progress: LessonProgress;
@@ -74,35 +73,36 @@ export async function processTrainingResult(
   }
 
   // Record opening exit tracking for completed sessions (best-effort)
-  try {
-    const lesson = await getLesson(result.lessonId);
-    const line = lesson ? await getOpeningLine(lesson.lineId) : undefined;
+  if (result.completed) {
+    try {
+      const lesson = await getLesson(result.lessonId);
+      const line = lesson ? await getOpeningLine(lesson.lineId) : undefined;
 
-    if (lesson && line) {
-      // Extract only the user's accepted moves from history
-      const userMoves = result.history
-        .filter((h) => h.type === "accepted" || h.type === "wrong")
-        .filter((h) => h.correct)
-        .map((h) => h.san);
+      if (lesson && line) {
+        // Full interleaved sequence (user + opponent correct moves) to match sanMoves
+        const allMoves = result.history
+          .filter((h) => h.correct)
+          .map((h) => h.san);
 
-      const status = evaluateOpeningLine(
-        result.lessonId,
-        line.sanMoves,
-        userMoves,
-      );
+        const status = evaluateOpeningLine(
+          result.lessonId,
+          line.sanMoves,
+          allMoves,
+        );
 
-      const sessionResult = buildSessionResult(
-        result.lessonId,
-        result.completed,
-        status.exited,
-        status.exitPly,
-        status.exitMoveSan,
-        status.expectedMoveSan,
-      );
-      await saveOpeningSessionResult(sessionResult);
+        const sessionResult = buildSessionResult(
+          result.lessonId,
+          result.completed,
+          status.exited,
+          status.exitPly,
+          status.exitMoveSan,
+          status.expectedMoveSan,
+        );
+        await saveOpeningSessionResult(sessionResult);
+      }
+    } catch {
+      // Best-effort — session tracking failure must not block progression
     }
-  } catch {
-    // Best-effort — session tracking failure must not block progression
   }
 
   return { progress: updated, rewardSummary, rewardError };
