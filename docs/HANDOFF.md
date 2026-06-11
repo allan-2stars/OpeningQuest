@@ -19,7 +19,86 @@ Notes:
 
 ---
 
-## TASK-018B Handoff
+## TASK-018C Handoff
+
+Date:
+2026-06-11
+
+Agent:
+Windows Agent (cc DS)
+
+Task:
+TASK-018C — Coach Explanation Foundation
+
+Branch:
+main
+
+Commit:
+N/A (pending)
+
+Files Changed:
+- src/features/coach/types.ts (created — CoachCharacter, CoachMessage, CoachCharacterMeta)
+- src/features/coach/coachService.ts (created — template-driven getCoachMessage, getCoachCharacter)
+- src/features/coach/CoachPanel.tsx (created — coach message card with empty state)
+- src/features/coach/CoachDemoPage.tsx (created — /coach-demo DEV-only interactive page)
+- src/features/coach/__tests__/coachService.test.tsx (created — 17 tests)
+- src/app/App.tsx (added /coach-demo DEV-guarded route)
+
+Tests Run:
+- tsc -b (passed)
+- eslint . (0 errors, 0 warnings)
+- vitest run (361/361 passed)
+
+Coach system:
+- Template-driven, no AI/LLM, no API calls
+- Single coach character: 🐴 Sir Knight
+- 10 template entries covering all classification+reason combinations
+- Template lookup: specific (CLASSIFICATION_REASON) → generic (CLASSIFICATION) → DEFAULT
+
+Templates:
+  SMART_MOVE + OPENING_MOVE → "Great Job!" / "You stayed on the opening path."
+  SMART_MOVE + BEST_MOVE → "Excellent!" / "You found the best move."
+  GOOD_MOVE → "Nice Move!" / "Your position remains solid."
+  SAFE_MOVE → "Safe Choice!" / "Nothing dangerous happened here."
+  WATCH_OUT + OPENING_EXIT → "Watch Out!" / "You left the opening path here."
+  WATCH_OUT + EVAL_DROP → "Careful!" / "This move made the position harder."
+  OOPS → "Oops!" / "This move made the position much harder."
+  DEFAULT → "Keep Going!" / "Every move is a chance to learn."
+
+CoachPanel component:
+- Renders coach card with avatar, character name, title, and message
+- Empty state: "Choose a move to see coaching advice."
+- Custom empty message supported via prop
+
+CoachDemoPage (/coach-demo — DEV-only):
+- Timeline on left, Coach panel on right (side-by-side on lg+)
+- Click a move to update coach panel
+- All 7 demo moves (e4, e5, Nf3, Nc6, Bc4, a4, Qh5) covering all classifications
+- Selected move highlighted with ring
+- No persistence, no Stockfish, no AI
+
+Tests:
+- All 8 template mappings verified
+- Sir Knight character metadata
+- CoachPanel empty state, custom empty message, normal rendering, OOPS message
+- CoachDemoPage: page title, initial empty coach, e4 click → coach update, Qh5 click → Oops
+
+Known Issues:
+- Template coverage incomplete for some classification+reason-pair combinations
+  (fall through to generic or DEFAULT gracefully)
+- No integration with real session review data yet
+- No persistence — coach messages are rendered on-the-fly
+
+Next Recommended Task:
+TASK-013-boss-battles.md or TASK-018D (wire coach into real post-session review)
+
+Notes:
+This is a template-driven coach system. No AI, LLM, OpenAI, Claude, or voice.
+The coachService is a pure function that maps classification+reasonCode to
+friendly messages. Ready for integration into the post-session review flow.
+
+---
+
 
 Date:
 2026-06-11

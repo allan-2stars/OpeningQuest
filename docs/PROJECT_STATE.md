@@ -9,7 +9,7 @@ Project Phase:
 Phase 1 - Implementation
 
 Status:
-TASK-018B Complete. Review timeline demo UI in place.
+TASK-018C Complete. Coach explanation foundation in place.
 
 ## Summary
 

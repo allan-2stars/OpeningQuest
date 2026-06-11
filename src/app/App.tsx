@@ -13,6 +13,7 @@ import Statistics from "../features/statistics/Statistics.tsx";
 import DesignSystem from "../features/design-system/DesignSystem";
 import AnalysisPage from "../features/analysis/AnalysisPage.tsx";
 import ReviewDemoPage from "../features/reviewAnalysis/ReviewDemoPage.tsx";
+import CoachDemoPage from "../features/coach/CoachDemoPage.tsx";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
         {import.meta.env.DEV && <Route path="/design-system" element={<DesignSystem />} />}
         {import.meta.env.DEV && <Route path="/analysis" element={<AnalysisPage />} />}
         {import.meta.env.DEV && <Route path="/review-demo" element={<ReviewDemoPage />} />}
+        {import.meta.env.DEV && <Route path="/coach-demo" element={<CoachDemoPage />} />}
       </Routes>
     </AppShell>
   );
