@@ -8,18 +8,19 @@ import type { MoveClassificationResult, ClassifierInput } from "./types.ts";
  * 1. moveSan === expectedMoveSan → SMART_MOVE / OPENING_MOVE
  * 2. moveSan === bestMoveSan → SMART_MOVE / BEST_MOVE
  * 3. openingExitDetected → WATCH_OUT / OPENING_EXIT
- * 4. evaluationDrop >= 150 → OOPS / LARGE_EVAL_DROP
- * 5. evaluationDrop >= 50 → WATCH_OUT / EVAL_DROP
- * 6. evaluationDrop < 30 → GOOD_MOVE / SOLID_MOVE
+ * 4. evalDrop >= 150 → OOPS / LARGE_EVAL_DROP
+ * 5. evalDrop >= 50 → WATCH_OUT / EVAL_DROP
+ * 6. evalDrop < 30 → GOOD_MOVE / SOLID_MOVE
  * 7. Fallback → SAFE_MOVE / SAFE_MOVE
+ *
+ * Note: evalDrop in [30, 49] has no dedicated rule and falls to SAFE_MOVE.
  */
 export function classifyMove(input: ClassifierInput): MoveClassificationResult {
   const {
     moveSan,
     expectedMoveSan,
     bestMoveSan,
-    evaluationBefore,
-    evaluationAfter,
+    evalDrop,
     openingExitDetected,
   } = input;
 
@@ -38,22 +39,19 @@ export function classifyMove(input: ClassifierInput): MoveClassificationResult {
     return { moveSan, classification: "WATCH_OUT", reasonCode: "OPENING_EXIT" };
   }
 
-  // Rules 4-6: Evaluation-based — require both values to be defined
-  const hasEvaluation = evaluationBefore !== undefined && evaluationAfter !== undefined;
-  if (hasEvaluation) {
-    const drop = Math.abs(evaluationBefore! - evaluationAfter!);
-
-    if (drop >= 150) {
+  // Rules 4-6: Evaluation-based (positive evalDrop = player's position worsened)
+  if (evalDrop !== undefined) {
+    if (evalDrop >= 150) {
       return { moveSan, classification: "OOPS", reasonCode: "LARGE_EVAL_DROP" };
     }
-    if (drop >= 50) {
+    if (evalDrop >= 50) {
       return { moveSan, classification: "WATCH_OUT", reasonCode: "EVAL_DROP" };
     }
-    if (drop < 30) {
+    if (evalDrop < 30) {
       return { moveSan, classification: "GOOD_MOVE", reasonCode: "SOLID_MOVE" };
     }
   }
 
-  // Rule 7: Fallback
+  // Rule 7: Fallback (also covers evalDrop in [30, 49])
   return { moveSan, classification: "SAFE_MOVE", reasonCode: "SAFE_MOVE" };
 }

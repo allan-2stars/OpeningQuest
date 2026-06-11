@@ -57,8 +57,7 @@ describe("classifyMove", () => {
       const result = classifyMove({
         moveSan: "a4",
         openingExitDetected: true,
-        evaluationBefore: 50,
-        evaluationAfter: 10,
+        evalDrop: 40,
       });
       expect(result.classification).toBe("WATCH_OUT");
       expect(result.reasonCode).toBe("OPENING_EXIT");
@@ -69,8 +68,7 @@ describe("classifyMove", () => {
     it("classifies large eval drop as OOPS", () => {
       const result = classifyMove({
         moveSan: "Qh5",
-        evaluationBefore: 80,
-        evaluationAfter: -120,
+        evalDrop: 200,
       });
       expect(result.classification).toBe("OOPS");
       expect(result.reasonCode).toBe("LARGE_EVAL_DROP");
@@ -79,8 +77,7 @@ describe("classifyMove", () => {
     it("drop of exactly 150 qualifies", () => {
       const result = classifyMove({
         moveSan: "Bxh7",
-        evaluationBefore: 200,
-        evaluationAfter: 50,
+        evalDrop: 150,
       });
       expect(result.classification).toBe("OOPS");
       expect(result.reasonCode).toBe("LARGE_EVAL_DROP");
@@ -89,8 +86,7 @@ describe("classifyMove", () => {
     it("drop of 200 qualifies", () => {
       const result = classifyMove({
         moveSan: "Ng5",
-        evaluationBefore: 300,
-        evaluationAfter: 100,
+        evalDrop: 200,
       });
       expect(result.classification).toBe("OOPS");
     });
@@ -100,8 +96,7 @@ describe("classifyMove", () => {
     it("classifies moderate eval drop as WATCH_OUT", () => {
       const result = classifyMove({
         moveSan: "Bb5",
-        evaluationBefore: 80,
-        evaluationAfter: 20,
+        evalDrop: 60,
       });
       expect(result.classification).toBe("WATCH_OUT");
       expect(result.reasonCode).toBe("EVAL_DROP");
@@ -110,8 +105,7 @@ describe("classifyMove", () => {
     it("drop of exactly 50 qualifies", () => {
       const result = classifyMove({
         moveSan: "Nc3",
-        evaluationBefore: 100,
-        evaluationAfter: 50,
+        evalDrop: 50,
       });
       expect(result.classification).toBe("WATCH_OUT");
       expect(result.reasonCode).toBe("EVAL_DROP");
@@ -120,8 +114,7 @@ describe("classifyMove", () => {
     it("drop of 120 qualifies (not large enough for OOPS)", () => {
       const result = classifyMove({
         moveSan: "Be3",
-        evaluationBefore: 200,
-        evaluationAfter: 80,
+        evalDrop: 120,
       });
       expect(result.classification).toBe("WATCH_OUT");
       expect(result.reasonCode).toBe("EVAL_DROP");
@@ -132,8 +125,7 @@ describe("classifyMove", () => {
     it("classifies small eval drop as GOOD_MOVE", () => {
       const result = classifyMove({
         moveSan: "O-O",
-        evaluationBefore: 50,
-        evaluationAfter: 35,
+        evalDrop: 15,
       });
       expect(result.classification).toBe("GOOD_MOVE");
       expect(result.reasonCode).toBe("SOLID_MOVE");
@@ -142,8 +134,7 @@ describe("classifyMove", () => {
     it("drop of 0 qualifies", () => {
       const result = classifyMove({
         moveSan: "d5",
-        evaluationBefore: 40,
-        evaluationAfter: 40,
+        evalDrop: 0,
       });
       expect(result.classification).toBe("GOOD_MOVE");
     });
@@ -151,10 +142,17 @@ describe("classifyMove", () => {
     it("drop of 29 qualifies", () => {
       const result = classifyMove({
         moveSan: "c5",
-        evaluationBefore: 60,
-        evaluationAfter: 31,
+        evalDrop: 29,
       });
       expect(result.classification).toBe("GOOD_MOVE");
+    });
+
+    it("drop of 30 does NOT qualify — falls to SAFE_MOVE", () => {
+      const result = classifyMove({
+        moveSan: "h3",
+        evalDrop: 30,
+      });
+      expect(result.classification).toBe("SAFE_MOVE");
     });
   });
 
@@ -167,14 +165,21 @@ describe("classifyMove", () => {
       expect(result.reasonCode).toBe("SAFE_MOVE");
     });
 
-    it("returns SAFE_MOVE for eval drop between 30 and 50 when no other rules fire", () => {
+    it("returns SAFE_MOVE for eval drop between 30 and 49", () => {
       const result = classifyMove({
         moveSan: "h3",
-        evaluationBefore: 80,
-        evaluationAfter: 45,
+        evalDrop: 35,
       });
       expect(result.classification).toBe("SAFE_MOVE");
       expect(result.reasonCode).toBe("SAFE_MOVE");
+    });
+
+    it("drop of 49 is still SAFE_MOVE (upper bound of gray zone)", () => {
+      const result = classifyMove({
+        moveSan: "h3",
+        evalDrop: 49,
+      });
+      expect(result.classification).toBe("SAFE_MOVE");
     });
   });
 
@@ -189,17 +194,6 @@ describe("classifyMove", () => {
       expect(result.reasonCode).toBe("OPENING_MOVE");
     });
 
-    it("Rule 3 > Rule 4: opening exit wins over eval drop", () => {
-      const result = classifyMove({
-        moveSan: "a4",
-        openingExitDetected: true,
-        evaluationBefore: 300,
-        evaluationAfter: 100,
-      });
-      expect(result.classification).toBe("WATCH_OUT");
-      expect(result.reasonCode).toBe("OPENING_EXIT");
-    });
-
     it("Rule 1 > Rule 3: opening move wins over exit flag", () => {
       const result = classifyMove({
         moveSan: "e4",
@@ -208,6 +202,46 @@ describe("classifyMove", () => {
       });
       expect(result.classification).toBe("SMART_MOVE");
       expect(result.reasonCode).toBe("OPENING_MOVE");
+    });
+
+    it("Rule 1 > Rule 4: opening move wins over large eval drop", () => {
+      const result = classifyMove({
+        moveSan: "e4",
+        expectedMoveSan: "e4",
+        evalDrop: 300,
+      });
+      expect(result.classification).toBe("SMART_MOVE");
+      expect(result.reasonCode).toBe("OPENING_MOVE");
+    });
+
+    it("Rule 2 > Rule 3: best move wins over opening exit", () => {
+      const result = classifyMove({
+        moveSan: "Nf3",
+        bestMoveSan: "Nf3",
+        openingExitDetected: true,
+      });
+      expect(result.classification).toBe("SMART_MOVE");
+      expect(result.reasonCode).toBe("BEST_MOVE");
+    });
+
+    it("Rule 2 > Rule 4: best move wins over large eval drop", () => {
+      const result = classifyMove({
+        moveSan: "Nf3",
+        bestMoveSan: "Nf3",
+        evalDrop: 300,
+      });
+      expect(result.classification).toBe("SMART_MOVE");
+      expect(result.reasonCode).toBe("BEST_MOVE");
+    });
+
+    it("Rule 3 > Rule 4: opening exit wins over eval drop", () => {
+      const result = classifyMove({
+        moveSan: "a4",
+        openingExitDetected: true,
+        evalDrop: 200,
+      });
+      expect(result.classification).toBe("WATCH_OUT");
+      expect(result.reasonCode).toBe("OPENING_EXIT");
     });
   });
 });
