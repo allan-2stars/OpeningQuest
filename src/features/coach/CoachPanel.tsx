@@ -8,11 +8,13 @@ export default function CoachPanel({
   message: CoachMessage | null;
   emptyTitle?: string;
 }) {
+  const defaultChar = getCoachCharacter("SIR_KNIGHT");
+
   if (!message) {
     return (
       <div className="rounded-xl border border-dashed border-slate-600 p-6 text-center">
-        <span className="text-3xl mb-2 block" aria-hidden="true">🐴</span>
-        <p className="text-sm text-text-primary font-semibold">Sir Knight</p>
+        <span className="text-3xl mb-2 block" aria-hidden="true">{defaultChar.avatar}</span>
+        <p className="text-sm text-text-primary font-semibold">{defaultChar.name}</p>
         <p className="text-xs text-text-muted mt-1">{emptyTitle}</p>
       </div>
     );

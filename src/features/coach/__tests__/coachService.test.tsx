@@ -33,7 +33,7 @@ describe("coachService", () => {
   it("returns GOOD_MOVE template", () => {
     const msg = getCoachMessage("GOOD_MOVE");
     expect(msg.title).toBe("Nice Move!");
-    expect(msg.message).toContain("solid");
+    expect(msg.message).toContain("great shape");
   });
 
   it("returns SAFE_MOVE template", () => {
@@ -90,7 +90,7 @@ describe("CoachPanel", () => {
     render(<CoachPanel message={msg} />);
     expect(screen.getByText("Sir Knight")).toBeDefined();
     expect(screen.getByText("Nice Move!")).toBeDefined();
-    expect(screen.getByText(/solid/)).toBeDefined();
+    expect(screen.getByText(/great shape/)).toBeDefined();
   });
 
   it("renders OOPS message", () => {

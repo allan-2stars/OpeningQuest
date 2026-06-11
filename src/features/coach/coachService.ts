@@ -13,11 +13,11 @@ const TEMPLATES: Partial<Record<TemplateKey, Pick<CoachMessage, "title" | "messa
     title: "Excellent!",
     message: "You found the best move.",
   },
-  SMART_MOVE_SOLID_MOVE: { title: "Great Job!", message: "Your opening knowledge is solid." },
-  SMART_MOVE: { title: "Smart Move!", message: "That was a sharp choice." },
+  SMART_MOVE_SOLID_MOVE: { title: "Great Job!", message: "You know your openings well!" },
+  SMART_MOVE: { title: "Smart Move!", message: "That was a clever choice!" },
 
   // ── GOOD_MOVE ──
-  GOOD_MOVE: { title: "Nice Move!", message: "Your position remains solid." },
+  GOOD_MOVE: { title: "Nice Move!", message: "Your pieces are in great shape!" },
 
   // ── SAFE_MOVE ──
   SAFE_MOVE: { title: "Safe Choice!", message: "Nothing dangerous happened here." },
@@ -25,7 +25,7 @@ const TEMPLATES: Partial<Record<TemplateKey, Pick<CoachMessage, "title" | "messa
   // ── WATCH_OUT variants ──
   WATCH_OUT_OPENING_EXIT: {
     title: "Watch Out!",
-    message: "You left the opening path here. Try following the lesson line.",
+    message: "You left the opening path here. Try following the lesson path.",
   },
   WATCH_OUT_EVAL_DROP: {
     title: "Careful!",
