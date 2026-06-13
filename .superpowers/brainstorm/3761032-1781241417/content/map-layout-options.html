@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knight Meadows — Layout Options</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f1a2e;
+    color: #e2e8f0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #f8fafc;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #94a3b8;
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+  }
+
+  /* ── Option tabs ── */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 10px 24px;
+    border-radius: 999px;
+    border: 2px solid #334155;
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { border-color: #4ade80; color: #f8fafc; }
+  .tab.active { border-color: #4ade80; background: #052e16; color: #4ade80; }
+
+  /* ── Map card wrapper ── */
+  .map-card {
+    display: none;
+    border-radius: 16px;
+    border: 2px solid #334155;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .map-card.visible { display: block; }
+
+  .map-label {
+    background: #1e293b;
+    padding: 14px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .map-label .badge {
+    background: #4ade80;
+    color: #052e16;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  /* ── OPTION A: Mario World ── */
+  .map-a {
+    background: #2d6a2e;
+    background-image:
+      radial-gradient(ellipse at 20% 80%, #1a4d1b 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, #3d8c3e 0%, transparent 50%);
+    position: relative;
+    height: 700px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .map-a-inner {
+    position: relative;
+    width: 1600px;
+    height: 700px;
+  }
+
+  /* sky */
+  .sky-a {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 200px;
+    background: linear-gradient(180deg, #87ceeb 0%, #b8e8ff 60%, transparent 100%);
+  }
+
+  /* ground strip */
+  .ground-a {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 120px;
+    background: linear-gradient(180deg, #4a7c59 0%, #3a5c44 100%);
+    border-top: 3px solid #5d9e6e;
+  }
+
+  /* winding road (SVG) */
+  .road-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1600px; height: 700px;
+  }
+
+  /* floating clouds */
+  .cloud-img {
+    position: absolute;
+    opacity: 0.9;
+  }
+
+  /* trees */
+  .tree-img { position: absolute; }
+
+  /* structures */
+  .struct-img { position: absolute; }
+
+  /* node circles */
+  .node {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+  }
+
+  .node-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2);
+    transition: transform 0.15s;
+  }
+  .node-circle:hover { transform: scale(1.1); }
+
+  .node-label {
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    white-space: nowrap;
+    max-width: 120px;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .node-available .node-circle {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    border-color: #fcd34d;
+  }
+
+  .node-locked .node-circle {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
+    border-color: #64748b;
+    opacity: 0.7;
+  }
+
+  .node-mastered .node-circle {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    border-color: #86efac;
+  }
+
+  .node-boss .node-circle {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    border-color: #c084fc;
+    font-size: 1.8rem;
+    box-shadow: 0 0 24px rgba(168,85,247,0.6), 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  /* ── OPTION B: ChessKid Style ── */
+  .map-b {
+    background: linear-gradient(180deg, #1e3a5f 0%, #0f2744 100%);
+    position: relative;
+    height: 700px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .map-b-inner {
+    position: relative;
+    width: 1600px;
+    height: 700px;
+  }
+
+  /* chess-themed background stripes */
+  .chess-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 200px,
+        rgba(255,255,255,0.02) 200px,
+        rgba(255,255,255,0.02) 202px
+      );
+  }
+
+  /* horizontal track */
+  .track-b {
+    position: absolute;
+    top: 50%;
+    left: 80px;
+    right: 80px;
+    height: 12px;
+    margin-top: -6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+  }
+
+  /* progress fill */
+  .track-fill {
+    height: 100%;
+    width: 35%;
+    background: linear-gradient(90deg, #4ade80, #22c55e);
+    border-radius: 6px;
+    box-shadow: 0 0 12px rgba(74,222,128,0.5);
+  }
+
+  .node-b {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+  }
+
+  .node-b-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+
+  .node-b-label {
+    color: #e2e8f0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    max-width: 100px;
+    line-height: 1.2;
+  }
+
+  .node-b-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    color: #94a3b8;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* ── OPTION C: Opening Quest Custom ── */
+  .map-c {
+    background: linear-gradient(180deg, #7ec8e3 0%, #a8d8a8 30%, #5a8a5a 100%);
+    position: relative;
+    height: 700px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .map-c-inner {
+    position: relative;
+    width: 1600px;
+    height: 700px;
+  }
+
+  /* grass zones */
+  .grass-zone {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, #6aaa6a 0%, #4a8a4a 100%);
+    opacity: 0.6;
+  }
+
+  /* scrolling info */
+  .scroll-hint {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 8px;
+  }
+
+  /* vote buttons */
+  .vote-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  .vote-btn {
+    padding: 14px 32px;
+    border-radius: 12px;
+    border: 2px solid #334155;
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .vote-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+
+  .vote-a:hover, .vote-a.selected { border-color: #f59e0b; color: #f59e0b; background: #1c150a; }
+  .vote-b:hover, .vote-b.selected { border-color: #38bdf8; color: #38bdf8; background: #0a1c28; }
+  .vote-c:hover, .vote-c.selected { border-color: #4ade80; color: #4ade80; background: #052e16; }
+
+  .selection-note {
+    text-align: center;
+    margin-top: 16px;
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+
+  .img-missing { display: none; }
+</style>
+</head>
+<body>
+
+<h1>Knight Meadows — Map Layout Options</h1>
+<p class="subtitle">Three visual directions for the horizontal adventure map. Scroll each map sideways to see the full layout.</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="showOption('a')">Option A — Mario World</div>
+  <div class="tab" onclick="showOption('b')">Option B — ChessKid</div>
+  <div class="tab" onclick="showOption('c')">Option C — Opening Quest</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION A — MARIO WORLD STYLE
+     ═══════════════════════════════════════════════════ -->
+<div class="map-card visible" id="card-a">
+  <div class="map-label">
+    <span class="badge">A</span>
+    Mario World Style — Lush overhead landscape, chunky nodes on a winding dirt path
+  </div>
+  <div class="map-a">
+    <div class="map-a-inner">
+
+      <!-- Sky gradient -->
+      <div class="sky-a"></div>
+
+      <!-- Ground -->
+      <div class="ground-a"></div>
+
+      <!-- SVG winding path -->
+      <svg class="road-svg" viewBox="0 0 1600 700" preserveAspectRatio="none">
+        <!-- main dirt road -->
+        <path d="M 100,420 C 200,380 280,340 380,360 C 480,380 520,430 620,410 C 720,390 760,340 860,360 C 960,380 1000,430 1100,400 C 1200,370 1280,320 1400,340 C 1460,350 1510,360 1540,380"
+              stroke="#8B6914" stroke-width="44" fill="none" stroke-linecap="round"/>
+        <!-- road surface -->
+        <path d="M 100,420 C 200,380 280,340 380,360 C 480,380 520,430 620,410 C 720,390 760,340 860,360 C 960,380 1000,430 1100,400 C 1200,370 1280,320 1400,340 C 1460,350 1510,360 1540,380"
+              stroke="#C8A855" stroke-width="36" fill="none" stroke-linecap="round"/>
+        <!-- road dashes -->
+        <path d="M 100,420 C 200,380 280,340 380,360 C 480,380 520,430 620,410 C 720,390 760,340 860,360 C 960,380 1000,430 1100,400 C 1200,370 1280,320 1400,340 C 1460,350 1510,360 1540,380"
+              stroke="#E8C870" stroke-width="4" fill="none" stroke-linecap="round"
+              stroke-dasharray="20,18"/>
+
+        <!-- River -->
+        <path d="M 660,580 C 680,540 700,500 720,460 C 740,420 730,380 720,340 C 710,300 700,260 690,220"
+              stroke="#1e6bb5" stroke-width="38" fill="none"/>
+        <path d="M 660,580 C 680,540 700,500 720,460 C 740,420 730,380 720,340 C 710,300 700,260 690,220"
+              stroke="#3a8fd4" stroke-width="30" fill="none"/>
+        <!-- river shimmer -->
+        <path d="M 660,580 C 680,540 700,500 720,460 C 740,420 730,380 720,340 C 710,300 700,260 690,220"
+              stroke="rgba(255,255,255,0.3)" stroke-width="8" fill="none" stroke-dasharray="12,16"/>
+      </svg>
+
+      <!-- Clouds -->
+      <img src="assets/cloud-a.png" class="cloud-img" style="left:80px;top:30px;width:180px;" onerror="this.style.display='none'">
+      <img src="assets/cloud-b.png" class="cloud-img" style="left:480px;top:15px;width:160px;" onerror="this.style.display='none'">
+      <img src="assets/cloud-a.png" class="cloud-img" style="left:900px;top:40px;width:200px;opacity:0.7;" onerror="this.style.display='none'">
+      <img src="assets/cloud-b.png" class="cloud-img" style="left:1280px;top:20px;width:150px;" onerror="this.style.display='none'">
+
+      <!-- Trees left cluster -->
+      <img src="assets/tree-oak-a.png" class="tree-img" style="left:40px;top:220px;width:110px;" onerror="this.style.display='none'">
+      <img src="assets/tree-pine-a.png" class="tree-img" style="left:130px;top:235px;width:90px;" onerror="this.style.display='none'">
+      <img src="assets/bush-a.png" class="tree-img" style="left:60px;top:360px;width:80px;" onerror="this.style.display='none'">
+
+      <!-- Mid trees top -->
+      <img src="assets/tree-oak-a.png" class="tree-img" style="left:430px;top:195px;width:100px;" onerror="this.style.display='none'">
+      <img src="assets/bush-b.png" class="tree-img" style="left:510px;top:270px;width:80px;" onerror="this.style.display='none'">
+
+      <!-- River bank assets -->
+      <img src="assets/rock-a.png" class="tree-img" style="left:640px;top:440px;width:70px;" onerror="this.style.display='none'">
+      <img src="assets/rock-b.png" class="tree-img" style="left:750px;top:400px;width:60px;" onerror="this.style.display='none'">
+      <img src="assets/mushroom-patch-a.png" class="tree-img" style="left:620px;top:510px;width:70px;" onerror="this.style.display='none'">
+
+      <!-- Bridge over river -->
+      <img src="assets/wooden-bridge-main.png" class="tree-img" style="left:670px;top:330px;width:140px;transform:rotate(-10deg);" onerror="this.style.display='none'">
+
+      <!-- Flowers -->
+      <img src="assets/flower-patch-a.png" class="tree-img" style="left:290px;top:450px;width:80px;" onerror="this.style.display='none'">
+      <img src="assets/flower-patch-b.png" class="tree-img" style="left:870px;top:480px;width:70px;" onerror="this.style.display='none'">
+      <img src="assets/butterfly-a.png" class="tree-img" style="left:340px;top:390px;width:50px;" onerror="this.style.display='none'">
+
+      <!-- Training camp -->
+      <img src="assets/training-camp-main.png" class="struct-img" style="left:860px;top:270px;width:140px;" onerror="this.style.display='none'">
+      <img src="assets/campfire-a.png" class="struct-img" style="left:980px;top:380px;width:60px;" onerror="this.style.display='none'">
+      <img src="assets/archery-target.png" class="struct-img" style="left:930px;top:460px;width:60px;" onerror="this.style.display='none'">
+
+      <!-- Watchtower -->
+      <img src="assets/watchtower-a.png" class="struct-img" style="left:1170px;top:230px;width:90px;" onerror="this.style.display='none'">
+
+      <!-- Castle (large, right side) -->
+      <img src="assets/castle-main.png" class="struct-img" style="left:1370px;top:130px;width:220px;" onerror="this.style.display='none'">
+
+      <!-- Treasure chest near boss -->
+      <img src="assets/treasure-chest-a.png" class="struct-img" style="left:1440px;top:370px;width:55px;" onerror="this.style.display='none'">
+
+      <!-- Trees right side -->
+      <img src="assets/tree-oak-a.png" class="tree-img" style="left:1310px;top:430px;width:110px;" onerror="this.style.display='none'">
+      <img src="assets/tree-pine-a.png" class="tree-img" style="left:1390px;top:450px;width:90px;" onerror="this.style.display='none'">
+
+      <!-- Signpost -->
+      <img src="assets/signpost-main.png" class="struct-img" style="left:200px;top:380px;width:60px;" onerror="this.style.display='none'">
+
+      <!-- Sir Knight (left start) -->
+      <img src="assets/sir-knight-main.png" class="struct-img" style="left:60px;top:335px;width:110px;z-index:15;" onerror="this.style.display='none'">
+
+      <!-- ── LESSON NODES ── -->
+      <div class="node node-mastered" style="left:280px;top:370px;">
+        <div class="node-circle">⭐</div>
+        <div class="node-label">Italian Game</div>
+      </div>
+
+      <div class="node node-available" style="left:480px;top:350px;">
+        <div class="node-circle">📖</div>
+        <div class="node-label">Giuoco Piano</div>
+      </div>
+
+      <div class="node node-available" style="left:810px;top:360px;">
+        <div class="node-circle">📖</div>
+        <div class="node-label">Evans Gambit</div>
+      </div>
+
+      <div class="node node-locked" style="left:1060px;top:390px;">
+        <div class="node-circle">🔒</div>
+        <div class="node-label">Four Knights</div>
+      </div>
+
+      <div class="node node-locked" style="left:1260px;top:355px;">
+        <div class="node-circle">🔒</div>
+        <div class="node-label">Scotch Game</div>
+      </div>
+
+      <div class="node node-boss" style="left:1510px;top:360px;">
+        <div class="node-circle">👑</div>
+        <div class="node-label">Knight Captain</div>
+      </div>
+
+    </div><!-- /map-a-inner -->
+  </div><!-- /map-a -->
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION B — CHESSKID STYLE
+     ═══════════════════════════════════════════════════ -->
+<div class="map-card" id="card-b">
+  <div class="map-label">
+    <span class="badge" style="background:#38bdf8;color:#0a1c28;">B</span>
+    ChessKid Style — Dark polished UI, glowing nodes on a clean horizontal track
+  </div>
+  <div class="map-b">
+    <div class="map-b-inner">
+      <div class="chess-bg"></div>
+
+      <!-- Stars / particles (SVG) -->
+      <svg style="position:absolute;top:0;left:0;width:100%;height:100%;" viewBox="0 0 1600 700">
+        <circle cx="150" cy="80" r="2" fill="white" opacity="0.4"/>
+        <circle cx="400" cy="50" r="1.5" fill="white" opacity="0.3"/>
+        <circle cx="700" cy="90" r="2" fill="white" opacity="0.5"/>
+        <circle cx="1000" cy="40" r="1.5" fill="white" opacity="0.35"/>
+        <circle cx="1300" cy="70" r="2" fill="white" opacity="0.4"/>
+        <circle cx="250" cy="620" r="1.5" fill="white" opacity="0.25"/>
+        <circle cx="900" cy="650" r="2" fill="white" opacity="0.3"/>
+        <circle cx="1450" cy="600" r="1.5" fill="white" opacity="0.4"/>
+      </svg>
+
+      <!-- Castle (large, right side, darker theme) -->
+      <img src="assets/castle-main.png" style="position:absolute;right:40px;top:100px;width:200px;opacity:0.85;filter:drop-shadow(0 0 20px rgba(168,85,247,0.6));" onerror="this.style.display='none'">
+
+      <!-- Sir Knight left -->
+      <img src="assets/sir-knight-main.png" style="position:absolute;left:60px;top:290px;width:100px;filter:drop-shadow(0 0 12px rgba(74,222,128,0.5));" onerror="this.style.display='none'">
+
+      <!-- Clouds (faint) -->
+      <img src="assets/cloud-a.png" style="position:absolute;left:200px;top:30px;width:160px;opacity:0.25;" onerror="this.style.display='none'">
+      <img src="assets/cloud-b.png" style="position:absolute;left:800px;top:50px;width:140px;opacity:0.2;" onerror="this.style.display='none'">
+
+      <!-- Horizontal track -->
+      <div style="position:absolute;top:50%;left:180px;right:180px;height:16px;margin-top:-8px;background:rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;">
+        <div style="height:100%;width:38%;background:linear-gradient(90deg,#4ade80,#22c55e);box-shadow:0 0 16px rgba(74,222,128,0.6);"></div>
+      </div>
+
+      <!-- Nodes on track -->
+
+      <!-- Node 1 - mastered -->
+      <div style="position:absolute;left:250px;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:20;">
+        <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#16a34a);border:3px solid #86efac;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 0 20px rgba(74,222,128,0.5),0 4px 12px rgba(0,0,0,0.6);">⭐</div>
+        <div style="color:#86efac;font-size:0.7rem;font-weight:700;text-align:center;text-shadow:0 0 8px rgba(74,222,128,0.5);">Italian Game</div>
+      </div>
+
+      <!-- Node 2 - available -->
+      <div style="position:absolute;left:490px;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:20;">
+        <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#d97706);border:3px solid #fcd34d;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 0 20px rgba(251,191,36,0.5),0 4px 12px rgba(0,0,0,0.6);">📖</div>
+        <div style="color:#fcd34d;font-size:0.7rem;font-weight:700;text-align:center;">Giuoco Piano</div>
+      </div>
+
+      <!-- Node 3 - available -->
+      <div style="position:absolute;left:730px;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:20;">
+        <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#d97706);border:3px solid #fcd34d;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 0 20px rgba(251,191,36,0.5),0 4px 12px rgba(0,0,0,0.6);animation:pulse 2s infinite;">📖</div>
+        <div style="color:#fcd34d;font-size:0.7rem;font-weight:700;text-align:center;">Evans Gambit</div>
+      </div>
+
+      <!-- Node 4 - locked -->
+      <div style="position:absolute;left:970px;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:20;opacity:0.55;">
+        <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#475569,#1e293b);border:3px solid #64748b;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 4px 12px rgba(0,0,0,0.6);">🔒</div>
+        <div style="color:#64748b;font-size:0.7rem;font-weight:700;text-align:center;">Four Knights</div>
+      </div>
+
+      <!-- Node 5 - locked -->
+      <div style="position:absolute;left:1190px;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:20;opacity:0.45;">
+        <div style="width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#475569,#1e293b);border:3px solid #64748b;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 4px 12px rgba(0,0,0,0.6);">🔒</div>
+        <div style="color:#64748b;font-size:0.7rem;font-weight:700;text-align:center;">Scotch Game</div>
+      </div>
+
+      <!-- Boss node -->
+      <div style="position:absolute;left:1400px;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:20;opacity:0.4;">
+        <div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4c1d95);border:4px solid #a78bfa;display:flex;align-items:center;justify-content:center;font-size:2.2rem;box-shadow:0 0 30px rgba(124,58,237,0.4),0 4px 16px rgba(0,0,0,0.7);">👑</div>
+        <div style="color:#a78bfa;font-size:0.72rem;font-weight:700;text-align:center;">Knight Captain</div>
+      </div>
+
+      <style>
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 20px rgba(251,191,36,0.5), 0 4px 12px rgba(0,0,0,0.6); }
+          50% { box-shadow: 0 0 36px rgba(251,191,36,0.9), 0 4px 12px rgba(0,0,0,0.6); }
+        }
+      </style>
+
+    </div><!-- /map-b-inner -->
+  </div><!-- /map-b -->
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION C — OPENING QUEST STYLE
+     ═══════════════════════════════════════════════════ -->
+<div class="map-card" id="card-c">
+  <div class="map-label">
+    <span class="badge" style="background:#4ade80;color:#052e16;">C</span>
+    Opening Quest Style — Cartoon 2.5D, bright meadow with layered depth and chunky nodes
+  </div>
+  <div class="map-c">
+    <div class="map-c-inner">
+
+      <!-- Sky -->
+      <div style="position:absolute;top:0;left:0;right:0;height:220px;background:linear-gradient(180deg,#87ceeb 0%,#c8e6f5 70%,transparent 100%);"></div>
+
+      <!-- Far ground -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:280px;background:linear-gradient(180deg,#7ec87e 0%,#5a9a5a 40%,#3a7a3a 100%);"></div>
+
+      <!-- Darker grass strip (near) -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(180deg,#4a8a4a 0%,#2d6b2d 100%);border-top:3px solid #5eb85e;"></div>
+
+      <!-- SVG winding path (warmer, more cartoon) -->
+      <svg style="position:absolute;top:0;left:0;width:1600px;height:700px;" viewBox="0 0 1600 700">
+        <!-- Shadow -->
+        <path d="M 80,480 C 180,430 300,380 430,390 C 560,400 590,460 720,440 C 850,420 900,360 1040,370 C 1180,380 1220,440 1360,410 C 1450,390 1510,370 1550,360"
+              stroke="rgba(0,0,0,0.15)" stroke-width="60" fill="none" stroke-linecap="round"/>
+        <!-- Dirt -->
+        <path d="M 80,480 C 180,430 300,380 430,390 C 560,400 590,460 720,440 C 850,420 900,360 1040,370 C 1180,380 1220,440 1360,410 C 1450,390 1510,370 1550,360"
+              stroke="#b8843a" stroke-width="52" fill="none" stroke-linecap="round"/>
+        <!-- Dirt surface -->
+        <path d="M 80,480 C 180,430 300,380 430,390 C 560,400 590,460 720,440 C 850,420 900,360 1040,370 C 1180,380 1220,440 1360,410 C 1450,390 1510,370 1550,360"
+              stroke="#d4a055" stroke-width="44" fill="none" stroke-linecap="round"/>
+        <!-- Path stones -->
+        <path d="M 80,480 C 180,430 300,380 430,390 C 560,400 590,460 720,440 C 850,420 900,360 1040,370 C 1180,380 1220,440 1360,410 C 1450,390 1510,370 1550,360"
+              stroke="rgba(255,255,255,0.25)" stroke-width="6" fill="none" stroke-linecap="round"
+              stroke-dasharray="16,24" stroke-dashoffset="8"/>
+
+        <!-- River -->
+        <ellipse cx="720" cy="550" rx="90" ry="22" fill="#3a8fd4" opacity="0.7"/>
+        <ellipse cx="720" cy="550" rx="70" ry="14" fill="#5ab0e8" opacity="0.7"/>
+        <!-- river shimmer -->
+        <path d="M 660,548 Q 720,542 780,548" stroke="rgba(255,255,255,0.5)" stroke-width="3" fill="none"/>
+        <path d="M 680,555 Q 720,550 760,555" stroke="rgba(255,255,255,0.4)" stroke-width="2" fill="none"/>
+      </svg>
+
+      <!-- Clouds -->
+      <img src="assets/cloud-a.png" style="position:absolute;left:100px;top:20px;width:200px;opacity:0.95;" onerror="this.style.display='none'">
+      <img src="assets/cloud-b.png" style="position:absolute;left:500px;top:10px;width:180px;opacity:0.9;" onerror="this.style.display='none'">
+      <img src="assets/cloud-a.png" style="position:absolute;left:950px;top:30px;width:220px;opacity:0.85;" onerror="this.style.display='none'">
+      <img src="assets/cloud-b.png" style="position:absolute;left:1340px;top:15px;width:170px;opacity:0.9;" onerror="this.style.display='none'">
+
+      <!-- Background (far) trees -->
+      <img src="assets/tree-pine-a.png" style="position:absolute;left:20px;top:160px;width:110px;opacity:0.7;" onerror="this.style.display='none'">
+      <img src="assets/tree-oak-a.png" style="position:absolute;left:100px;top:170px;width:130px;opacity:0.65;" onerror="this.style.display='none'">
+      <img src="assets/tree-pine-a.png" style="position:absolute;left:380px;top:150px;width:100px;opacity:0.7;" onerror="this.style.display='none'">
+      <img src="assets/tree-oak-a.png" style="position:absolute;left:550px;top:165px;width:120px;opacity:0.65;" onerror="this.style.display='none'">
+      <img src="assets/tree-pine-a.png" style="position:absolute;left:950px;top:155px;width:110px;opacity:0.7;" onerror="this.style.display='none'">
+      <img src="assets/tree-oak-a.png" style="position:absolute;left:1100px;top:170px;width:130px;opacity:0.65;" onerror="this.style.display='none'">
+
+      <!-- Foreground (near) trees -->
+      <img src="assets/tree-oak-a.png" style="position:absolute;left:150px;top:320px;width:140px;" onerror="this.style.display='none'">
+      <img src="assets/tree-pine-a.png" style="position:absolute;left:250px;top:340px;width:110px;" onerror="this.style.display='none'">
+
+      <!-- Bushes / flowers (near path) -->
+      <img src="assets/bush-a.png" style="position:absolute;left:340px;top:490px;width:90px;" onerror="this.style.display='none'">
+      <img src="assets/bush-b.png" style="position:absolute;left:520px;top:500px;width:80px;" onerror="this.style.display='none'">
+      <img src="assets/flower-patch-a.png" style="position:absolute;left:200px;top:530px;width:90px;" onerror="this.style.display='none'">
+      <img src="assets/flower-patch-b.png" style="position:absolute;left:860px;top:510px;width:85px;" onerror="this.style.display='none'">
+      <img src="assets/mushroom-patch-a.png" style="position:absolute;left:640px;top:600px;width:80px;" onerror="this.style.display='none'">
+
+      <!-- Rocks -->
+      <img src="assets/rock-a.png" style="position:absolute;left:650px;top:520px;width:70px;" onerror="this.style.display='none'">
+      <img src="assets/rock-c.png" style="position:absolute;left:790px;top:510px;width:60px;" onerror="this.style.display='none'">
+
+      <!-- Bridge -->
+      <img src="assets/wooden-bridge-main.png" style="position:absolute;left:672px;top:420px;width:150px;" onerror="this.style.display='none'">
+
+      <!-- Butterfly -->
+      <img src="assets/butterfly-a.png" style="position:absolute;left:380px;top:380px;width:55px;" onerror="this.style.display='none'">
+
+      <!-- Signpost -->
+      <img src="assets/signpost-main.png" style="position:absolute;left:185px;top:440px;width:65px;" onerror="this.style.display='none'">
+
+      <!-- Training camp (midfield) -->
+      <img src="assets/training-camp-main.png" style="position:absolute;left:900px;top:280px;width:160px;" onerror="this.style.display='none'">
+      <img src="assets/campfire-a.png" style="position:absolute;left:1010px;top:400px;width:65px;" onerror="this.style.display='none'">
+      <img src="assets/archery-target.png" style="position:absolute;left:975px;top:480px;width:60px;" onerror="this.style.display='none'">
+
+      <!-- Watchtower -->
+      <img src="assets/watchtower-a.png" style="position:absolute;left:1190px;top:260px;width:100px;" onerror="this.style.display='none'">
+      <img src="assets/blue-flag-a.png" style="position:absolute;left:1280px;top:310px;width:55px;" onerror="this.style.display='none'">
+
+      <!-- Castle (prominent right side) -->
+      <img src="assets/castle-main.png" style="position:absolute;left:1360px;top:140px;width:240px;filter:drop-shadow(0 8px 20px rgba(0,0,0,0.4));" onerror="this.style.display='none'">
+
+      <!-- Treasure chest near boss -->
+      <img src="assets/treasure-chest-a.png" style="position:absolute;left:1460px;top:420px;width:60px;" onerror="this.style.display='none'">
+
+      <!-- Trees right side -->
+      <img src="assets/tree-oak-a.png" style="position:absolute;left:1310px;top:430px;width:130px;" onerror="this.style.display='none'">
+      <img src="assets/tree-pine-a.png" style="position:absolute;left:1430px;top:450px;width:110px;" onerror="this.style.display='none'">
+
+      <!-- Sir Knight (prominent, left start) -->
+      <img src="assets/sir-knight-main.png" style="position:absolute;left:48px;top:360px;width:120px;z-index:25;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));" onerror="this.style.display='none'">
+
+      <!-- ── LESSON NODES (cartoon circles, bigger) ── -->
+
+      <!-- Italian Game - mastered -->
+      <div style="position:absolute;left:290px;top:385px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:30;">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(145deg,#6ee7b7,#10b981);border:4px solid #34d399;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 6px 16px rgba(0,0,0,0.35),0 2px 0 #059669,inset 0 2px 4px rgba(255,255,255,0.3);">⭐</div>
+        <div style="background:rgba(0,0,0,0.65);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap;">Italian Game</div>
+      </div>
+
+      <!-- Giuoco Piano - available (pulsing) -->
+      <div style="position:absolute;left:530px;top:365px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:30;">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(145deg,#fde68a,#f59e0b);border:4px solid #fcd34d;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 6px 16px rgba(0,0,0,0.35),0 2px 0 #d97706,inset 0 2px 4px rgba(255,255,255,0.3);">📖</div>
+        <div style="background:rgba(0,0,0,0.65);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap;">Giuoco Piano</div>
+      </div>
+
+      <!-- Evans Gambit - available, near bridge -->
+      <div style="position:absolute;left:820px;top:380px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:30;">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(145deg,#fde68a,#f59e0b);border:4px solid #fcd34d;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 6px 16px rgba(0,0,0,0.35),0 2px 0 #d97706,inset 0 2px 4px rgba(255,255,255,0.3);">📖</div>
+        <div style="background:rgba(0,0,0,0.65);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap;">Evans Gambit</div>
+      </div>
+
+      <!-- Four Knights - locked -->
+      <div style="position:absolute;left:1080px;top:370px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:30;opacity:0.6;">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(145deg,#6b7280,#374151);border:4px solid #9ca3af;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 6px 16px rgba(0,0,0,0.35),0 2px 0 #1f2937,inset 0 2px 4px rgba(255,255,255,0.1);">🔒</div>
+        <div style="background:rgba(0,0,0,0.65);color:#9ca3af;font-size:0.65rem;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap;">Four Knights</div>
+      </div>
+
+      <!-- Scotch Game - locked -->
+      <div style="position:absolute;left:1290px;top:355px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:30;opacity:0.5;">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(145deg,#6b7280,#374151);border:4px solid #9ca3af;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 6px 16px rgba(0,0,0,0.35),0 2px 0 #1f2937,inset 0 2px 4px rgba(255,255,255,0.1);">🔒</div>
+        <div style="background:rgba(0,0,0,0.65);color:#9ca3af;font-size:0.65rem;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap;">Scotch Game</div>
+      </div>
+
+      <!-- Boss node - Knight Captain -->
+      <div style="position:absolute;left:1530px;top:330px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:30;opacity:0.45;">
+        <div style="width:88px;height:88px;border-radius:50%;background:linear-gradient(145deg,#c084fc,#7c3aed);border:5px solid #e879f9;display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 6px 24px rgba(0,0,0,0.5),0 0 30px rgba(192,132,252,0.3),0 2px 0 #5b21b6,inset 0 2px 4px rgba(255,255,255,0.2);">👑</div>
+        <div style="background:rgba(0,0,0,0.65);color:#e879f9;font-size:0.65rem;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap;">Knight Captain</div>
+      </div>
+
+    </div><!-- /map-c-inner -->
+  </div><!-- /map-c -->
+</div>
+
+<p class="scroll-hint">← Scroll inside each map to see the full layout →</p>
+
+<!-- VOTE -->
+<div class="vote-row">
+  <button class="vote-btn vote-a" onclick="vote(this,'a')">🍄 Option A — Mario World</button>
+  <button class="vote-btn vote-b" onclick="vote(this,'b')">♟ Option B — ChessKid</button>
+  <button class="vote-btn vote-c" onclick="vote(this,'c')">🌿 Option C — Opening Quest</button>
+</div>
+<p class="selection-note">Select your preferred direction, then let me know in the terminal.</p>
+
+<script>
+function showOption(id) {
+  document.querySelectorAll('.map-card').forEach(c => c.classList.remove('visible'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('card-' + id).classList.add('visible');
+  document.querySelectorAll('.tab')[{a:0,b:1,c:2}[id]].classList.add('active');
+}
+
+function vote(btn, choice) {
+  document.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  // Record to brainstorm events if helper available
+  if (typeof toggleSelect === 'function') {
+    // use built-in helper
+  }
+  // Manual record via fetch to capture selection
+  const label = btn.textContent.trim();
+  console.log('Selected:', choice, label);
+  if (window.__brainstorm_record) window.__brainstorm_record(choice, label);
+}
+</script>
+</body>
+</html>

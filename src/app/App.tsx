@@ -15,6 +15,8 @@ import AnalysisPage from "../features/analysis/AnalysisPage.tsx";
 import ReviewDemoPage from "../features/reviewAnalysis/ReviewDemoPage.tsx";
 import CoachDemoPage from "../features/coach/CoachDemoPage.tsx";
 import ReviewResultPage from "../features/reviewAnalysis/ReviewResultPage.tsx";
+import AssetTest from "../features/asset-test/AssetTest.tsx";
+import AdventureMapPrototype from "../features/adventure-map-v2/AdventureMapPrototype.tsx";
 
 export default function App() {
   return (
@@ -36,6 +38,8 @@ export default function App() {
         {import.meta.env.DEV && <Route path="/analysis" element={<AnalysisPage />} />}
         {import.meta.env.DEV && <Route path="/review-demo" element={<ReviewDemoPage />} />}
         {import.meta.env.DEV && <Route path="/coach-demo" element={<CoachDemoPage />} />}
+        {import.meta.env.DEV && <Route path="/asset-test" element={<AssetTest />} />}
+        {import.meta.env.DEV && <Route path="/adventure-prototype" element={<AdventureMapPrototype />} />}
       </Routes>
     </AppShell>
   );

@@ -1,0 +1,3 @@
+{"type":"server-started","port":51469,"host":"0.0.0.0","url_host":"localhost","url":"http://localhost:51469","screen_dir":"/home/pi/open_request/.superpowers/brainstorm/3718633-1781237520/content","state_dir":"/home/pi/open_request/.superpowers/brainstorm/3718633-1781237520/state"}
+{"type":"screen-added","file":"/home/pi/open_request/.superpowers/brainstorm/3718633-1781237520/content/map-layout-options.html"}
+{"type":"server-stopped","reason":"owner process exited"}

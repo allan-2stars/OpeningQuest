@@ -1,0 +1,5 @@
+{"type":"server-started","port":61543,"host":"0.0.0.0","url_host":"192.168.50.205","url":"http://192.168.50.205:61543","screen_dir":"/home/pi/open_request/.superpowers/brainstorm/3761032-1781241417/content","state_dir":"/home/pi/open_request/.superpowers/brainstorm/3761032-1781241417/state"}
+{"type":"screen-added","file":"/home/pi/open_request/.superpowers/brainstorm/3761032-1781241417/content/map-layout-options.html"}
+{"type":"screen-added","file":"/home/pi/open_request/.superpowers/brainstorm/3761032-1781241417/content/knight-meadows-world.html"}
+{"type":"screen-added","file":"/home/pi/open_request/.superpowers/brainstorm/3761032-1781241417/content/world-background.html"}
+{"type":"server-stopped","reason":"idle timeout"}

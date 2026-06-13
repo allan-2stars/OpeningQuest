@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Knight Meadows — World Background</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #000;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, sans-serif;
+}
+
+.toolbar {
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 9px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  z-index: 200;
+}
+.toolbar-title { font-size: 0.9rem; font-weight: 700; color: #f1f5f9; }
+.toolbar-sub   { font-size: 0.75rem; color: #64748b; }
+
+.map-scroll {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+}
+.map-scroll:active { cursor: grabbing; }
+.map-scroll::-webkit-scrollbar { height: 6px; }
+.map-scroll::-webkit-scrollbar-track { background: #111; }
+.map-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+/* ── Canvas ── */
+.world {
+  position: relative;
+  width: 1900px;
+  height: calc(100vh - 40px);
+  min-height: 660px;
+  max-height: 880px;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── Butterfly float ── */
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(-6deg) scaleX(1);   }
+  25%      { transform: translateY(-10px) rotate(4deg) scaleX(1); }
+  50%      { transform: translateY(-4px) rotate(-3deg) scaleX(-1); }
+  75%      { transform: translateY(-14px) rotate(6deg) scaleX(-1); }
+}
+.flutter { animation: float 4.2s ease-in-out infinite; }
+
+/* ── Cloud drift ── */
+@keyframes drift {
+  0%   { transform: translateX(0); }
+  50%  { transform: translateX(18px); }
+  100% { transform: translateX(0); }
+}
+.drift-slow { animation: drift 18s ease-in-out infinite; }
+.drift-mid  { animation: drift 13s ease-in-out infinite 2s; }
+.drift-fast { animation: drift 9s  ease-in-out infinite 1s; }
+
+/* ── Campfire flicker ── */
+@keyframes flicker {
+  0%,100% { filter: drop-shadow(0 0 8px rgba(255,140,0,0.7)); }
+  33%      { filter: drop-shadow(0 0 16px rgba(255,80,0,0.9)); }
+  66%      { filter: drop-shadow(0 0 6px rgba(255,180,0,0.6)); }
+}
+.flicker { animation: flicker 1.8s ease-in-out infinite; }
+
+/* zone label flavor text */
+.zone-label {
+  position: absolute;
+  z-index: 60;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.38);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="toolbar-title">🏰 Knight Meadows</span>
+  <span class="toolbar-sub">World Background Prototype · drag to scroll</span>
+  <span style="margin-left:auto;font-size:0.72rem;color:#4ade80;font-weight:600;">← Scroll to explore the world →</span>
+</div>
+
+<div class="map-scroll" id="scroll">
+<div class="world" id="world">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L1 · SKY — gradient atmosphere
+═══════════════════════════════════════════════════════ -->
+<div style="position:absolute;inset:0;
+  background: linear-gradient(180deg,
+    #3a7ab8 0%,
+    #5a9ece 12%,
+    #87ceeb 32%,
+    #b2dcf0 52%,
+    #cee8c4 68%,
+    #92c87a 80%,
+    #6aaa58 100%
+  );z-index:1;"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L2 · GROUND — layered grass
+═══════════════════════════════════════════════════════ -->
+<!-- Main ground -->
+<div style="position:absolute;bottom:0;left:0;right:0;height:52%;
+  background:linear-gradient(180deg,#7ec870 0%,#60a852 35%,#488038 70%,#305820 100%);
+  z-index:2;"></div>
+<!-- Near ground strip (darkest, closest to viewer) -->
+<div style="position:absolute;bottom:0;left:0;right:0;height:108px;
+  background:linear-gradient(180deg,#3a7030 0%,#285020 100%);
+  border-top:3px solid #50984a;z-index:3;"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L3 · SVG TERRAIN — hills, river, road
+═══════════════════════════════════════════════════════ -->
+<svg style="position:absolute;top:0;left:0;width:1900px;height:100%;z-index:4;"
+     viewBox="0 0 1900 780" preserveAspectRatio="xMidYMid slice">
+
+  <!-- Rolling hills — far (atmospheric, very faint) -->
+  <path d="M0,310 Q200,265 420,285 Q640,305 860,268 Q1080,231 1300,255
+           Q1520,279 1740,250 Q1820,242 1900,248 L1900,400 L0,400Z"
+        fill="#a0c8a0" opacity="0.28"/>
+
+  <!-- Rolling hills — mid (closer, more defined) -->
+  <path d="M0,350 Q240,308 480,328 Q720,348 960,315
+           Q1200,282 1440,308 Q1680,334 1900,318 L1900,430 L0,430Z"
+        fill="#80b878" opacity="0.40"/>
+
+  <!-- ── HORIZONTAL RIVER ── flows left-to-right across the world
+       positioned as a wide band in the lower-middle zone            -->
+
+  <!-- River shadow / depth -->
+  <rect x="0" y="486" width="1900" height="148" fill="#0e4a85" opacity="0.35"/>
+
+  <!-- River body — deep water -->
+  <rect x="0" y="492" width="1900" height="136" fill="#1a6ab5"/>
+
+  <!-- River lighter surface -->
+  <rect x="0" y="498" width="1900" height="124" fill="#2880cc"/>
+
+  <!-- River near-surface glint (brightest band, shows sky reflection) -->
+  <rect x="0" y="504" width="1900" height="48" fill="#3a92d8" opacity="0.7"/>
+  <rect x="0" y="516" width="1900" height="20" fill="rgba(150,210,255,0.25)"/>
+
+  <!-- Horizontal ripple lines (show river flows left → right) -->
+  <line x1="0" y1="502" x2="1900" y2="500" stroke="rgba(255,255,255,0.22)" stroke-width="1.8"/>
+  <line x1="0" y1="512" x2="1900" y2="510" stroke="rgba(255,255,255,0.28)" stroke-width="2.2"/>
+  <line x1="0" y1="522" x2="1900" y2="520" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+  <line x1="0" y1="534" x2="1900" y2="532" stroke="rgba(255,255,255,0.24)" stroke-width="2.0"/>
+  <line x1="0" y1="546" x2="1900" y2="544" stroke="rgba(255,255,255,0.16)" stroke-width="1.5"/>
+  <line x1="0" y1="558" x2="1900" y2="556" stroke="rgba(255,255,255,0.22)" stroke-width="1.8"/>
+  <line x1="0" y1="570" x2="1900" y2="568" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+  <line x1="0" y1="582" x2="1900" y2="580" stroke="rgba(255,255,255,0.2)" stroke-width="1.8"/>
+  <line x1="0" y1="596" x2="1900" y2="594" stroke="rgba(255,255,255,0.16)" stroke-width="1.5"/>
+  <line x1="0" y1="610" x2="1900" y2="608" stroke="rgba(255,255,255,0.22)" stroke-width="2.0"/>
+
+  <!-- River TOP bank (grassy edge above water) -->
+  <path d="M0,486 Q480,478 960,484 Q1440,490 1900,482 L1900,498 L0,498Z"
+        fill="#4a9040" opacity="0.75"/>
+  <path d="M0,480 Q320,474 640,480 Q960,486 1280,477 Q1620,468 1900,476 L1900,494 L0,494Z"
+        fill="#60a852" opacity="0.55"/>
+
+  <!-- River BOTTOM bank (grassy edge below water) -->
+  <path d="M0,628 Q480,620 960,626 Q1440,632 1900,622 L1900,642 L0,642Z"
+        fill="#4a9040" opacity="0.75"/>
+  <path d="M0,632 Q400,640 800,634 Q1200,628 1600,638 Q1760,642 1900,636 L1900,648 L0,648Z"
+        fill="#60a852" opacity="0.50"/>
+
+  <!-- ── DIRT ROAD — winding path through the world (ABOVE the river) ──
+       The road goes left-to-right, then crosses the river via bridge      -->
+
+  <!-- Road shadow -->
+  <path d="M0,472 C120,458 220,448 340,454 C460,460 520,474 640,468
+           C700,465 720,462 748,462"
+        stroke="#7a5010" stroke-width="38" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <!-- Road surface -->
+  <path d="M0,472 C120,458 220,448 340,454 C460,460 520,474 640,468
+           C700,465 720,462 748,462"
+        stroke="#b88830" stroke-width="28" fill="none" stroke-linecap="round" opacity="0.72"/>
+  <!-- Road highlight -->
+  <path d="M0,472 C120,458 220,448 340,454 C460,460 520,474 640,468
+           C700,465 720,462 748,462"
+        stroke="#d4a840" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- Road continues after river -->
+  <path d="M1152,464 C1220,458 1310,450 1420,456 C1530,462 1620,470 1740,462
+           C1820,456 1870,459 1900,462"
+        stroke="#7a5010" stroke-width="38" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <path d="M1152,464 C1220,458 1310,450 1420,456 C1530,462 1620,470 1740,462
+           C1820,456 1870,459 1900,462"
+        stroke="#b88830" stroke-width="28" fill="none" stroke-linecap="round" opacity="0.72"/>
+  <path d="M1152,464 C1220,458 1310,450 1420,456 C1530,462 1620,470 1740,462
+           C1820,456 1870,459 1900,462"
+        stroke="#d4a840" stroke-width="16" fill="none" stroke-linecap="round" opacity="0.55"/>
+
+</svg>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L4 · CLOUDS — drifting above world
+═══════════════════════════════════════════════════════ -->
+<img class="drift-slow" src="assets/cloud-a.png"
+     style="position:absolute;left:55px;top:22px;width:235px;z-index:5;opacity:0.93;"
+     onerror="this.style.display='none'">
+<img class="drift-mid" src="assets/cloud-b.png"
+     style="position:absolute;left:380px;top:10px;width:210px;z-index:5;opacity:0.87;"
+     onerror="this.style.display='none'">
+<img class="drift-fast" src="assets/cloud-a.png"
+     style="position:absolute;left:740px;top:36px;width:195px;z-index:5;opacity:0.78;"
+     onerror="this.style.display='none'">
+<img class="drift-mid" src="assets/cloud-b.png"
+     style="position:absolute;left:1080px;top:16px;width:220px;z-index:5;opacity:0.82;"
+     onerror="this.style.display='none'">
+<img class="drift-slow" src="assets/cloud-a.png"
+     style="position:absolute;left:1440px;top:28px;width:200px;z-index:5;opacity:0.76;"
+     onerror="this.style.display='none'">
+<img class="drift-fast" src="assets/cloud-b.png"
+     style="position:absolute;left:1710px;top:14px;width:185px;z-index:5;opacity:0.80;"
+     onerror="this.style.display='none'">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L5 · BACKGROUND TREES — distant forest silhouette (faded)
+═══════════════════════════════════════════════════════ -->
+
+<!-- Far-left forest horizon -->
+<img src="assets/tree-pine-a.png" style="position:absolute;left:148px;top:256px;width:82px;z-index:6;opacity:0.38;" onerror="this.style.display='none'">
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:206px;top:246px;width:98px;z-index:6;opacity:0.34;" onerror="this.style.display='none'">
+<img src="assets/tree-pine-a.png" style="position:absolute;left:282px;top:258px;width:80px;z-index:6;opacity:0.38;" onerror="this.style.display='none'">
+
+<!-- Far-mid forest -->
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:460px;top:248px;width:92px;z-index:6;opacity:0.34;" onerror="this.style.display='none'">
+<img src="assets/tree-pine-a.png" style="position:absolute;left:534px;top:256px;width:80px;z-index:6;opacity:0.38;" onerror="this.style.display='none'">
+
+<!-- Far-right forest -->
+<img src="assets/tree-pine-a.png" style="position:absolute;left:930px;top:252px;width:84px;z-index:6;opacity:0.36;" onerror="this.style.display='none'">
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:1004px;top:244px;width:94px;z-index:6;opacity:0.33;" onerror="this.style.display='none'">
+<img src="assets/tree-pine-a.png" style="position:absolute;left:1080px;top:252px;width:82px;z-index:6;opacity:0.36;" onerror="this.style.display='none'">
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:1152px;top:246px;width:90px;z-index:6;opacity:0.32;" onerror="this.style.display='none'">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L6 · CASTLE — destination, dominates right skyline
+═══════════════════════════════════════════════════════ -->
+<img src="assets/castle-main.png"
+     style="position:absolute;left:1400px;top:82px;width:400px;z-index:7;
+            filter:drop-shadow(0 18px 36px rgba(0,0,0,0.6)) drop-shadow(0 4px 8px rgba(0,0,0,0.4));"
+     onerror="this.style.display='none'">
+
+<!-- Castle zone label -->
+<div class="zone-label" style="left:1482px;top:88px;">Knight's Keep</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L7 · MID-GROUND STRUCTURES
+═══════════════════════════════════════════════════════ -->
+
+<!-- ── START AREA ── -->
+<!-- Training Ground (left side landmark) -->
+<img src="assets/training-camp-main.png"
+     style="position:absolute;left:112px;top:308px;width:180px;z-index:8;
+            filter:drop-shadow(0 5px 10px rgba(0,0,0,0.45));"
+     onerror="this.style.display='none'">
+
+<!-- Signpost at the road -->
+<img src="assets/signpost-main.png"
+     style="position:absolute;left:286px;top:410px;width:72px;z-index:9;"
+     onerror="this.style.display='none'">
+
+<!-- ── ADVENTURE AREA (right of river) ── -->
+<!-- Campfire -->
+<img src="assets/campfire-a.png"
+     class="flicker"
+     style="position:absolute;left:1040px;top:408px;width:82px;z-index:9;"
+     onerror="this.style.display='none'">
+
+<!-- Archery target -->
+<img src="assets/archery-target.png"
+     style="position:absolute;left:1002px;top:426px;width:72px;z-index:9;"
+     onerror="this.style.display='none'">
+
+<!-- Watchtower -->
+<img src="assets/watchtower-a.png"
+     style="position:absolute;left:1205px;top:278px;width:128px;z-index:8;
+            filter:drop-shadow(0 5px 10px rgba(0,0,0,0.4));"
+     onerror="this.style.display='none'">
+
+<!-- Flag on watchtower -->
+<img src="assets/blue-flag-a.png"  <!-- removed stray comment -->
+     style="position:absolute;left:1302px;top:326px;width:62px;z-index:9;"
+     onerror="this.style.display='none'">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L8 · RIVER BANK DETAILS — rocks & vegetation at water edges
+═══════════════════════════════════════════════════════ -->
+
+<!-- TOP BANK (just above river at y≈486) — rocks and reeds -->
+<img src="assets/rock-a.png"           style="position:absolute;left:48px;top:450px;width:80px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-b.png"           style="position:absolute;left:200px;top:456px;width:68px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/mushroom-patch-a.png" style="position:absolute;left:138px;top:448px;width:82px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-c.png"           style="position:absolute;left:400px;top:452px;width:62px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-a.png"           style="position:absolute;left:598px;top:450px;width:76px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/mushroom-patch-a.png" style="position:absolute;left:730px;top:446px;width:80px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-b.png"           style="position:absolute;left:908px;top:452px;width:70px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-c.png"           style="position:absolute;left:1094px;top:454px;width:64px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-a.png"           style="position:absolute;left:1290px;top:450px;width:74px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/mushroom-patch-a.png" style="position:absolute;left:1490px;top:448px;width:80px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-b.png"           style="position:absolute;left:1680px;top:452px;width:68px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-c.png"           style="position:absolute;left:1820px;top:450px;width:62px;z-index:10;" onerror="this.style.display='none'">
+
+<!-- BOTTOM BANK (just below river at y≈628) -->
+<img src="assets/rock-b.png"           style="position:absolute;left:80px;top:630px;width:72px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-a.png"           style="position:absolute;left:310px;top:634px;width:76px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/mushroom-patch-a.png" style="position:absolute;left:540px;top:628px;width:78px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-c.png"           style="position:absolute;left:760px;top:632px;width:66px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-a.png"           style="position:absolute;left:1020px;top:630px;width:74px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/mushroom-patch-a.png" style="position:absolute;left:1260px;top:626px;width:80px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-b.png"           style="position:absolute;left:1520px;top:630px;width:70px;z-index:10;" onerror="this.style.display='none'">
+<img src="assets/rock-c.png"           style="position:absolute;left:1760px;top:632px;width:64px;z-index:10;" onerror="this.style.display='none'">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L9 · BRIDGE — crossing the river
+═══════════════════════════════════════════════════════ -->
+<!-- Bridge sits over the river, connecting the road path -->
+<img src="assets/wooden-bridge-main.png"
+     style="position:absolute;left:680px;top:444px;width:300px;z-index:12;
+            filter:drop-shadow(0 6px 14px rgba(0,0,0,0.55));"
+     onerror="this.style.display='none'">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L10 · MAIN FOREGROUND TREES — dense, full-size forest
+═══════════════════════════════════════════════════════ -->
+
+<!-- LEFT FOREST (meadow zone) -->
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:342px;top:288px;width:162px;z-index:11;" onerror="this.style.display='none'">
+<img src="assets/tree-pine-a.png" style="position:absolute;left:442px;top:304px;width:128px;z-index:11;" onerror="this.style.display='none'">
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:506px;top:278px;width:152px;z-index:11;" onerror="this.style.display='none'">
+<img src="assets/tree-pine-a.png" style="position:absolute;left:590px;top:296px;width:122px;z-index:11;" onerror="this.style.display='none'">
+
+<!-- RIGHT FOREST (adventure zone) -->
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:878px;top:284px;width:158px;z-index:11;" onerror="this.style.display='none'">
+<img src="assets/tree-pine-a.png" style="position:absolute;left:968px;top:298px;width:124px;z-index:11;" onerror="this.style.display='none'">
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:1032px;top:280px;width:148px;z-index:11;" onerror="this.style.display='none'">
+
+<!-- CASTLE FLANKING TREES -->
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:1348px;top:380px;width:148px;z-index:11;" onerror="this.style.display='none'">
+<img src="assets/tree-pine-a.png" style="position:absolute;left:1702px;top:368px;width:126px;z-index:11;" onerror="this.style.display='none'">
+<img src="assets/tree-oak-a.png"  style="position:absolute;left:1776px;top:380px;width:142px;z-index:11;" onerror="this.style.display='none'">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L11 · FOREGROUND — flowers, bushes, rocks (large, near)
+═══════════════════════════════════════════════════════ -->
+
+<!-- Left foreground (wide sweep of vegetation) -->
+<img src="assets/bush-a.png"         style="position:absolute;left:38px;top:644px;width:112px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/flower-patch-a.png" style="position:absolute;left:155px;top:656px;width:102px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/bush-b.png"         style="position:absolute;left:268px;top:648px;width:108px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/flower-patch-b.png" style="position:absolute;left:384px;top:660px;width:98px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/bush-a.png"         style="position:absolute;left:495px;top:650px;width:106px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/flower-patch-a.png" style="position:absolute;left:612px;top:658px;width:100px;z-index:14;" onerror="this.style.display='none'">
+
+<!-- Right foreground -->
+<img src="assets/bush-b.png"         style="position:absolute;left:892px;top:648px;width:110px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/flower-patch-b.png" style="position:absolute;left:1010px;top:656px;width:100px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/bush-a.png"         style="position:absolute;left:1128px;top:646px;width:108px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/flower-patch-a.png" style="position:absolute;left:1252px;top:658px;width:102px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/bush-b.png"         style="position:absolute;left:1372px;top:648px;width:110px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/flower-patch-b.png" style="position:absolute;left:1496px;top:656px;width:100px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/bush-a.png"         style="position:absolute;left:1616px;top:648px;width:108px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/flower-patch-a.png" style="position:absolute;left:1740px;top:656px;width:100px;z-index:14;" onerror="this.style.display='none'">
+<img src="assets/bush-b.png"         style="position:absolute;left:1848px;top:648px;width:108px;z-index:14;" onerror="this.style.display='none'">
+
+<!-- Treasure chest near castle -->
+<img src="assets/treasure-chest-a.png"
+     style="position:absolute;left:1640px;top:426px;width:72px;z-index:14;"
+     onerror="this.style.display='none'">
+
+<!-- Butterfly floating in meadow -->
+<img src="assets/butterfly-a.png"
+     class="flutter"
+     style="position:absolute;left:334px;top:398px;width:62px;z-index:15;"
+     onerror="this.style.display='none'">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     L12 · SIR KNIGHT — guide, start of journey
+═══════════════════════════════════════════════════════ -->
+<img src="assets/sir-knight-main.png"
+     style="position:absolute;left:30px;top:346px;width:145px;z-index:20;
+            filter:drop-shadow(0 8px 16px rgba(0,0,0,0.65));"
+     onerror="this.style.display='none'">
+
+
+<!-- ═══════════════════════════════════════════════════════
+     ZONE FLAVOR LABELS (very subtle, world atmosphere only)
+═══════════════════════════════════════════════════════ -->
+<div class="zone-label" style="left:140px;top:280px;">Training Ground</div>
+<div class="zone-label" style="left:408px;top:268px;">Knight Meadows</div>
+<div class="zone-label" style="left:700px;top:464px;color:rgba(200,235,255,0.45);">Crossing River</div>
+<div class="zone-label" style="left:960px;top:274px;">Adventure Wilds</div>
+
+
+</div><!-- /world -->
+</div><!-- /scroll -->
+
+<script>
+/* Drag-to-scroll */
+const s = document.getElementById('scroll');
+let drag = false, sx = 0, sl = 0;
+s.addEventListener('mousedown', e => { drag=true; sx=e.pageX-s.offsetLeft; sl=s.scrollLeft; s.style.cursor='grabbing'; });
+document.addEventListener('mouseup',   () => { drag=false; s.style.cursor=''; });
+document.addEventListener('mousemove', e => {
+  if (!drag) return;
+  e.preventDefault();
+  s.scrollLeft = sl - (e.pageX - s.offsetLeft - sx);
+});
+
+/* Auto-scroll hint — gently pan right on load so user sees more of the world */
+window.addEventListener('load', () => {
+  let done = false;
+  const hint = setInterval(() => {
+    if (done || s.scrollLeft >= 200) { clearInterval(hint); return; }
+    s.scrollLeft += 1.2;
+    if (s.scrollLeft >= 200) done = true;
+  }, 12);
+});
+</script>
+</body>
+</html>
